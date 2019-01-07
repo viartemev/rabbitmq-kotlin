@@ -12,7 +12,7 @@ fun main(args: Array<String>) {
             channel.confirmSelect()
             val queue = "test_without"
             channel.queueDeclare(queue, false, true, true, null)
-            for (i in 1..100) {
+            for (i in 1..10) {
                 println("next publish tag: ${channel.nextPublishSeqNo}")
                 channel.basicPublish("", queue, MessageProperties.PERSISTENT_BASIC, "hello1".toByteArray(charset("UTF-8")))
             }
