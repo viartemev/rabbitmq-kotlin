@@ -2,9 +2,8 @@ package com.viartemev.krabbit
 
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.ConfirmListener
+import com.rabbitmq.client.MessageProperties
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.resume
@@ -16,15 +15,11 @@ class CoroutineSender(private val queueName: String, private val channel: Channe
     }
 
     suspend fun sendWithAck(message: String): Boolean {
-
-        channel.basicPublish("", queueName, null, message.toByteArray(charset("UTF-8")))
+        println("seqNo: ${channel.nextPublishSeqNo}")
+        channel.basicPublish("", queueName, MessageProperties.PERSISTENT_BASIC, message.toByteArray(charset("UTF-8")))
         return suspendCancellableCoroutine { continuation ->
-            GlobalScope.launch {
-                for (y in acks) println("Print from channel: $y")
-            }
             channel.addConfirmListener(object : ConfirmListener {
                 override fun handleAck(deliveryTag: Long, multiple: Boolean) {
-                    GlobalScope.launch { acks.send(deliveryTag) }
                     println("Delivery tag: $deliveryTag, multiple: $multiple")
                     continuation.resume(true)
                 }
