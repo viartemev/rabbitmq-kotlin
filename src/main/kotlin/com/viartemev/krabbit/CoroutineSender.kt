@@ -23,7 +23,7 @@ class CoroutineSender(private val queueName: String, private val channel: Channe
         }
 
         fun handle(deliveryTag: Long, multiple: Boolean, ack: Boolean) {
-            println("deliveryTag = [$deliveryTag], multiple = [$multiple], positive = [$ack]")
+            //println("deliveryTag = [$deliveryTag], multiple = [$multiple], positive = [$ack]")
             if (multiple) {
                 (1..deliveryTag)
                         .forEach {

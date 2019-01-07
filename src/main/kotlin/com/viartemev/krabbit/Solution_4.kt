@@ -6,6 +6,7 @@ import com.rabbitmq.client.ConnectionFactory
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.util.concurrent.atomic.LongAdder
+import kotlin.system.measureTimeMillis
 
 fun main(args: Array<String>) {
     val factory = ConnectionFactory()
@@ -18,16 +19,19 @@ fun main(args: Array<String>) {
             channel.confirmSelect()
             channel.queueDeclare(queue, false, false, false, null)
             val counter = LongAdder()
-            runBlocking {
-                repeat(999) {
-                    launch {
-                        val message = Fuel.get("http://localhost:8081/message").awaitString() + " $it"
-                        val ack = sender.sendWithAck(message)
-                        counter.increment()
-                        println(" [x] Sent '$message' ack: $ack")
+            val measureTimeMillis = measureTimeMillis {
+                runBlocking {
+                    repeat(999) {
+                        launch {
+                            val message = Fuel.get("http://localhost:8081/message").awaitString() + " $it"
+                            val ack = sender.sendWithAck(message)
+                            counter.increment()
+                            println(" [x] Sent '$message' ack: $ack")
+                        }
                     }
                 }
             }
+            println(measureTimeMillis)
             println(counter.sumThenReset())
         }
     }
