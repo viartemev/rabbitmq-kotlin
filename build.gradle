@@ -1,0 +1,31 @@
+plugins {
+    id 'java'
+    id 'org.jetbrains.kotlin.jvm' version '1.3.11'
+}
+
+group 'com.viartemev'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+dependencies {
+    compile 'com.rabbitmq:amqp-client:5.5.2'
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    compile group: 'com.github.kittinunf.fuel', name: 'fuel', version: '1.16.0'
+    compile group: 'com.github.kittinunf.fuel', name: 'fuel-json', version: '1.16.0'
+    compile group: 'com.github.kittinunf.fuel', name: 'fuel-coroutines', version: '1.16.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.0.1'
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+compileKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+compileTestKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
