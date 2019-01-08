@@ -2,11 +2,12 @@ package com.viartemev.whiterabbit.queue
 
 import com.rabbitmq.client.AMQP
 import com.rabbitmq.client.Channel
+import com.viartemev.whiterabbit.common.techDispatcher
 import kotlinx.coroutines.future.await
+import kotlinx.coroutines.withContext
 
 object Queue {
 
-    //TODO move channel from method and use internal pool for it
     suspend fun declareQueue(channel: Channel, queueSpecification: QueueSpecification): AMQP.Queue.DeclareOk {
         val declaration = AMQP.Queue.Declare.Builder()
                 .queue(queueSpecification.name)
@@ -15,7 +16,9 @@ object Queue {
                 .autoDelete(queueSpecification.autoDelete)
                 .arguments(queueSpecification.arguments)
                 .build()
-        //FIXME IOException can be thrown here
-        return channel.asyncCompletableRpc(declaration).await().method as AMQP.Queue.DeclareOk
+
+        return withContext(techDispatcher) {
+            channel.asyncCompletableRpc(declaration).await().method as AMQP.Queue.DeclareOk
+        }
     }
 }
