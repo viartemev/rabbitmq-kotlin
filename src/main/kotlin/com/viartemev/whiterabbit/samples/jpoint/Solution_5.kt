@@ -1,4 +1,4 @@
-package com.viartemev.whiterabbit.samples
+package com.viartemev.whiterabbit.samples.jpoint
 
 import com.rabbitmq.client.ConfirmListener
 import com.rabbitmq.client.ConnectionFactory

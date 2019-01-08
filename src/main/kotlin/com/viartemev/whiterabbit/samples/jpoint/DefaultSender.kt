@@ -1,4 +1,4 @@
-package com.viartemev.whiterabbit.samples
+package com.viartemev.whiterabbit.samples.jpoint
 
 import com.rabbitmq.client.Channel
 

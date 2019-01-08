@@ -1,9 +1,11 @@
-package com.viartemev.whiterabbit.samples
+package com.viartemev.whiterabbit.samples.jpoint
 
 import awaitString
 import com.github.kittinunf.fuel.Fuel
 import com.rabbitmq.client.ConnectionFactory
-import com.viartemev.whiterabbit.sender.Sender
+import com.rabbitmq.client.MessageProperties
+import com.viartemev.whiterabbit.publisher.OutboundMessage
+import com.viartemev.whiterabbit.publisher.Publisher
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.util.concurrent.atomic.LongAdder
@@ -16,7 +18,7 @@ fun main(args: Array<String>) {
     factory.newConnection().use { connection ->
         connection.createChannel().use { channel ->
             val queue = "test"
-            val sender = Sender(queue, channel)
+            val sender = Publisher(channel)
             channel.confirmSelect()
             channel.queueDeclare(queue, false, false, false, null)
             val counter = LongAdder()
@@ -25,7 +27,8 @@ fun main(args: Array<String>) {
                     repeat(999) {
                         launch {
                             val message = Fuel.get("http://localhost:8081/message").awaitString() + " $it"
-                            val ack = sender.sendWithAck(message)
+                            val outboundMessage = OutboundMessage("", queue, MessageProperties.PERSISTENT_BASIC, message.toByteArray(charset("UTF-8")))
+                            val ack = sender.publishWithConfirm(outboundMessage)
                             counter.increment()
                             println(" [x] Sent '$message' ack: $ack")
                         }

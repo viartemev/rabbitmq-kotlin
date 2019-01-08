@@ -1,4 +1,4 @@
-package com.viartemev.whiterabbit.samples
+package com.viartemev.whiterabbit.samples.jpoint
 
 import com.github.kittinunf.fuel.Fuel
 import com.rabbitmq.client.ConnectionFactory
