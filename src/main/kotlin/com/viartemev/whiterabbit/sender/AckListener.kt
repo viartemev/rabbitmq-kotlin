@@ -1,4 +1,4 @@
-package com.viartemev.krabbit.sender
+package com.viartemev.whiterabbit.sender
 
 import com.rabbitmq.client.ConfirmListener
 import java.util.concurrent.ConcurrentHashMap

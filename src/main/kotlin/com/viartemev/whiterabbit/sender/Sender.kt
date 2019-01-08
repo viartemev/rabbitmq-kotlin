@@ -1,4 +1,4 @@
-package com.viartemev.krabbit.sender
+package com.viartemev.whiterabbit.sender
 
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.MessageProperties

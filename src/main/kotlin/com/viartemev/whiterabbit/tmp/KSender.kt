@@ -1,4 +1,4 @@
-package com.viartemev.krabbit.tmp
+package com.viartemev.whiterabbit.tmp
 
 import com.rabbitmq.client.Channel
 

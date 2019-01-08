@@ -1,4 +1,4 @@
-package com.viartemev.krabbit.samples
+package com.viartemev.whiterabbit.samples
 
 import com.github.kittinunf.fuel.Fuel
 import com.rabbitmq.client.ConnectionFactory
