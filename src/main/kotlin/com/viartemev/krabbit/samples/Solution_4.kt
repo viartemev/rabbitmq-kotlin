@@ -1,8 +1,9 @@
-package com.viartemev.krabbit
+package com.viartemev.krabbit.samples
 
 import awaitString
 import com.github.kittinunf.fuel.Fuel
 import com.rabbitmq.client.ConnectionFactory
+import com.viartemev.krabbit.sender.Sender
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.util.concurrent.atomic.LongAdder

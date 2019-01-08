@@ -1,4 +1,4 @@
-package com.viartemev.krabbit
+package com.viartemev.krabbit.samples
 
 import com.rabbitmq.client.ConfirmListener
 import com.rabbitmq.client.ConnectionFactory
