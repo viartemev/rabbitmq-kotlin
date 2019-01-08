@@ -6,7 +6,6 @@ import com.viartemev.thewhiterabbit.publisher.OutboundMessage
 import com.viartemev.thewhiterabbit.publisher.Publisher
 import com.viartemev.thewhiterabbit.queue.Queue
 import com.viartemev.thewhiterabbit.queue.QueueSpecification
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.util.concurrent.atomic.LongAdder
 
@@ -22,21 +21,17 @@ fun main(args: Array<String>) {
             channel.confirmSelect()
             val counter = LongAdder()
             val sender = Publisher(channel)
-
+            var ack: List<Boolean> = emptyList()
             runBlocking {
                 Queue.declareQueue(channel, QueueSpecification(queue))
-                repeat(times.toInt()) {
-                    launch {
-                        //TODO difference between run in launch and without as an example for JPOINT
-                        val message = OutboundMessage("", queue, MessageProperties.PERSISTENT_BASIC, "Hello #$it".toByteArray(charset("UTF-8")))
-                        val ack = sender.publishWithConfirm(message)
-                        if (ack) {
-                            counter.increment()
-                        }
-                        println(" [x] Sent '${String(message.body)}' ack: $ack")
-                    }
+                //TODO difference between run in launch and without as an example for JPOINT
+                val messages = (1..times).map { OutboundMessage("", queue, MessageProperties.PERSISTENT_BASIC, "Hello #$it".toByteArray(charset("UTF-8"))) }
+                ack = sender.publishWithConfirm(messages)
+                if (ack.all { b -> b }) {
+                    counter.increment()
                 }
             }
+            println(ack)
             assert(times == counter.sumThenReset())
         }
     }

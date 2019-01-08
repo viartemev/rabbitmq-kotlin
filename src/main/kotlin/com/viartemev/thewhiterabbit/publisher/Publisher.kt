@@ -1,8 +1,9 @@
 package com.viartemev.thewhiterabbit.publisher
 
 import com.rabbitmq.client.Channel
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import mu.KotlinLogging
 import java.util.concurrent.ConcurrentHashMap
@@ -18,15 +19,8 @@ class Publisher(private val channel: Channel) {
         channel.addConfirmListener(AckListener(continuations))
     }
 
-    //FIXME do we really need coroutine scope and launch there?
-    suspend fun publish(message: OutboundMessage) = coroutineScope {
-        launch {
-            message.run { channel.basicPublish(exchange, routingKey, properties, body) }
-        }
-    }
-
-    suspend fun publish(messages: List<OutboundMessage>) = coroutineScope {
-        launch { for (message in messages) publish(message) }
+    suspend fun publishWithConfirm(messages: List<OutboundMessage>): List<Boolean> = coroutineScope {
+        messages.map { async { publishWithConfirm(it) } }.awaitAll()
     }
 
     //FIXME coroutine scope???
