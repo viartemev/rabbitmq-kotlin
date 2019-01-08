@@ -1,8 +1,6 @@
-package com.viartemev.whiterabbit.samples.queue
+package com.viartemev.whiterabbit.exchange
 
 import com.rabbitmq.client.ConnectionFactory
-import com.viartemev.whiterabbit.queue.Queue
-import com.viartemev.whiterabbit.queue.QueueSpecification
 import kotlinx.coroutines.runBlocking
 
 fun main(args: Array<String>) {
@@ -11,7 +9,7 @@ fun main(args: Array<String>) {
     factory.newConnection().use { connection ->
         connection.createChannel().use { channel ->
             runBlocking {
-                Queue.declareQueue(channel, QueueSpecification("name"))
+                Exchange.declareExchange(channel, ExchangeSpecification("custom_exchange"))
             }
         }
     }
