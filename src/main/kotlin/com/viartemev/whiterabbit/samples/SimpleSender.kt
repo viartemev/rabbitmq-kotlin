@@ -26,6 +26,7 @@ fun main(args: Array<String>) {
             runBlocking {
                 Queue.declareQueue(channel, QueueSpecification(queue))
                 repeat(times.toInt()) {
+                    //TODO difference between run in launch and without as an example for JPOINT
                     launch {
                         val message = OutboundMessage("", queue, MessageProperties.PERSISTENT_BASIC, "Hello #$it".toByteArray(charset("UTF-8")))
                         val ack = sender.publishWithConfirm(message)

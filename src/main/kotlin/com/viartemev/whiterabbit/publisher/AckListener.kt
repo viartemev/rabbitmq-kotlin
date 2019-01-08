@@ -1,9 +1,12 @@
 package com.viartemev.whiterabbit.publisher
 
 import com.rabbitmq.client.ConfirmListener
+import mu.KotlinLogging
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
+
+private val logger = KotlinLogging.logger {}
 
 class AckListener(private val continuations: ConcurrentHashMap<Long, Continuation<Boolean>>) : ConfirmListener {
 
@@ -16,7 +19,7 @@ class AckListener(private val continuations: ConcurrentHashMap<Long, Continuatio
     }
 
     private fun handle(deliveryTag: Long, multiple: Boolean, ack: Boolean) {
-        println("deliveryTag = [$deliveryTag], multiple = [$multiple], positive = [$ack]")
+        logger.debug { "deliveryTag = [$deliveryTag], multiple = [$multiple], positive = [$ack]" }
         if (multiple) {
             (1..deliveryTag)
                     .forEach { tag ->

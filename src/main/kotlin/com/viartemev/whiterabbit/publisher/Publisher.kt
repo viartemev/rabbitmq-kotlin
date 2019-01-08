@@ -4,8 +4,12 @@ import com.rabbitmq.client.Channel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import mu.KotlinLogging
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.Continuation
+import kotlinx.coroutines.channels.Channel as KChannel
+
+private val logger = KotlinLogging.logger {}
 
 class Publisher(private val channel: Channel) {
     private val continuations = ConcurrentHashMap<Long, Continuation<Boolean>>()
@@ -14,34 +18,29 @@ class Publisher(private val channel: Channel) {
         channel.addConfirmListener(AckListener(continuations))
     }
 
-    //FIXME coroutine context???
+    //FIXME do we really need coroutine scope and launch there?
     suspend fun publish(message: OutboundMessage) = coroutineScope {
-        message.run {
-            channel.basicPublish(exchange, routingKey, properties, body)
+        launch {
+            message.run { channel.basicPublish(exchange, routingKey, properties, body) }
         }
     }
 
-    //FIXME coroutine context???
-    suspend fun publish(messages: List<OutboundMessage>) = coroutineScope {
-        for (message in messages) {
-            //FIXME launch???
-            launch { publish(message) }
-        }
+    suspend fun publish(messages: List<OutboundMessage>) {
+        for (message in messages) publish(message)
     }
 
-    //FIXME coroutine context???
+    //FIXME coroutine scope???
     suspend fun publishWithConfirm(message: OutboundMessage): Boolean {
-        val seqNo = channel.nextPublishSeqNo
-        //TODO move to logger
-        println("seqNo: $seqNo")
+        val messageSequenceNumber = channel.nextPublishSeqNo
+        logger.debug { "The message Sequence Number: $messageSequenceNumber" }
 
-        return suspendCancellableCoroutine {
-            continuations[seqNo] = it
-
-            //FIXME move to publish??
+        return suspendCancellableCoroutine { continuation ->
+            continuations[messageSequenceNumber] = continuation
             message.run {
                 channel.basicPublish(exchange, routingKey, properties, body)
             }
         }
     }
 }
+
+typealias MessageWithConfirmation = Pair<OutboundMessage, Boolean>
