@@ -1,9 +1,6 @@
 package com.viartemev.thewhiterabbit.publisher
 
 import com.rabbitmq.client.Channel
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.suspendCancellableCoroutine
 import mu.KotlinLogging
 import java.util.concurrent.ConcurrentHashMap
@@ -16,10 +13,6 @@ class ConfirmPublisher internal constructor(private val channel: Channel) {
 
     init {
         channel.addConfirmListener(AckListener(continuations))
-    }
-
-    suspend fun publish(messages: List<OutboundMessage>): List<Boolean> = coroutineScope {
-        messages.map { async { publish(it) } }.awaitAll()
     }
 
     suspend fun publish(message: OutboundMessage): Boolean {

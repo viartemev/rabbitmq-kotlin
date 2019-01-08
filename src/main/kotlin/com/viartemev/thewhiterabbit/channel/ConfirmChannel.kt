@@ -2,6 +2,7 @@ package com.viartemev.thewhiterabbit.channel
 
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Connection
+import com.viartemev.thewhiterabbit.consumer.Consumer
 import com.viartemev.thewhiterabbit.publisher.ConfirmPublisher
 
 class ConfirmChannel internal constructor(val channel: Channel) : Channel by channel {
@@ -10,6 +11,7 @@ class ConfirmChannel internal constructor(val channel: Channel) : Channel by cha
     }
 
     fun publisher() = ConfirmPublisher(this)
+    fun consumer() = Consumer(this)
 }
 
 fun Connection.createConfirmChannel(): ConfirmChannel = ConfirmChannel(this.createChannel())
