@@ -24,7 +24,7 @@ fun main(args: Array<String>) {
             val sender = Publisher(channel)
 
             runBlocking {
-                Queue().declareQueue(channel, QueueSpecification(queue))
+                Queue.declareQueue(channel, QueueSpecification(queue))
                 repeat(times.toInt()) {
                     launch {
                         val message = OutboundMessage("", queue, MessageProperties.PERSISTENT_BASIC, "Hello #$it".toByteArray(charset("UTF-8")))

@@ -4,7 +4,7 @@ import com.rabbitmq.client.AMQP
 import com.rabbitmq.client.Channel
 import kotlinx.coroutines.future.await
 
-class Exchange {
+object Exchange {
 
     //TODO move channel from method and use internal pool for it
     suspend fun declareExchange(channel: Channel, exchangeSpecification: ExchangeSpecification): AMQP.Exchange.DeclareOk {

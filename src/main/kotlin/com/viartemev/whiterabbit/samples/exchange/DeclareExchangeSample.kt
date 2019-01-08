@@ -11,7 +11,7 @@ fun main(args: Array<String>) {
     factory.newConnection().use { connection ->
         connection.createChannel().use { channel ->
             runBlocking {
-                Exchange().declareExchange(channel, ExchangeSpecification("custom_exchange"))
+                Exchange.declareExchange(channel, ExchangeSpecification("custom_exchange"))
             }
         }
     }

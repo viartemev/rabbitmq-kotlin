@@ -11,7 +11,7 @@ fun main(args: Array<String>) {
     factory.newConnection().use { connection ->
         connection.createChannel().use { channel ->
             runBlocking {
-                Queue().declareQueue(channel, QueueSpecification("name"))
+                Queue.declareQueue(channel, QueueSpecification("name"))
             }
         }
     }

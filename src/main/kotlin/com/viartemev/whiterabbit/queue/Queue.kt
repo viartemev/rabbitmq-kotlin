@@ -4,7 +4,7 @@ import com.rabbitmq.client.AMQP
 import com.rabbitmq.client.Channel
 import kotlinx.coroutines.future.await
 
-class Queue {
+object Queue {
 
     //TODO move channel from method and use internal pool for it
     suspend fun declareQueue(channel: Channel, queueSpecification: QueueSpecification): AMQP.Queue.DeclareOk {
