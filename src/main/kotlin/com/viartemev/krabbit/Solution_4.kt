@@ -15,7 +15,7 @@ fun main(args: Array<String>) {
     factory.newConnection().use { connection ->
         connection.createChannel().use { channel ->
             val queue = "test"
-            val sender = CoroutineSender(queue, channel)
+            val sender = Sender(queue, channel)
             channel.confirmSelect()
             channel.queueDeclare(queue, false, false, false, null)
             val counter = LongAdder()
