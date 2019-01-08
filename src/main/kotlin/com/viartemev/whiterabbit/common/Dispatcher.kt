@@ -1,6 +1,5 @@
 package com.viartemev.whiterabbit.common
 
-import kotlinx.coroutines.asCoroutineDispatcher
-import java.util.concurrent.Executors
+import kotlinx.coroutines.newSingleThreadContext
 
-val techDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+val resourceManagementDispatcher = newSingleThreadContext("ResourceManagementDispatcher")

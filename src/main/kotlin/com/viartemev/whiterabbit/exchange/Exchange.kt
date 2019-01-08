@@ -2,7 +2,7 @@ package com.viartemev.whiterabbit.exchange
 
 import com.rabbitmq.client.AMQP
 import com.rabbitmq.client.Channel
-import com.viartemev.whiterabbit.common.techDispatcher
+import com.viartemev.whiterabbit.common.resourceManagementDispatcher
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.withContext
 
@@ -18,7 +18,7 @@ object Exchange {
                 .arguments(exchangeSpecification.arguments)
                 .build()
 
-        return withContext(techDispatcher) {
+        return withContext(resourceManagementDispatcher) {
             channel.asyncCompletableRpc(declaration).await().method as AMQP.Exchange.DeclareOk
         }
     }
