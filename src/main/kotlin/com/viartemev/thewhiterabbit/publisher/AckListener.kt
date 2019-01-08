@@ -23,14 +23,17 @@ class AckListener(private val continuations: ConcurrentHashMap<Long, Continuatio
 
     private fun handle(deliveryTag: Long, multiple: Boolean, ack: Boolean) {
         logger.debug { "deliveryTag = [$deliveryTag], multiple = [$multiple], positive = [$ack]" }
+        val lowerBound = lowerBoundOfMultiple.get()
         if (multiple) {
-            val lowerBound = lowerBoundOfMultiple.get()
             for (tag in lowerBound..deliveryTag) {
                 continuations.remove(tag)?.resume(ack)
             }
             lowerBoundOfMultiple.compareAndSet(lowerBound, deliveryTag)
         } else {
             continuations.remove(deliveryTag)?.resume(ack)
+            if (deliveryTag == lowerBound +1){
+                lowerBoundOfMultiple.compareAndSet(lowerBound, deliveryTag)
+            }
         }
     }
 
