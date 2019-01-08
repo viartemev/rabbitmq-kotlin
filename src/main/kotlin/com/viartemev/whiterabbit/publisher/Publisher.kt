@@ -25,8 +25,8 @@ class Publisher(private val channel: Channel) {
         }
     }
 
-    suspend fun publish(messages: List<OutboundMessage>) {
-        for (message in messages) publish(message)
+    suspend fun publish(messages: List<OutboundMessage>) = coroutineScope {
+        launch { for (message in messages) publish(message) }
     }
 
     //FIXME coroutine scope???
@@ -42,5 +42,3 @@ class Publisher(private val channel: Channel) {
         }
     }
 }
-
-typealias MessageWithConfirmation = Pair<OutboundMessage, Boolean>
