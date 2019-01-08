@@ -21,15 +21,9 @@ class AckListener(private val continuations: ConcurrentHashMap<Long, Continuatio
     private fun handle(deliveryTag: Long, multiple: Boolean, ack: Boolean) {
         logger.debug { "deliveryTag = [$deliveryTag], multiple = [$multiple], positive = [$ack]" }
         if (multiple) {
-            (1..deliveryTag)
-                    .forEach { tag ->
-                        continuations[tag]?.resume(ack)
-                        continuations.remove(tag)
-                    }
-
+            (1..deliveryTag).forEach { tag -> continuations.remove(tag)?.resume(ack) }
         } else {
-            continuations[deliveryTag]?.resume(ack)
-            continuations.remove(deliveryTag)
+            continuations.remove(deliveryTag)?.resume(ack)
         }
     }
 

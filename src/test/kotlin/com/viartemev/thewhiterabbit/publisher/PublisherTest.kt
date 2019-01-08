@@ -18,7 +18,7 @@ class PublisherTest {
         factory.newConnection().use { connection ->
             connection.createChannel().use { channel ->
                 channel.confirmSelect()
-                val sender = Publisher(channel)
+                val sender = ConfirmPublisher(channel)
 
                 runBlocking {
                     Queue.declareQueue(channel, QueueSpecification(queue))

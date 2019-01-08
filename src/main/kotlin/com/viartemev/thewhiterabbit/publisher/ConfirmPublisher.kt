@@ -11,20 +11,18 @@ import kotlin.coroutines.Continuation
 
 private val logger = KotlinLogging.logger {}
 
-class Publisher(private val channel: Channel) {
+class ConfirmPublisher internal constructor(private val channel: Channel) {
     private val continuations = ConcurrentHashMap<Long, Continuation<Boolean>>()
 
     init {
-        channel.confirmSelect()
         channel.addConfirmListener(AckListener(continuations))
     }
 
-    suspend fun publishWithConfirm(messages: List<OutboundMessage>): List<Boolean> = coroutineScope {
-        messages.map { async { publishWithConfirm(it) } }.awaitAll()
+    suspend fun publish(messages: List<OutboundMessage>): List<Boolean> = coroutineScope {
+        messages.map { async { publish(it) } }.awaitAll()
     }
 
-    //FIXME coroutine scope???
-    suspend fun publishWithConfirm(message: OutboundMessage): Boolean {
+    suspend fun publish(message: OutboundMessage): Boolean {
         val messageSequenceNumber = channel.nextPublishSeqNo
         logger.debug { "The message Sequence Number: $messageSequenceNumber" }
 
