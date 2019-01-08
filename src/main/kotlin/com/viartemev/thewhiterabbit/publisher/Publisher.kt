@@ -16,6 +16,7 @@ class Publisher(private val channel: Channel) {
     private val continuations = ConcurrentHashMap<Long, Continuation<Boolean>>()
 
     init {
+        channel.confirmSelect()
         channel.addConfirmListener(AckListener(continuations))
     }
 
