@@ -8,7 +8,6 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import mu.KotlinLogging
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.Continuation
-import kotlinx.coroutines.channels.Channel as KChannel
 
 private val logger = KotlinLogging.logger {}
 
