@@ -3,12 +3,15 @@ package com.viartemev.thewhiterabbit.publisher
 import com.rabbitmq.client.ConfirmListener
 import mu.KotlinLogging
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicLong
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 
 private val logger = KotlinLogging.logger {}
 
 class AckListener(private val continuations: ConcurrentHashMap<Long, Continuation<Boolean>>) : ConfirmListener {
+
+    private val lowerBoundOfMultiple = AtomicLong(1)
 
     override fun handleAck(deliveryTag: Long, multiple: Boolean) {
         handle(deliveryTag, multiple, true)
@@ -21,7 +24,11 @@ class AckListener(private val continuations: ConcurrentHashMap<Long, Continuatio
     private fun handle(deliveryTag: Long, multiple: Boolean, ack: Boolean) {
         logger.debug { "deliveryTag = [$deliveryTag], multiple = [$multiple], positive = [$ack]" }
         if (multiple) {
-            (1..deliveryTag).forEach { tag -> continuations.remove(tag)?.resume(ack) }
+            val lowerBound = lowerBoundOfMultiple.get()
+            for (tag in lowerBound..deliveryTag) {
+                continuations.remove(tag)?.resume(ack)
+            }
+            lowerBoundOfMultiple.compareAndSet(lowerBound, deliveryTag)
         } else {
             continuations.remove(deliveryTag)?.resume(ack)
         }
