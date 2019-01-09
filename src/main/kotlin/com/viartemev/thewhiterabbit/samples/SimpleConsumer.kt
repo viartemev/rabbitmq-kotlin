@@ -20,7 +20,12 @@ fun main(args: Array<String>) {
                 Queue.declareQueue(channel, QueueSpecification(queue))
                 val consumer = channel.consumer(queue)
                 val consumeWithConfirm = consumer.fetch() //{ delivery: Delivery -> println("Delivery: $delivery") }
-                for (i in 1..10) consumeWithConfirm.receive()
+                println("Channel is closed: ${consumeWithConfirm.isClosedForReceive}")
+                for (i in 1..3) {
+                    println("Blocking on consuming...")
+                    val receive = consumeWithConfirm.receive()
+                    println("Consumed new message: $receive")
+                }
                 coroutineContext.cancelChildren()
             }
         }
