@@ -4,7 +4,7 @@ import com.rabbitmq.client.ConnectionFactory
 import com.viartemev.thewhiterabbit.channel.createConfirmChannel
 import com.viartemev.thewhiterabbit.queue.Queue
 import com.viartemev.thewhiterabbit.queue.QueueSpecification
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.channels.Channel as KChannel
 
@@ -18,11 +18,8 @@ fun main(args: Array<String>) {
         connection.createConfirmChannel().use { channel ->
             runBlocking {
                 Queue.declareQueue(channel, QueueSpecification(queue))
-                val out = KChannel<String>()
-                launch { channel.consumer().consumeAutoAckAsync(queue, out) }
-                for (m in out) {
-                    println("Message: $m")
-                }
+                val delivery = async { channel.consumer().consumeManualAck(queue) }
+                println("Delivery: ${delivery.await()}")
             }
         }
     }
