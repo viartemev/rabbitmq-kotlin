@@ -11,7 +11,7 @@ class ConfirmChannel internal constructor(val channel: Channel) : Channel by cha
     }
 
     fun publisher() = ConfirmPublisher(this)
-    fun consumer() = Consumer(this)
+    fun consumer(queue: String) = Consumer(this, queue)
 }
 
 fun Connection.createConfirmChannel(): ConfirmChannel = ConfirmChannel(this.createChannel())
