@@ -13,7 +13,7 @@ import kotlin.system.measureNanoTime
 
 fun main(args: Array<String>) {
     val queue = "test_queue"
-    val times = 10
+    val times = 10_000
 
     val factory = ConnectionFactory()
     factory.useNio()
