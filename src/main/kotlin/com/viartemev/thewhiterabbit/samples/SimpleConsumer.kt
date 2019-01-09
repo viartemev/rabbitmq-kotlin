@@ -19,7 +19,7 @@ fun main(args: Array<String>) {
             runBlocking {
                 Queue.declareQueue(channel, QueueSpecification(queue))
                 val consumer = channel.consumer(queue)
-                consumer.consume { delivery: Delivery -> println("Delivery: $delivery") }
+                consumer.consumeWithConfim { delivery: Delivery -> println("Delivery: $delivery") }
             }
         }
     }

@@ -19,7 +19,7 @@ class Consumer(private val AMQPChannel: Channel, queue: String) {
         AMQPChannel.basicConsume(queue, true, CustomDeliveryCallback(continuations), CustomCancelCallback())
     }
 
-    suspend fun consume(function: suspend (Delivery) -> Unit) = coroutineScope {
+    suspend fun consumeWithConfim(function: suspend (Delivery) -> Unit) = coroutineScope {
         produce<Delivery> {
             val deliveries = fetch()
             val handledDelivery = handle(deliveries, function)
