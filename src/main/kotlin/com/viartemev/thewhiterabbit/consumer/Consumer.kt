@@ -1,53 +1,52 @@
 package com.viartemev.thewhiterabbit.consumer
 
+import com.rabbitmq.client.CancelCallback
 import com.rabbitmq.client.Channel
+import com.rabbitmq.client.DeliverCallback
 import com.rabbitmq.client.Delivery
-import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.channels.map
 import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import mu.KotlinLogging
-import java.util.concurrent.ArrayBlockingQueue
 
 private val logger = KotlinLogging.logger {}
 
-class Consumer(private val AMQPChannel: Channel, queue: String) {
-    private val continuations = ArrayBlockingQueue<CancellableContinuation<Delivery?>>(10)
+class Consumer(private val AMQPChannel: Channel, private val AMQPQueue: String) {
 
-    init {
-        AMQPChannel.basicConsume(queue, true, CustomDeliveryCallback(continuations), CustomCancelCallback())
-    }
-
-    suspend fun consumeWithConfim(function: suspend (Delivery) -> Unit) = coroutineScope {
-        produce<Delivery> {
-            val deliveries = fetch()
-            val handledDelivery = handle(deliveries, function)
-            ackDelivery(handledDelivery)
-        }
+    suspend fun consumeWithConfirm(function: suspend (Delivery) -> Unit) = coroutineScope {
+        val deliveries = fetch()
+        val handledDelivery = handle(deliveries, function)
+        return@coroutineScope ackDelivery(handledDelivery)
     }
 
     private suspend fun handle(input: ReceiveChannel<Delivery>, function: suspend (Delivery) -> Unit) = coroutineScope {
-        produce<Delivery> {
-            input.map { delivery ->
+        produce {
+            for (delivery in input) {
                 function(delivery)
-                delivery
+                send(delivery)
             }
         }
     }
 
     suspend fun ackDelivery(input: ReceiveChannel<Delivery>) = coroutineScope {
-        produce<Delivery> {
+        produce {
             for (delivery in input) {
                 logger.debug { "Ack for delivery: $delivery" }
                 AMQPChannel.basicAck(delivery.envelope.deliveryTag, false)
+                send(delivery)
             }
         }
     }
 
     suspend fun fetch() = coroutineScope {
-        produce<Delivery> {
-            //there is fetching from RabbitMQ
+        produce {
+            AMQPChannel.basicConsume(AMQPQueue, false,
+                    DeliverCallback { consumerTag: String, message: Delivery ->
+                        logger.debug { "Got message: $message" }
+                        launch { send(message) }
+                    },
+                    CancelCallback { println("Cancelled") })
         }
     }
 
