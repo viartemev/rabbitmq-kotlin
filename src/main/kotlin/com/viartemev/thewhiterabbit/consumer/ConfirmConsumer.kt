@@ -5,6 +5,7 @@ import com.rabbitmq.client.Channel
 import com.rabbitmq.client.DeliverCallback
 import com.rabbitmq.client.Delivery
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
@@ -16,7 +17,7 @@ import kotlinx.coroutines.channels.Channel as KChannel
 
 private val logger = KotlinLogging.logger {}
 
-class Consumer(private val AMQPChannel: Channel, AMQPQueue: String, private val handlerDispatcher: CoroutineDispatcher) {
+class ConfirmConsumer internal constructor(private val AMQPChannel: Channel, AMQPQueue: String) {
     //FIXME the queue size is Integer.MAX_VALUE
     private val continuations = LinkedBlockingQueue<Continuation<Delivery>>()
 
@@ -27,7 +28,7 @@ class Consumer(private val AMQPChannel: Channel, AMQPQueue: String, private val 
         )
     }
 
-    suspend fun consume(handler: suspend (Delivery) -> Unit) = coroutineScope {
+    suspend fun consumeWithConfirm(handler: suspend (Delivery) -> Unit, handlerDispatcher: CoroutineDispatcher = Dispatchers.Default) = coroutineScope {
         val delivery = suspendCancellableCoroutine<Delivery> { continuations.offer(it) }
         withContext(handlerDispatcher) { handler(delivery) }
         AMQPChannel.basicAck(delivery.envelope.deliveryTag, false)

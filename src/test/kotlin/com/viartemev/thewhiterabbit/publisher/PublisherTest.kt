@@ -34,11 +34,11 @@ class PublisherTest {
     fun `test one message publishing`() {
         factory.newConnection().use { connection ->
             connection.createConfirmChannel().use { channel ->
+                val publisher = channel.publisher()
                 runBlocking {
                     Queue.declareQueue(channel, QueueSpecification(QUEUE_NAME))
-                    val sender = ConfirmPublisher(channel)
                     val message = createMessage("Hello")
-                    val ack = sender.publishWithConfirm(message)
+                    val ack = publisher.publishWithConfirm(message)
                     assertTrue { ack }
                 }
             }
@@ -51,12 +51,12 @@ class PublisherTest {
         val time = measureNanoTime {
             factory.newConnection().use { connection ->
                 connection.createConfirmChannel().use { channel ->
+                    val publisher = channel.publisher()
                     runBlocking {
                         Queue.declareQueue(channel, QueueSpecification(QUEUE_NAME))
-                        val sender = ConfirmPublisher(channel)
                         val acks = (1..times).map {
                             async {
-                                sender.publishWithConfirm(createMessage("Hello #$it"))
+                                publisher.publishWithConfirm(createMessage("Hello #$it"))
                             }
                         }.awaitAll()
                         assertTrue { acks.all { true } }
