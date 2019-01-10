@@ -16,12 +16,12 @@ val time = measureNanoTime {
         useNio()
     }.newConnection().use { connection ->
         connection.createConfirmChannel().use { channel ->
+            val publisher = channel.publisher()
             runBlocking {
                 Queue.declareQueue(channel, QueueSpecification(QUEUE_NAME))
-                val sender = ConfirmPublisher(channel)
                 val acks = (1..times).map {
                     async {
-                        sender.publish(createMessage("Hello #$it"))
+                        publisher.publishWithConfirm(createMessage("Hello #$it"))
                     }
                 }.awaitAll()
                 assertTrue { acks.all { true } }
@@ -31,6 +31,7 @@ val time = measureNanoTime {
 }
 println("Time: $time")
 
+fun createMessage(body: String) = OutboundMessage(EXCHANGE_NAME, QUEUE_NAME, MessageProperties.PERSISTENT_BASIC, body.toByteArray(charset("UTF-8")))
 ```
 
 - Consume:
@@ -40,19 +41,21 @@ ConnectionFactory().apply {
     useNio()
 }.newConnection().use { connection ->
     connection.createChannel().use { channel ->
+        val consumer = channel.consumer(QUEUE_NAME)
         runBlocking {
             Queue.declareQueue(channel, QueueSpecification(QUEUE_NAME))
-            val consumer = Consumer(channel, QUEUE_NAME, Dispatchers.IO)
             for (i in 1..3) {
                 launch {
-                    consumer.consume {
-                        println("Got a message: ${String(it.body)}. Let's do some async work...")
-                        delay(100)
-                        println("Work is done")
-                    }
+                    consumer.consumeWithConfirm({ handleDelivery(it) })
                 }
             }
         }
     }
+}
+
+suspend fun handleDelivery(message: Delivery) {
+    println("Got a message: ${String(message.body)}. Let's do some async work...")
+    delay(100)
+    println("Work is done")
 }
 ```
