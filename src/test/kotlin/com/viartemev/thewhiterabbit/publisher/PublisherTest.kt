@@ -38,7 +38,7 @@ class PublisherTest {
                     Queue.declareQueue(channel, QueueSpecification(QUEUE_NAME))
                     val sender = ConfirmPublisher(channel)
                     val message = createMessage("Hello")
-                    val ack = sender.publish(message)
+                    val ack = sender.publishWithConfirm(message)
                     assertTrue { ack }
                 }
             }
@@ -56,7 +56,7 @@ class PublisherTest {
                         val sender = ConfirmPublisher(channel)
                         val acks = (1..times).map {
                             async {
-                                sender.publish(createMessage("Hello #$it"))
+                                sender.publishWithConfirm(createMessage("Hello #$it"))
                             }
                         }.awaitAll()
                         assertTrue { acks.all { true } }
