@@ -1,1 +1,1 @@
-#The White Rabbit - based on Kotlin coroutines RabbitMQ library
+# The White Rabbit - based on Kotlin coroutines RabbitMQ library
