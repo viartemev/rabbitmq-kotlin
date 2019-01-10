@@ -1,4 +1,4 @@
-package com.viartemev.thewhiterabbit.queue
+package com.viartemev.thewhiterabbit.exchange
 
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.jackson.responseObject
@@ -12,8 +12,8 @@ import kotlin.test.assertTrue
 
 //FIXME add testcontainers
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class QueueTest {
-    private val QUEUE_NAME = "name"
+class ExchangeTest {
+    private val EXCHANGE_NAME = "name"
     lateinit var factory: ConnectionFactory
 
 
@@ -24,19 +24,19 @@ class QueueTest {
     }
 
     @Test
-    fun `queue declaration test`() = runBlocking {
+    fun `exchange declaration test`() = runBlocking {
         factory.newConnection().use { connection ->
             connection.createChannel().use { channel ->
-                Queue.declareQueue(channel, QueueSpecification(QUEUE_NAME))
-                val (_, _, response) = Fuel.get("http://localhost:8080/api/queues").authenticate("guest", "guest").responseObject<List<QueuesHttpResponse>>()
-                val queues = response.component1()
-                assertNotNull(queues)
-                assertTrue { queues.isNotEmpty() }
-                assertTrue { queues.find { it.name == QUEUE_NAME } != null }
+                Exchange.declareExchange(channel, ExchangeSpecification(EXCHANGE_NAME))
+                val (_, _, response) = Fuel.get("http://localhost:8080/api/exchanges").authenticate("guest", "guest").responseObject<List<ExchangesHttpResponse>>()
+                val exchanges = response.component1()
+                assertNotNull(exchanges)
+                assertTrue { exchanges.isNotEmpty() }
+                assertTrue { exchanges.find { it.name == EXCHANGE_NAME } != null }
             }
         }
     }
 }
 
 
-data class QueuesHttpResponse(val name: String)
+data class ExchangesHttpResponse(val name: String)

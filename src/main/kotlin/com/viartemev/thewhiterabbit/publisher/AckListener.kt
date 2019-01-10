@@ -31,10 +31,9 @@ class AckListener(private val continuations: ConcurrentHashMap<Long, Continuatio
             lowerBoundOfMultiple.compareAndSet(lowerBound, deliveryTag)
         } else {
             continuations.remove(deliveryTag)?.resume(ack)
-            if (deliveryTag == lowerBound +1){
+            if (deliveryTag == lowerBound + 1) {
                 lowerBoundOfMultiple.compareAndSet(lowerBound, deliveryTag)
             }
         }
     }
-
 }
