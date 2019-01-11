@@ -4,6 +4,9 @@ The Whit Rabbit is a library for RabbitMQ based on Kotlin coroutines.
 
 ##### *IMPORTANT: This project is still under development, if you are planning to use it, please contact me.*
 
+### Status
+[![Build Status](https://travis-ci.org/viartemev/the-white-rabbit.svg?branch=master)](https://travis-ci.org/viartemev/the-white-rabbit)
+
 ### Usage:
 - Start RabbitMQ: 
 ```docker
