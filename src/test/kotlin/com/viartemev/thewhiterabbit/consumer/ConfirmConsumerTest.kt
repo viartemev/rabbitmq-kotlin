@@ -30,9 +30,9 @@ class ConfirmConsumerTest {
     fun `test one message publishing`() {
         factory.newConnection().use { connection ->
             connection.createChannel().use { channel ->
-                val consumer = channel.consumer(QUEUE_NAME)
                 runBlocking {
                     Queue.declareQueue(channel, QueueSpecification(QUEUE_NAME))
+                    val consumer = channel.consumer(QUEUE_NAME)
                     for (i in 1..3) {
                         launch {
                             consumer.consumeWithConfirm({ handleDelivery(it) })
