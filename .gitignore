@@ -1,5 +1,8 @@
-# Directories
-.gradle
-.idea
-out
-build
+### IntelliJ IDEA ###
+.idea/
+*.iml
+
+### Gradle ###
+out/
+.gradle/
+build/
