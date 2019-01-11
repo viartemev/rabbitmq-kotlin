@@ -27,7 +27,7 @@ class QueueTest {
     fun `queue declaration test`() = runBlocking {
         factory.newConnection().use { connection ->
             connection.createChannel().use { channel ->
-                Queue.declareQueue(channel, QueueSpecification(QUEUE_NAME))
+                channel.declareQueue(QueueSpecification(QUEUE_NAME))
                 val (_, _, response) = Fuel.get("http://localhost:8080/api/queues").authenticate("guest", "guest").responseObject<List<QueuesHttpResponse>>()
                 val queues = response.component1()
                 assertNotNull(queues)
