@@ -3,8 +3,8 @@ package com.viartemev.thewhiterabbit.publisher
 import com.rabbitmq.client.ConnectionFactory
 import com.rabbitmq.client.MessageProperties
 import com.viartemev.thewhiterabbit.channel.createConfirmChannel
-import com.viartemev.thewhiterabbit.queue.Queue
 import com.viartemev.thewhiterabbit.queue.QueueSpecification
+import com.viartemev.thewhiterabbit.queue.declareQueue
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
@@ -36,7 +36,7 @@ class PublisherTest {
             connection.createConfirmChannel().use { channel ->
                 val publisher = channel.publisher()
                 runBlocking {
-                    Queue.declareQueue(channel, QueueSpecification(QUEUE_NAME))
+                    channel.declareQueue(QueueSpecification(QUEUE_NAME))
                     val message = createMessage("Hello")
                     val ack = publisher.publishWithConfirm(message)
                     assertTrue { ack }
@@ -53,7 +53,7 @@ class PublisherTest {
                 connection.createConfirmChannel().use { channel ->
                     val publisher = channel.publisher()
                     runBlocking {
-                        Queue.declareQueue(channel, QueueSpecification(QUEUE_NAME))
+                        channel.declareQueue(QueueSpecification(QUEUE_NAME))
                         val acks = (1..times).map {
                             async {
                                 publisher.publishWithConfirm(createMessage("Hello #$it"))
