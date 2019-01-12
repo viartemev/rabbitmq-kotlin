@@ -27,7 +27,7 @@ class ExchangeTest {
     fun `exchange declaration test`() = runBlocking {
         factory.newConnection().use { connection ->
             connection.createChannel().use { channel ->
-                Exchange.declareExchange(channel, ExchangeSpecification(EXCHANGE_NAME))
+                channel.declareExchange(ExchangeSpecification(EXCHANGE_NAME))
                 val (_, _, response) = Fuel.get("http://localhost:8080/api/exchanges").authenticate("guest", "guest").responseObject<List<ExchangesHttpResponse>>()
                 val exchanges = response.component1()
                 assertNotNull(exchanges)

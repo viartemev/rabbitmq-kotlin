@@ -7,7 +7,8 @@ import kotlinx.coroutines.future.await
 import kotlinx.coroutines.withContext
 
 
-suspend fun declareExchange(channel: Channel, exchangeSpecification: ExchangeSpecification): AMQP.Exchange.DeclareOk {
+suspend fun Channel.declareExchange(exchangeSpecification: ExchangeSpecification): AMQP.Exchange.DeclareOk {
+    val channel = this
     val declaration = AMQP.Exchange.Declare.Builder()
         .exchange(exchangeSpecification.name)
         .type(exchangeSpecification.type.asString)

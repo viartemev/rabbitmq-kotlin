@@ -3,8 +3,8 @@ package com.viartemev.thewhiterabbit.consumer
 import com.rabbitmq.client.ConnectionFactory
 import com.rabbitmq.client.Delivery
 import com.viartemev.thewhiterabbit.channel.consumer
-import com.viartemev.thewhiterabbit.queue.Queue
 import com.viartemev.thewhiterabbit.queue.QueueSpecification
+import com.viartemev.thewhiterabbit.queue.declareQueue
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -31,7 +31,7 @@ class ConfirmConsumerTest {
         factory.newConnection().use { connection ->
             connection.createChannel().use { channel ->
                 runBlocking {
-                    Queue.declareQueue(channel, QueueSpecification(QUEUE_NAME))
+                    channel.declareQueue(QueueSpecification(QUEUE_NAME))
                     val consumer = channel.consumer(QUEUE_NAME)
                     for (i in 1..3) {
                         launch {
