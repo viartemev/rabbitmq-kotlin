@@ -45,7 +45,7 @@ class ConfirmConsumerTest {
                 runBlocking {
                     channel.declareQueue(QueueSpecification(QUEUE_NAME))
                     val consumer = channel.consumer(QUEUE_NAME)
-                    consumer.consumeWithConfirm(3, { handleDelivery(it) })
+                    consumer.consumeWithConfirm(parallelism = 3, handler = { handleDelivery(it) })
                 }
             }
         }

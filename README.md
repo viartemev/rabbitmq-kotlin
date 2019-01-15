@@ -73,7 +73,7 @@ ConnectionFactory().apply {
             for (i in 1..3) consumer.consumeWithConfirm({ handleDelivery(it) })
             
             //infinite consuming
-            consumer.consumeWithConfirm(3, { handleDelivery(it) })
+            consumer.consumeWithConfirm(parallelism = 3, handler = { handleDelivery(it) })
         }
     }
 }

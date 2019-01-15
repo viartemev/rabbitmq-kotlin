@@ -1,31 +1,31 @@
 package com.viartemev.thewhiterabbit.consumer
 
-import com.rabbitmq.client.CancelCallback
 import com.rabbitmq.client.Channel
-import com.rabbitmq.client.DeliverCallback
 import com.rabbitmq.client.Delivery
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.sendBlocking
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.withContext
 import mu.KotlinLogging
 import kotlinx.coroutines.channels.Channel as KChannel
 
 private val logger = KotlinLogging.logger {}
 
-class ConfirmConsumer internal constructor(private val AMQPChannel: Channel, AMQPQueue: String) {
+class ConfirmConsumer internal constructor(private val AMQPChannel: Channel, AMQPQueue: String, prefetchSize: Int = 0) {
     private val continuations = KChannel<Delivery>()
     private lateinit var consTag: String
 
     init {
+        AMQPChannel.basicQos(prefetchSize, false)
         consTag = AMQPChannel.basicConsume(AMQPQueue, false,
-            DeliverCallback { consumerTag, message -> if (consumerTag == consTag) continuations.sendBlocking(message) },
-            CancelCallback {
-                logger.info { "Consumer $consTag has been cancelled" }
-                continuations.cancel()
+            { consumerTag, message -> if (consumerTag == consTag) continuations.sendBlocking(message) },
+            { consumerTag ->
+                if (consumerTag == consTag) {
+                    logger.info { "Consumer $consumerTag has been cancelled" }
+                    continuations.cancel()
+                }
             }
         )
     }
