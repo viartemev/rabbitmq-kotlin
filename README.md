@@ -12,6 +12,24 @@ The Whit Rabbit is a library for RabbitMQ based on Kotlin coroutines.
 ```docker
 docker run -d --hostname my-rabbit --name some-rabbit -p 8080:15672 -p 5672:5672 rabbitmq:3-management
 ```
+
+- Declare an exchange/queue:
+```kotlin
+ConnectionFactory().apply {
+    host = "localhost"
+    useNio()
+}.newConnection().use { connection ->
+    connection.createChannel().use { channel ->
+        runBlocking {
+            channel.apply {
+                declareExchange(ExchangeSpecification("test_exchange"))
+                declareQueue(QueueSpecification("test_queue"))
+                bindQueue(BindQueueSpecification("test_queue", "test_exchange", "test_queue"))
+            }
+        }
+    }
+}
+```
 - Publish: 
 ```kotlin
 val times = 10
