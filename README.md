@@ -1,6 +1,6 @@
 # The White Rabbit
 
-The Whit Rabbit is a library for RabbitMQ based on Kotlin coroutines.
+The White Rabbit is a library for RabbitMQ based on Kotlin coroutines.
 
 ##### *IMPORTANT: This project is still under development, if you are planning to use it, please contact me.*
 
