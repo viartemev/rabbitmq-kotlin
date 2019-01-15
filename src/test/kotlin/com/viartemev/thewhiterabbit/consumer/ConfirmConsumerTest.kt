@@ -6,7 +6,6 @@ import com.viartemev.thewhiterabbit.channel.consumer
 import com.viartemev.thewhiterabbit.queue.QueueSpecification
 import com.viartemev.thewhiterabbit.queue.declareQueue
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -33,15 +32,25 @@ class ConfirmConsumerTest {
                 runBlocking {
                     channel.declareQueue(QueueSpecification(QUEUE_NAME))
                     val consumer = channel.consumer(QUEUE_NAME)
-                    for (i in 1..3) {
-                        launch {
-                            consumer.consumeWithConfirm({ handleDelivery(it) })
-                        }
-                    }
+                    for (i in 1..3) consumer.consumeWithConfirm({ handleDelivery(it) })
                 }
             }
         }
     }
+
+    @Test
+    fun `test one message publishing 2`() {
+        factory.newConnection().use { connection ->
+            connection.createChannel().use { channel ->
+                runBlocking {
+                    channel.declareQueue(QueueSpecification(QUEUE_NAME))
+                    val consumer = channel.consumer(QUEUE_NAME)
+                    consumer.consumeWithConfirm(3, { handleDelivery(it) })
+                }
+            }
+        }
+    }
+
 
     suspend fun handleDelivery(message: Delivery) {
         println("Got a message: ${String(message.body)}. Let's do some async work...")
