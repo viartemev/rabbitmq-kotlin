@@ -48,12 +48,14 @@ ConnectionFactory().apply {
     connection.createChannel().use { channel ->
         val consumer = channel.consumer(QUEUE_NAME)
         runBlocking {
-            Queue.declareQueue(channel, QueueSpecification(QUEUE_NAME))
-            for (i in 1..3) {
-                launch {
-                    consumer.consumeWithConfirm({ handleDelivery(it) })
-                }
-            }
+            channel.declareQueue(QueueSpecification(QUEUE_NAME))
+            val consumer = channel.consumer(QUEUE_NAME)
+            
+            //consume 3 messages
+            for (i in 1..3) consumer.consumeWithConfirm({ handleDelivery(it) })
+            
+            //infinite consuming
+            consumer.consumeWithConfirm(3, { handleDelivery(it) })
         }
     }
 }
