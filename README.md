@@ -4,10 +4,31 @@ The Whit Rabbit is a library for RabbitMQ based on Kotlin coroutines.
 
 ##### *IMPORTANT: This project is still under development, if you are planning to use it, please contact me.*
 
+### Status
+[![Build Status](https://travis-ci.org/viartemev/the-white-rabbit.svg?branch=master)](https://travis-ci.org/viartemev/the-white-rabbit)
+
 ### Usage:
 - Start RabbitMQ: 
 ```docker
 docker run -d --hostname my-rabbit --name some-rabbit -p 8080:15672 -p 5672:5672 rabbitmq:3-management
+```
+
+- Declare an exchange/queue:
+```kotlin
+ConnectionFactory().apply {
+    host = "localhost"
+    useNio()
+}.newConnection().use { connection ->
+    connection.createChannel().use { channel ->
+        runBlocking {
+            channel.apply {
+                declareExchange(ExchangeSpecification("test_exchange"))
+                declareQueue(QueueSpecification("test_queue"))
+                bindQueue(BindQueueSpecification("test_queue", "test_exchange", "test_queue"))
+            }
+        }
+    }
+}
 ```
 - Publish: 
 ```kotlin
@@ -45,12 +66,14 @@ ConnectionFactory().apply {
     connection.createChannel().use { channel ->
         val consumer = channel.consumer(QUEUE_NAME)
         runBlocking {
-            Queue.declareQueue(channel, QueueSpecification(QUEUE_NAME))
-            for (i in 1..3) {
-                launch {
-                    consumer.consumeWithConfirm({ handleDelivery(it) })
-                }
-            }
+            channel.declareQueue(QueueSpecification(QUEUE_NAME))
+            val consumer = channel.consumer(QUEUE_NAME)
+            
+            //consume 3 messages
+            for (i in 1..3) consumer.consumeWithConfirm({ handleDelivery(it) })
+            
+            //infinite consuming
+            consumer.consumeWithConfirm(3, { handleDelivery(it) })
         }
     }
 }
