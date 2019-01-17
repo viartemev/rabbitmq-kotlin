@@ -6,3 +6,6 @@
 out/
 .gradle/
 build/
+
+#tmp
+CONTENT.md
