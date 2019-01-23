@@ -14,8 +14,6 @@ import kotlinx.coroutines.channels.Channel as KChannel
 private val logger = KotlinLogging.logger {}
 
 /**
- * @todo AMQPChannel.basicQos can throw an exception
- * @todo AMQPChannel.basicConsume can throw an exception
  * @todo What will be if consumer gets huge amount of messages, but handling is very slow?
  * @todo What will be if an exception will be thrown in handler?
  * @todo What will be if an exception will be thrown in AMQPChannel.basicAck after handling the message?
