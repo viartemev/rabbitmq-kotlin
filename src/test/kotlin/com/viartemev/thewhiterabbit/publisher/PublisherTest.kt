@@ -67,5 +67,5 @@ class PublisherTest {
         println("Time: $time")
     }
 
-    private fun createMessage(body: String) = OutboundMessage(EXCHANGE_NAME, QUEUE_NAME, MessageProperties.PERSISTENT_BASIC, body.toByteArray(charset("UTF-8")))
+    private fun createMessage(body: String) = OutboundMessage(EXCHANGE_NAME, QUEUE_NAME, MessageProperties.PERSISTENT_BASIC, body)
 }
