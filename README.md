@@ -1,5 +1,5 @@
 <p align="center">
-  The White Rabbit<br/><br/>
+    <strong>The White Rabbit</strong><br/><br/>
   <img src ="https://github.com/viartemev/the-white-rabbit/blob/master/art/the-white-rabbit.png?raw=true"/><br/>
   The White Rabbit is a library for RabbitMQ based on Kotlin coroutines.
 </p>
