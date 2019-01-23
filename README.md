@@ -1,4 +1,7 @@
 # The White Rabbit
+<div style="text-align:center">
+    <img src ="https://github.com/viartemev/the-white-rabbit/blob/master/art/the-white-rabbit.png?raw=true"/>
+</div>
 
 The White Rabbit is a library for RabbitMQ based on Kotlin coroutines.
 
