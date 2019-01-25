@@ -34,7 +34,7 @@ dependencies {
     compile "com.github.kittinunf.fuel:fuel-coroutines:1.16.0"
     compile 'com.github.kittinunf.fuel:fuel-jackson:1.16.0'
     compile "org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.1.1"
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.0.1'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.1.1'
 
     testImplementation('org.spekframework.spek2:spek-dsl-jvm:2.0.0-rc.1') {
         exclude group: 'org.jetbrains.kotlin'
