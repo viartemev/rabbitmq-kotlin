@@ -4,7 +4,7 @@ plugins {
 }
 
 ext {
-    rabbitMqJavaClientVersion = '5.5.2'
+    rabbitMqJavaClientVersion = '5.6.0'
     junit_jupiter_version = '5.3.2'
     junit_plugin_version = '1.2.0'
     spek_version = '1.2.1'
