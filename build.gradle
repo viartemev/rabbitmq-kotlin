@@ -9,7 +9,7 @@ ext {
     junit_plugin_version = '1.2.0'
     spek_version = '1.2.1'
     assertj_version = '3.9.1'
-    kluent_version = '1.45'
+    kluent_version = '1.47'
 }
 
 group 'com.viartemev'
