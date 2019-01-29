@@ -32,7 +32,7 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     compile "com.github.kittinunf.fuel:fuel:1.16.0"
     compile "com.github.kittinunf.fuel:fuel-coroutines:1.16.0"
-    compile 'com.github.kittinunf.fuel:fuel-jackson:1.16.0'
+    compile 'com.github.kittinunf.fuel:fuel-jackson:2.0.1'
     compile "org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.1.1"
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.1.1'
 
