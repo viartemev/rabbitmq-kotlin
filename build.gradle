@@ -30,9 +30,6 @@ dependencies {
 
     compile "com.rabbitmq:amqp-client:$rabbitMqJavaClientVersion"
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-    compile "com.github.kittinunf.fuel:fuel:1.16.0"
-    compile "com.github.kittinunf.fuel:fuel-coroutines:1.16.0"
-    compile 'com.github.kittinunf.fuel:fuel-jackson:1.16.0'
     compile "org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.1.1"
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.1.1'
 
@@ -40,17 +37,18 @@ dependencies {
         exclude group: 'org.jetbrains.kotlin'
     }
     testImplementation "org.amshove.kluent:kluent:$kluent_version"
-
-    compile "org.testcontainers:testcontainers:1.10.6"
-    compile "org.testcontainers:junit-jupiter:1.10.6"
+    testCompile "com.github.kittinunf.fuel:fuel:1.16.0"
+    testCompile "com.github.kittinunf.fuel:fuel-coroutines:1.16.0"
+    testCompile 'com.github.kittinunf.fuel:fuel-jackson:1.16.0'
+    testCompile "org.testcontainers:testcontainers:1.10.6"
+    testCompile "org.testcontainers:junit-jupiter:1.10.6"
+    testCompile("org.junit.jupiter:junit-jupiter-api:$junit_jupiter_version")
+    testCompile("com.nhaarman:mockito-kotlin:1.6.0")
     testRuntimeOnly('org.spekframework.spek2:spek-runner-junit5:2.0.0') {
         exclude group: 'org.junit.platform'
         exclude group: 'org.jetbrains.kotlin'
     }
     testRuntime("org.junit.jupiter:junit-jupiter-engine:$junit_jupiter_version")
-
-    testCompile("org.junit.jupiter:junit-jupiter-api:$junit_jupiter_version")
-    testCompile("com.nhaarman:mockito-kotlin:1.6.0")
 }
 
 test {
