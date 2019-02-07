@@ -19,7 +19,7 @@ class ConfirmPublisher internal constructor(private val channel: Channel) {
     }
 
     /**
-     * Asynchronous publish a message with the waiting of confirmation.
+     * Asynchronously publish a message with the waiting of confirmation.
      *
      * @see com.viartemev.thewhiterabbit.publisher.OutboundMessage
      * @return acknowledgement - represent messages handled successfully or lost by the broker.
@@ -36,7 +36,7 @@ class ConfirmPublisher internal constructor(private val channel: Channel) {
     }
 
     /**
-     * Asynchronous publish a list of messages with the waiting of confirmation.
+     * Asynchronously publish a list of messages with the waiting of confirmation.
      *
      * @see com.viartemev.thewhiterabbit.publisher.OutboundMessage
      * @return list of acknowledgements - represent messages handled successfully or lost by the broker.
