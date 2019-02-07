@@ -7,7 +7,7 @@ import kotlinx.coroutines.future.await
 import kotlinx.coroutines.withContext
 
 /**
- * Declare a queue.
+ * Asynchronously declare a queue.
  * @see com.viartemev.thewhiterabbit.queue.QueueSpecification
  * @return a declaration-confirm method to indicate the queue was successfully declared
  * @throws java.io.IOException if an error is encountered
@@ -28,7 +28,7 @@ suspend fun Channel.declareQueue(queueSpecification: QueueSpecification): AMQP.Q
 }
 
 /**
- * Delete a queue, without regard for whether it is in use or has messages on it
+ * Asynchronously delete a queue.
  * @see com.viartemev.thewhiterabbit.queue.DeleteQueueSpecification
  * @return a deletion-confirm method to indicate the queue was successfully deleted
  * @throws java.io.IOException if an error is encountered
@@ -48,7 +48,7 @@ suspend fun Channel.deleteQueue(specification: DeleteQueueSpecification): AMQP.Q
 }
 
 /**
- * Purges the contents of the given queue.
+ * Asynchronously purges the contents of the given queue.
  * @see com.viartemev.thewhiterabbit.queue.PurgeQueueSpecification
  * @return a purge-confirm method if the purge was executed successfully
  * @throws java.io.IOException if an error is encountered
@@ -66,7 +66,7 @@ suspend fun Channel.purgeQueue(specification: PurgeQueueSpecification): AMQP.Que
 }
 
 /**
- * Bind a queue to an exchange.
+ * Asynchronously bind a queue to an exchange.
  * @see com.viartemev.thewhiterabbit.queue.BindQueueSpecification
  * @return a binding-confirm method if the binding was successfully created
  * @throws java.io.IOException if an error is encountered
@@ -87,7 +87,7 @@ suspend fun Channel.bindQueue(specification: BindQueueSpecification): AMQP.Queue
 }
 
 /**
- * Unbinds a queue from an exchange, with no extra arguments.
+ * Asynchronously unbinds a queue from an exchange, with no extra arguments.
  * @see com.viartemev.thewhiterabbit.queue.UnbindQueueSpecification
  * @return an unbinding-confirm method if the binding was successfully deleted
  * @throws java.io.IOException if an error is encountered

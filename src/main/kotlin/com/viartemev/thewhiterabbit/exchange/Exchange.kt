@@ -5,8 +5,14 @@ import com.rabbitmq.client.Channel
 import com.viartemev.thewhiterabbit.common.resourceManagementDispatcher
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.withContext
+import java.io.IOException
 
 
+/**
+ * Asynchronously Declare an exchange passively; that is, check if the named exchange exists.
+ * @see com.viartemev.thewhiterabbit.exchange.ExchangeSpecification
+ * @throws IOException the server will raise a 404 channel exception if the named exchange does not exist.
+ */
 suspend fun Channel.declareExchange(exchangeSpecification: ExchangeSpecification): AMQP.Exchange.DeclareOk {
     val channel = this
     val declaration = AMQP.Exchange.Declare.Builder()
@@ -23,6 +29,12 @@ suspend fun Channel.declareExchange(exchangeSpecification: ExchangeSpecification
     }
 }
 
+/**
+ * Asynchronously delete an exchange.
+ * @see com.viartemev.thewhiterabbit.exchange.DeleteExchangeSpecification
+ * @return a deletion-confirm method to indicate the exchange was successfully deleted
+ * @throws java.io.IOException if an error is encountered
+ */
 suspend fun Channel.deleteExchange(specification: DeleteExchangeSpecification): AMQP.Exchange.DeleteOk {
     val channel = this
     val deleteDeclaration = AMQP.Exchange.Delete.Builder()
@@ -36,6 +48,12 @@ suspend fun Channel.deleteExchange(specification: DeleteExchangeSpecification): 
     }
 }
 
+/**
+ * Asynchronously bind an exchange to an exchange.
+ * @see com.viartemev.thewhiterabbit.exchange.BindExchangeSpecification
+ * @return a binding-confirm method if the binding was successfully created
+ * @throws java.io.IOException if an error is encountered
+ */
 suspend fun Channel.bindExchange(specification: BindExchangeSpecification): AMQP.Exchange.BindOk {
     val channel = this
     val bindDeclaration = AMQP.Exchange.Bind.Builder()
@@ -51,6 +69,12 @@ suspend fun Channel.bindExchange(specification: BindExchangeSpecification): AMQP
     }
 }
 
+/**
+ * Asynchronously unbind an exchange from an exchange.
+ * @see com.viartemev.thewhiterabbit.exchange.UnbindExchangeSpecification
+ * @return a binding-confirm method if the binding was successfully created
+ * @throws java.io.IOException if an error is encountered
+ */
 suspend fun Channel.unbindExchange(specification: UnbindExchangeSpecification): AMQP.Exchange.UnbindOk {
     val channel = this
     val unbindDeclaration = AMQP.Exchange.Unbind.Builder()
