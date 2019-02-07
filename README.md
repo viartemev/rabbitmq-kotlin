@@ -39,9 +39,3 @@ val channel = connection.createConfirmChannel()
 val consumer = channel.consumer(QUEUE_NAME)
 for (i in 1..n) consumer.consumeWithConfirm({ println(it) })
 ```
-or Infinite consuming
-```kotlin
-val channel = connection.createConfirmChannel()
-val consumer = channel.consumer(QUEUE_NAME)
-consumer.consumeWithConfirm(parallelism = m, handler = { println(it) })
-```
