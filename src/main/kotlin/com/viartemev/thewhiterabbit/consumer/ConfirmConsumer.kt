@@ -2,6 +2,7 @@ package com.viartemev.thewhiterabbit.consumer
 
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Delivery
+import com.viartemev.thewhiterabbit.exception.AcknowledgeException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.sendBlocking
@@ -9,6 +10,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import mu.KotlinLogging
+import java.io.IOException
 import kotlinx.coroutines.channels.Channel as KChannel
 
 private val logger = KotlinLogging.logger {}
@@ -33,21 +35,23 @@ class ConfirmConsumer internal constructor(private val AMQPChannel: Channel, AMQ
         )
     }
 
+
     suspend fun consumeWithConfirm(handler: suspend (Delivery) -> Unit, handlerDispatcher: CoroutineDispatcher = Dispatchers.Default) {
         val delivery = continuations.receive()
         val deliveryTag = delivery.envelope.deliveryTag
         withContext(handlerDispatcher) { handler(delivery) }
         try {
             AMQPChannel.basicAck(deliveryTag, false)
-        } catch (e: Exception) {
+        } catch (e: IOException) {
             val errorMessage = "Can't ack a message with deliveryTag: $deliveryTag"
             logger.error { errorMessage }
-            throw RuntimeException(errorMessage)
+            throw AcknowledgeException(errorMessage)
         }
     }
 
     /**
      * @todo Refactor it!
+     * @todo Do we need coroutineScope here?
      */
     suspend fun consumeWithConfirm(parallelism: Int = 3, handler: suspend (Delivery) -> Unit, handlerDispatcher: CoroutineDispatcher = Dispatchers.Default) = coroutineScope {
         val internalJobChannel = KChannel<Unit>(parallelism)
