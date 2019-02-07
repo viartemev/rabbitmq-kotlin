@@ -7,6 +7,7 @@ import com.viartemev.thewhiterabbit.queue.QueueSpecification
 import com.viartemev.thewhiterabbit.queue.declareQueue
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -46,6 +47,31 @@ class PublisherTest {
     }
 
     @Test
+    fun `test n-messages publishing manually`() {
+        val times = 10
+        val time = measureNanoTime {
+            factory.newConnection().use { connection ->
+                connection.createConfirmChannel().use { channel ->
+                    val publisher = channel.publisher()
+                    runBlocking {
+                        channel.declareQueue(QueueSpecification(QUEUE_NAME))
+                        val acks = coroutineScope {
+
+                            (1..times).map {
+                                async {
+                                    publisher.publishWithConfirm(createMessage("Hello #$it"))
+                                }
+                            }.awaitAll()
+                        }
+                        assertTrue { acks.all { true } }
+                    }
+                }
+            }
+        }
+        println("Time: $time")
+    }
+
+    @Test
     fun `test n-messages publishing`() {
         val times = 10
         val time = measureNanoTime {
@@ -54,11 +80,8 @@ class PublisherTest {
                     val publisher = channel.publisher()
                     runBlocking {
                         channel.declareQueue(QueueSpecification(QUEUE_NAME))
-                        val acks = (1..times).map {
-                            async {
-                                publisher.publishWithConfirm(createMessage("Hello #$it"))
-                            }
-                        }.awaitAll()
+                        val messages = (1..times).map { createMessage("Hello #$it") }
+                        val acks = publisher.publishWithConfirm(messages).awaitAll()
                         assertTrue { acks.all { true } }
                     }
                 }

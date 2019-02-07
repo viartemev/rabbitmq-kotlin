@@ -18,9 +18,6 @@ class ConfirmPublisher internal constructor(private val channel: Channel) {
         channel.addConfirmListener(AckListener(continuations))
     }
 
-    /**
-     * @todo channel.basicPublish can throw an exception
-     */
     suspend fun publishWithConfirm(message: OutboundMessage): Boolean {
         val messageSequenceNumber = channel.nextPublishSeqNo
         logger.debug { "The message Sequence Number: $messageSequenceNumber" }
