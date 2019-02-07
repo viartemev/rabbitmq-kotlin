@@ -33,11 +33,11 @@ coroutineScope {
 ```
 
 ##### - Async message consuming with acknowledge: 
-Consume only 3 messages:
+Consume only n-messages:
 ```kotlin
 val channel = connection.createConfirmChannel()
 val consumer = channel.consumer(QUEUE_NAME)
-for (i in 1..3) consumer.consumeWithConfirm({ println(it) })
+for (i in 1..n) consumer.consumeWithConfirm({ println(it) })
 ```
 or Infinite consuming
 ```kotlin
