@@ -38,20 +38,6 @@ class ConfirmConsumerTest {
         }
     }
 
-    @Test
-    fun `test message consuming 2`() {
-        factory.newConnection().use { connection ->
-            connection.createChannel().use { channel ->
-                runBlocking {
-                    channel.declareQueue(QueueSpecification(QUEUE_NAME))
-                    val consumer = channel.consumer(QUEUE_NAME)
-                    consumer.consumeWithConfirm(parallelism = 3, handler = { handleDelivery(it) })
-                }
-            }
-        }
-    }
-
-
     suspend fun handleDelivery(message: Delivery) {
         println("Got a message: ${String(message.body)}. Let's do some async work...")
         delay(100)
