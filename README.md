@@ -43,5 +43,5 @@ or Infinite consuming
 ```kotlin
 val channel = connection.createConfirmChannel()
 val consumer = channel.consumer(QUEUE_NAME)
-consumer.consumeWithConfirm(parallelism = 3, handler = { println(it) })
+consumer.consumeWithConfirm(parallelism = m, handler = { println(it) })
 ```
