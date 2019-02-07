@@ -12,4 +12,8 @@ class ConfirmChannel internal constructor(private val channel: Channel) : Channe
     fun publisher() = ConfirmPublisher(this)
 }
 
+/**
+ * Create a channel with enabled publisher acknowledgements on it.
+ * @see com.rabbitmq.client.Channel.confirmSelect()
+ */
 fun Connection.createConfirmChannel(): ConfirmChannel = ConfirmChannel(this.createChannel())

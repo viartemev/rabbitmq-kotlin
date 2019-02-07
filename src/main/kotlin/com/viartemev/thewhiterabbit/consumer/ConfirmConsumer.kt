@@ -35,7 +35,10 @@ class ConfirmConsumer internal constructor(private val AMQPChannel: Channel, AMQ
         )
     }
 
-
+    /**
+     * Asynchronously consume one message.
+     * @throws IOException if an error is encountered
+     */
     suspend fun consumeWithConfirm(handler: suspend (Delivery) -> Unit, handlerDispatcher: CoroutineDispatcher = Dispatchers.Default) {
         val delivery = continuations.receive()
         val deliveryTag = delivery.envelope.deliveryTag
@@ -50,6 +53,9 @@ class ConfirmConsumer internal constructor(private val AMQPChannel: Channel, AMQ
     }
 
     /**
+     * Infinitely asynchronously consume messages.
+     * @param parallelism - number of parallel coroutines
+     * @param handler - handler
      * @todo Refactor it!
      * @todo Do we need coroutineScope here?
      */
