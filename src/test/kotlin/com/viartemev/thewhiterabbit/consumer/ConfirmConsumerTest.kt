@@ -26,7 +26,7 @@ class ConfirmConsumerTest {
     }
 
     @Test
-    fun `test one message publishing`() {
+    fun `test message consuming`() {
         factory.newConnection().use { connection ->
             connection.createChannel().use { channel ->
                 runBlocking {
@@ -39,7 +39,7 @@ class ConfirmConsumerTest {
     }
 
     @Test
-    fun `test one message publishing 2`() {
+    fun `test message consuming 2`() {
         factory.newConnection().use { connection ->
             connection.createChannel().use { channel ->
                 runBlocking {
