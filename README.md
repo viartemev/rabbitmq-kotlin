@@ -5,14 +5,6 @@ The White Rabbit is an asynchronous RabbitMQ library based on Kotlin coroutines.
 [![Build Status](https://travis-ci.org/viartemev/the-white-rabbit.svg?branch=master)](https://travis-ci.org/viartemev/the-white-rabbit)
 
 ### Usage:
-##### - Async exchange declaration:
-```kotlin
-channel.declareExchange(ExchangeSpecification(EXCHANGE_NAME))
-```
-##### - Async queue declaration:
-```kotlin
-channel.declareQueue(QueueSpecification(QUEUE_NAME))
-```
 ##### - Async message publishing with confirmation: 
 ```kotlin
 val channel = connection.createConfirmChannel()
@@ -37,4 +29,17 @@ Consume only n-messages:
 val channel = connection.createConfirmChannel()
 val consumer = channel.consumer(QUEUE_NAME)
 for (i in 1..n) consumer.consumeWithConfirm({ println(it) })
+```
+
+##### - Async exchange declaration:
+```kotlin
+channel.declareExchange(ExchangeSpecification(EXCHANGE_NAME))
+```
+##### - Async queue declaration:
+```kotlin
+channel.declareQueue(QueueSpecification(QUEUE_NAME))
+```
+##### - Async queue declaration:
+```kotlin
+channel.declareQueue(QueueSpecification(QUEUE_NAME))
 ```
