@@ -41,5 +41,5 @@ channel.declareQueue(QueueSpecification(QUEUE_NAME))
 ```
 ##### - Async queue bindging to an exchange:
 ```kotlin
-channel.declareQueue(QueueSpecification(QUEUE_NAME))
+channel.bindQueue(BindQueueSpecification(EXCHANGE_NAME, QUEUE_NAME))
 ```
