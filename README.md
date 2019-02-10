@@ -1,5 +1,5 @@
 # The White Rabbit
-The White Rabbit is a asynchronous RabbitMQ library based on Kotlin coroutines.
+The White Rabbit is an asynchronous RabbitMQ library based on Kotlin coroutines.
 
 ### Status
 [![Build Status](https://travis-ci.org/viartemev/the-white-rabbit.svg?branch=master)](https://travis-ci.org/viartemev/the-white-rabbit)
