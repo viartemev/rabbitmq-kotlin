@@ -39,7 +39,7 @@ channel.declareExchange(ExchangeSpecification(EXCHANGE_NAME))
 ```kotlin
 channel.declareQueue(QueueSpecification(QUEUE_NAME))
 ```
-##### - Async queue declaration:
+##### - Async queue bindging to an exchange:
 ```kotlin
 channel.declareQueue(QueueSpecification(QUEUE_NAME))
 ```
