@@ -67,9 +67,10 @@ publish {
     repoName = 'Maven'
     groupId = 'com.viartemev'
     artifactId = 'the-white-rabbit'
-    publishVersion = '0.0.0'
+    publishVersion = '0.0.0.1'
     desc = 'The White Rabbit is an asynchronous RabbitMQ library based on Kotlin coroutines'
     website = 'https://github.com/viartemev/the-white-rabbit'
+    licences = ['MIT']
 }
 
 compileKotlin {
