@@ -1,10 +1,32 @@
-# The White Rabbit
+# The White Rabbit 
+[![Build Status](https://travis-ci.org/viartemev/the-white-rabbit.svg?branch=master)](https://travis-ci.org/viartemev/the-white-rabbit)
+[ ![Download](https://api.bintray.com/packages/viartemev/Maven/the-white-rabbit/images/download.svg) ](https://bintray.com/viartemev/Maven/the-white-rabbit/_latestVersion)
+
 The White Rabbit is an asynchronous RabbitMQ library based on Kotlin coroutines.
 
-### Status
-[![Build Status](https://travis-ci.org/viartemev/the-white-rabbit.svg?branch=master)](https://travis-ci.org/viartemev/the-white-rabbit)
+#### Adding to project:
+##### Gradle:
+```
+repositories {
+    maven {
+        url  "https://dl.bintray.com/viartemev/Maven" 
+    }
+}
 
-### Usage:
+compile 'com.viartemev:the-white-rabbit:0.0.0'
+```
+##### Maven:
+Set up `https://dl.bintray.com/viartemev/Maven` as a repository for maven.
+```
+<dependency>
+  <groupId>com.viartemev</groupId>
+  <artifactId>the-white-rabbit</artifactId>
+  <version>0.0.0</version>
+  <type>pom</type>
+</dependency>
+```
+
+#### Usage:
 ##### - Async message publishing with confirmation: 
 ```kotlin
 val channel = connection.createConfirmChannel()
