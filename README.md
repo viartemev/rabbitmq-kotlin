@@ -4,7 +4,7 @@
 
 The White Rabbit is an asynchronous RabbitMQ library based on Kotlin coroutines.
 
-#### Adding to project:
+### Adding to project:
 ##### Gradle:
 ```
 repositories {
@@ -26,7 +26,7 @@ Set up `https://dl.bintray.com/viartemev/Maven` as a repository for maven.
 </dependency>
 ```
 
-#### Usage:
+### Usage:
 ##### - Async message publishing with confirmation: 
 ```kotlin
 val channel = connection.createConfirmChannel()
