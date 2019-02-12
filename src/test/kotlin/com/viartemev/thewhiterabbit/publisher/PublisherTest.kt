@@ -11,10 +11,11 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 
-//FIXME add testcontainers
+@Disabled("FIXME add testcontainers and split local and CI env")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class PublisherTest {
 
