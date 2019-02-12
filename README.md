@@ -13,7 +13,7 @@ repositories {
     }
 }
 
-compile 'com.viartemev:the-white-rabbit:0.0.0'
+compile 'com.viartemev:the-white-rabbit:0.0.1'
 ```
 ##### Maven:
 Set up `https://dl.bintray.com/viartemev/Maven` as a repository for maven.
@@ -21,7 +21,7 @@ Set up `https://dl.bintray.com/viartemev/Maven` as a repository for maven.
 <dependency>
   <groupId>com.viartemev</groupId>
   <artifactId>the-white-rabbit</artifactId>
-  <version>0.0.0</version>
+  <version>0.0.1</version>
   <type>pom</type>
 </dependency>
 ```
