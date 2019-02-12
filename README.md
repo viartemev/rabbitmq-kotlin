@@ -8,15 +8,13 @@ The White Rabbit is an asynchronous RabbitMQ library based on Kotlin coroutines.
 ##### Gradle:
 ```
 repositories {
-    maven {
-        url  "https://dl.bintray.com/viartemev/Maven" 
-    }
+    jcenter()
 }
 
 compile 'com.viartemev:the-white-rabbit:0.0.1'
 ```
 ##### Maven:
-Set up `https://dl.bintray.com/viartemev/Maven` as a repository for maven.
+Set up `jcenter` or `https://dl.bintray.com/viartemev/Maven` as a repository
 ```
 <dependency>
   <groupId>com.viartemev</groupId>
