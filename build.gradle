@@ -28,7 +28,7 @@ apply plugin: "kotlin"
 apply plugin: "idea"
 
 group 'com.viartemev'
-version '1.0-SNAPSHOT'
+version '0.0.1'
 
 sourceCompatibility = 1.8
 
