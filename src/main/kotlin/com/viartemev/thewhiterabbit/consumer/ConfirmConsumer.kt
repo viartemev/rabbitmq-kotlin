@@ -13,22 +13,17 @@ import kotlinx.coroutines.channels.Channel as KChannel
 
 private val logger = KotlinLogging.logger {}
 
-/**
- * @todo What will be if consumer gets huge amount of messages, but handling is very slow?
- */
 class ConfirmConsumer internal constructor(private val AMQPChannel: Channel, AMQPQueue: String, prefetchSize: Int = 0) {
     private val continuations = KChannel<Delivery>()
-    private lateinit var consTag: String
+    private val consTag: String
 
     init {
         AMQPChannel.basicQos(prefetchSize, false)
         consTag = AMQPChannel.basicConsume(AMQPQueue, false,
-            { consumerTag, message -> if (consumerTag == consTag) continuations.sendBlocking(message) },
+            { _, message -> continuations.sendBlocking(message) },
             { consumerTag ->
-                if (consumerTag == consTag) {
-                    logger.info { "Consumer $consumerTag has been cancelled" }
-                    continuations.cancel()
-                }
+                logger.info { "Consumer $consumerTag has been cancelled" }
+                continuations.cancel()
             }
         )
     }
