@@ -17,3 +17,14 @@ class ConfirmChannel internal constructor(private val channel: Channel) : Channe
  * @see com.rabbitmq.client.Channel.confirmSelect()
  */
 fun Connection.createConfirmChannel(): ConfirmChannel = ConfirmChannel(this.createChannel())
+
+suspend fun Connection.confirmChannel(block: suspend ConfirmChannel.() -> Unit): ConfirmChannel {
+    val confirmChannel = this.createConfirmChannel()
+    confirmChannel.use { block(it) }
+    return confirmChannel
+}
+
+suspend fun ConfirmChannel.publish(block: suspend ConfirmPublisher.() -> Unit) {
+    val publisher = this.publisher()
+    block(publisher)
+}

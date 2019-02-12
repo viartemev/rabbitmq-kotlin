@@ -2,7 +2,8 @@ package com.viartemev.thewhiterabbit.consumer
 
 import com.rabbitmq.client.ConnectionFactory
 import com.rabbitmq.client.Delivery
-import com.viartemev.thewhiterabbit.channel.consumer
+import com.viartemev.thewhiterabbit.channel.channel
+import com.viartemev.thewhiterabbit.channel.consume
 import com.viartemev.thewhiterabbit.queue.QueueSpecification
 import com.viartemev.thewhiterabbit.queue.declareQueue
 import kotlinx.coroutines.delay
@@ -29,11 +30,12 @@ class ConfirmConsumerTest {
     @Test
     fun `test message consuming`() {
         factory.newConnection().use { connection ->
-            connection.createChannel().use { channel ->
-                runBlocking {
-                    channel.declareQueue(QueueSpecification(QUEUE_NAME))
-                    val consumer = channel.consumer(QUEUE_NAME)
-                    for (i in 1..3) consumer.consumeWithConfirm({ handleDelivery(it) })
+            runBlocking {
+                connection.channel {
+                    declareQueue(QueueSpecification(QUEUE_NAME))
+                    consume(QUEUE_NAME) {
+                        for (i in 1..3) consumeWithConfirm({ handleDelivery(it) })
+                    }
                 }
             }
         }

@@ -2,7 +2,8 @@ package com.viartemev.thewhiterabbit.publisher
 
 import com.rabbitmq.client.ConnectionFactory
 import com.rabbitmq.client.MessageProperties
-import com.viartemev.thewhiterabbit.channel.createConfirmChannel
+import com.viartemev.thewhiterabbit.channel.confirmChannel
+import com.viartemev.thewhiterabbit.channel.publish
 import com.viartemev.thewhiterabbit.queue.QueueSpecification
 import com.viartemev.thewhiterabbit.queue.declareQueue
 import kotlinx.coroutines.async
@@ -33,14 +34,16 @@ class PublisherTest {
 
     @Test
     fun `test one message publishing`() {
-        factory.newConnection().use { connection ->
-            connection.createConfirmChannel().use { channel ->
-                val publisher = channel.publisher()
-                runBlocking {
-                    channel.declareQueue(QueueSpecification(QUEUE_NAME))
-                    val message = createMessage("Hello")
-                    val ack = publisher.publishWithConfirm(message)
-                    assertTrue { ack }
+        factory.newConnection().use {
+            val connection = it
+            runBlocking {
+                connection.confirmChannel {
+                    declareQueue(QueueSpecification(QUEUE_NAME))
+                    publish {
+                        val message = createMessage("Hello")
+                        val ack = publishWithConfirm(message)
+                        assertTrue { ack }
+                    }
                 }
             }
         }
@@ -50,19 +53,19 @@ class PublisherTest {
     fun `test n-messages publishing manually`() {
         val times = 10
         factory.newConnection().use { connection ->
-            connection.createConfirmChannel().use { channel ->
-                val publisher = channel.publisher()
-                runBlocking {
-                    channel.declareQueue(QueueSpecification(QUEUE_NAME))
-                    val acks = coroutineScope {
-
-                        (1..times).map {
-                            async {
-                                publisher.publishWithConfirm(createMessage("Hello #$it"))
-                            }
-                        }.awaitAll()
+            runBlocking {
+                connection.confirmChannel {
+                    declareQueue(QueueSpecification(QUEUE_NAME))
+                    publish {
+                        val acks = coroutineScope {
+                            (1..times).map {
+                                async {
+                                    publishWithConfirm(createMessage("Hello #$it"))
+                                }
+                            }.awaitAll()
+                        }
+                        assertTrue { acks.all { true } }
                     }
-                    assertTrue { acks.all { true } }
                 }
             }
         }
@@ -72,13 +75,14 @@ class PublisherTest {
     fun `test n-messages publishing`() {
         val times = 10
         factory.newConnection().use { connection ->
-            connection.createConfirmChannel().use { channel ->
-                val publisher = channel.publisher()
-                runBlocking {
-                    channel.declareQueue(QueueSpecification(QUEUE_NAME))
-                    val messages = (1..times).map { createMessage("Hello #$it") }
-                    val acks = publisher.publishWithConfirm(messages).awaitAll()
-                    assertTrue { acks.all { true } }
+            runBlocking {
+                connection.confirmChannel {
+                    declareQueue(QueueSpecification(QUEUE_NAME))
+                    publish {
+                        val messages = (1..times).map { createMessage("Hello #$it") }
+                        val acks = publishWithConfirm(messages).awaitAll()
+                        assertTrue { acks.all { true } }
+                    }
                 }
             }
         }
