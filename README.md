@@ -11,7 +11,7 @@ repositories {
     jcenter()
 }
 
-compile 'com.viartemev:the-white-rabbit:0.0.1'
+compile 'com.viartemev:the-white-rabbit:0.0.2'
 ```
 ##### Maven:
 Set up `jcenter` or `https://dl.bintray.com/viartemev/Maven` as a repository
@@ -19,7 +19,7 @@ Set up `jcenter` or `https://dl.bintray.com/viartemev/Maven` as a repository
 <dependency>
   <groupId>com.viartemev</groupId>
   <artifactId>the-white-rabbit</artifactId>
-  <version>0.0.1</version>
+  <version>0.0.2</version>
   <type>pom</type>
 </dependency>
 ```
