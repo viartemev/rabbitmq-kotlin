@@ -20,7 +20,13 @@ class ConfirmConsumer internal constructor(private val AMQPChannel: Channel, AMQ
     init {
         AMQPChannel.basicQos(prefetchSize, false)
         consTag = AMQPChannel.basicConsume(AMQPQueue, false,
-            { _, message -> continuations.sendBlocking(message) },
+            { consumerTag, message ->
+                try {
+                    continuations.sendBlocking(message)
+                } catch (e: Exception) {
+                    logger.info { "Consumer $consumerTag has been cancelled" }
+                }
+            },
             { consumerTag ->
                 logger.info { "Consumer $consumerTag has been cancelled" }
                 continuations.cancel()
@@ -43,5 +49,10 @@ class ConfirmConsumer internal constructor(private val AMQPChannel: Channel, AMQ
             logger.error { errorMessage }
             throw AcknowledgeException(errorMessage)
         }
+    }
+
+    fun cancel() {
+        AMQPChannel.basicCancel(consTag)
+        continuations.cancel()
     }
 }
