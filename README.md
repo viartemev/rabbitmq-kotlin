@@ -36,7 +36,7 @@ compile 'com.viartemev:the-white-rabbit:0.0.2'
 connection.confirmChannel {
      publish {
         coroutineScope {
-            (1..1_000).map { async { publishWithConfirm(createMessage("Hello #$it")) } }.awaitAll()
+            (1..n).map { async { publishWithConfirm(createMessage("Hello #$it")) } }.awaitAll()
         }
     }
 }
@@ -45,7 +45,7 @@ or
 ```kotlin
 connection.confirmChannel {
     publish {
-        val messages = (1..times).map { createMessage("Hello #$it") }
+        val messages = (1..n).map { createMessage("Hello #$it") }
         publishWithConfirm(messages).awaitAll()
     }
 }
