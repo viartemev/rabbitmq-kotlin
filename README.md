@@ -33,28 +33,32 @@ compile 'com.viartemev:the-white-rabbit:0.0.2'
 ### Usage:
 ##### - Async message publishing with confirmation: 
 ```kotlin
-val channel = connection.createConfirmChannel()
-val publisher = channel.publisher()
-val messages = (1..times).map { createMessage("Hello #$it") }
-publisher.publishWithConfirm(messages).awaitAll()
+connection.confirmChannel {
+     publish {
+        coroutineScope {
+            (1..1_000).map { async { publishWithConfirm(createMessage("Hello #$it")) } }.awaitAll()
+        }
+    }
+}
 ```
 or
 ```kotlin
-val channel = connection.createConfirmChannel()
-val publisher = channel.publisher()
-coroutineScope {
-    (1..times).map {
-        async { publisher.publishWithConfirm(createMessage("Hello #$it")) }
-    }.awaitAll()
+connection.confirmChannel {
+    publish {
+        val messages = (1..times).map { createMessage("Hello #$it") }
+        publishWithConfirm(messages).awaitAll()
+    }
 }
 ```
 
 ##### - Async message consuming with acknowledge: 
 Consume only n-messages:
 ```kotlin
-val channel = connection.createConfirmChannel()
-val consumer = channel.consumer(QUEUE_NAME)
-for (i in 1..n) consumer.consumeWithConfirm({ println(it) })
+connection.channel {
+    consume(QUEUE_NAME) {
+        (1..n).map { async { consumeWithConfirm({ println(it) }) } }.awaitAll()
+    }
+}
 ```
 
 ##### - Async exchange declaration:
