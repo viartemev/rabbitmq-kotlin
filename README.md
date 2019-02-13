@@ -14,8 +14,14 @@ repositories {
 compile 'com.viartemev:the-white-rabbit:0.0.2'
 ```
 ##### Maven:
-Set up `jcenter` or `https://dl.bintray.com/viartemev/Maven` as a repository
 ```
+<repositories>
+    <repository>
+        <id>jcenter</id>
+        <url>https://jcenter.bintray.com/</url>
+    </repository>
+</repositories>
+
 <dependency>
   <groupId>com.viartemev</groupId>
   <artifactId>the-white-rabbit</artifactId>
