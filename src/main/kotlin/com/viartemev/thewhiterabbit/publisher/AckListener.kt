@@ -9,7 +9,7 @@ import kotlin.coroutines.resume
 
 private val logger = KotlinLogging.logger {}
 
-class AckListener(private val continuations: ConcurrentHashMap<Long, Continuation<Boolean>>) : ConfirmListener {
+internal class AckListener(private val continuations: ConcurrentHashMap<Long, Continuation<Boolean>>) : ConfirmListener {
 
     private val lowerBoundOfMultiple = AtomicLong(1)
 

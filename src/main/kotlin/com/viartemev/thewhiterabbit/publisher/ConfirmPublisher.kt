@@ -25,6 +25,25 @@ class ConfirmPublisher internal constructor(private val channel: Channel) {
      * @return acknowledgement - represent messages handled successfully or lost by the broker.
      * @throws java.io.IOException if an error is encountered
      */
+    suspend fun asyncPublishWithConfirm(message: OutboundMessage): Deferred<Boolean> = coroutineScope {
+        async {
+            val messageSequenceNumber = channel.nextPublishSeqNo
+            logger.debug { "The message Sequence Number: $messageSequenceNumber" }
+
+            suspendCancellableCoroutine<Boolean> { continuation ->
+                continuations[messageSequenceNumber] = continuation
+                message.run { channel.basicPublish(exchange, routingKey, properties, msg.toByteArray()) }
+            }
+        }
+    }
+
+    /**
+     * Publish a message with the waiting of confirmation.
+     *
+     * @see com.viartemev.thewhiterabbit.publisher.OutboundMessage
+     * @return acknowledgement - represent messages handled successfully or lost by the broker.
+     * @throws java.io.IOException if an error is encountered
+     */
     suspend fun publishWithConfirm(message: OutboundMessage): Boolean {
         val messageSequenceNumber = channel.nextPublishSeqNo
         logger.debug { "The message Sequence Number: $messageSequenceNumber" }
@@ -36,13 +55,24 @@ class ConfirmPublisher internal constructor(private val channel: Channel) {
     }
 
     /**
+     * Publish a list of messages with the waiting of confirmation.
+     *
+     * @see com.viartemev.thewhiterabbit.publisher.OutboundMessage
+     * @return list of acknowledgements - represent messages handled successfully or lost by the broker.
+     * @throws java.io.IOException if an error is encountered
+     */
+    suspend fun publishWithConfirm(messages: List<OutboundMessage>): List<Boolean> {
+        return messages.map { publishWithConfirm(it) }
+    }
+
+    /**
      * Asynchronously publish a list of messages with the waiting of confirmation.
      *
      * @see com.viartemev.thewhiterabbit.publisher.OutboundMessage
      * @return list of acknowledgements - represent messages handled successfully or lost by the broker.
      * @throws java.io.IOException if an error is encountered
      */
-    suspend fun publishWithConfirm(messages: List<OutboundMessage>): List<Deferred<Boolean>> = coroutineScope {
+    suspend fun asyncPublishWithConfirm(messages: List<OutboundMessage>): List<Deferred<Boolean>> = coroutineScope {
         messages.map { async { publishWithConfirm(it) } }
     }
 }

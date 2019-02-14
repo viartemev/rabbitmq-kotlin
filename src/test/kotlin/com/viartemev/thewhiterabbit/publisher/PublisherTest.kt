@@ -64,7 +64,7 @@ class PublisherTest {
                                 }
                             }.awaitAll()
                         }
-                        assertTrue { acks.all { true } }
+                        assertTrue { acks.all { it } }
                     }
                 }
             }
@@ -80,8 +80,8 @@ class PublisherTest {
                     declareQueue(QueueSpecification(QUEUE_NAME))
                     publish {
                         val messages = (1..times).map { createMessage("Hello #$it") }
-                        val acks = publishWithConfirm(messages).awaitAll()
-                        assertTrue { acks.all { true } }
+                        val acks = asyncPublishWithConfirm(messages).awaitAll()
+                        assertTrue { acks.all { it } }
                     }
                 }
             }
