@@ -7,9 +7,9 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.suspendCancellableCoroutine
 import mu.KotlinLogging
-import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.Continuation
+import kotlin.coroutines.resumeWithException
 
 private val logger = KotlinLogging.logger {}
 
@@ -35,8 +35,8 @@ class ConfirmPublisher internal constructor(private val channel: Channel) {
                 continuations[messageSequenceNumber] = continuation
                 message.run { channel.basicPublish(exchange, routingKey, properties, msg.toByteArray()) }
             }
-        } catch (e: IOException) {
-            continuations.remove(messageSequenceNumber)
+        } catch (e: Exception) {
+            continuations[messageSequenceNumber]?.resumeWithException(e)
         }
         throw PublishException("Can't publish message: $message")
     }
