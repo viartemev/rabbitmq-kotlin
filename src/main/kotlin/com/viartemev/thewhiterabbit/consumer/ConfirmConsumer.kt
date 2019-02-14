@@ -13,23 +13,23 @@ import kotlinx.coroutines.channels.Channel as KChannel
 
 private val logger = KotlinLogging.logger {}
 
-class ConfirmConsumer internal constructor(private val AMQPChannel: Channel, AMQPQueue: String, prefetchSize: Int = 0) {
-    private val continuations = KChannel<Delivery>()
+class ConfirmConsumer internal constructor(private val amqpChannel: Channel, amqpQueue: String, prefetchSize: Int = 0) {
+    private val deliveries = KChannel<Delivery>()
     private val consTag: String
 
     init {
-        AMQPChannel.basicQos(prefetchSize, false)
-        consTag = AMQPChannel.basicConsume(AMQPQueue, false,
+        amqpChannel.basicQos(prefetchSize, false)
+        consTag = amqpChannel.basicConsume(amqpQueue, false,
             { consumerTag, message ->
                 try {
-                    continuations.sendBlocking(message)
+                    deliveries.sendBlocking(message)
                 } catch (e: Exception) {
                     logger.info { "Consumer $consumerTag has been cancelled" }
                 }
             },
             { consumerTag ->
                 logger.info { "Consumer $consumerTag has been cancelled" }
-                continuations.cancel()
+                deliveries.cancel()
             }
         )
     }
@@ -39,11 +39,11 @@ class ConfirmConsumer internal constructor(private val AMQPChannel: Channel, AMQ
      * @throws IOException if an error is encountered
      */
     suspend fun consumeWithConfirm(handler: suspend (Delivery) -> Unit, handlerDispatcher: CoroutineDispatcher = Dispatchers.Default) {
-        val delivery = continuations.receive()
+        val delivery = deliveries.receive()
         val deliveryTag = delivery.envelope.deliveryTag
         withContext(handlerDispatcher) { handler(delivery) }
         try {
-            AMQPChannel.basicAck(deliveryTag, false)
+            amqpChannel.basicAck(deliveryTag, false)
         } catch (e: IOException) {
             val errorMessage = "Can't ack a message with deliveryTag: $deliveryTag"
             logger.error { errorMessage }
@@ -52,7 +52,7 @@ class ConfirmConsumer internal constructor(private val AMQPChannel: Channel, AMQ
     }
 
     fun cancel() {
-        AMQPChannel.basicCancel(consTag)
-        continuations.cancel()
+        amqpChannel.basicCancel(consTag)
+        deliveries.cancel()
     }
 }
