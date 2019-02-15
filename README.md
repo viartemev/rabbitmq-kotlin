@@ -12,7 +12,7 @@ repositories {
     jcenter()
 }
 
-compile 'com.viartemev:the-white-rabbit:0.0.2'
+compile 'com.viartemev:the-white-rabbit:0.0.3'
 ```
 ##### Maven:
 ```
@@ -26,7 +26,7 @@ compile 'com.viartemev:the-white-rabbit:0.0.2'
 <dependency>
   <groupId>com.viartemev</groupId>
   <artifactId>the-white-rabbit</artifactId>
-  <version>0.0.2</version>
+  <version>0.0.3</version>
   <type>pom</type>
 </dependency>
 ```
@@ -37,7 +37,7 @@ compile 'com.viartemev:the-white-rabbit:0.0.2'
 connection.confirmChannel {
      publish {
         coroutineScope {
-            (1..n).map { async { publishWithConfirm(createMessage("Hello #$it")) } }.awaitAll()
+            (1..n).map { asyncPublishWithConfirm(createMessage("Hello #$it")) }.awaitAll()
         }
     }
 }
@@ -47,7 +47,7 @@ or
 connection.confirmChannel {
     publish {
         val messages = (1..n).map { createMessage("Hello #$it") }
-        publishWithConfirm(messages).awaitAll()
+        asyncPublishWithConfirm(messages).awaitAll()
     }
 }
 ```
@@ -57,7 +57,7 @@ Consume only n-messages:
 ```kotlin
 connection.channel {
     consume(QUEUE_NAME) {
-        (1..n).map { async { consumeWithConfirm({ println(it) }) } }.awaitAll()
+        (1..n).map { asyncConsumeWithConfirm({ println(it) }) }.awaitAll()
     }
 }
 ```
