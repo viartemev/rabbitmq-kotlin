@@ -28,7 +28,7 @@ apply plugin: "kotlin"
 apply plugin: "idea"
 
 group 'com.viartemev'
-version '0.0.2'
+version '0.0.3'
 
 sourceCompatibility = 1.8
 
@@ -67,7 +67,7 @@ publish {
     repoName = 'Maven'
     groupId = 'com.viartemev'
     artifactId = 'the-white-rabbit'
-    publishVersion = '0.0.2'
+    publishVersion = '0.0.3'
     desc = 'The White Rabbit is an asynchronous RabbitMQ library based on Kotlin coroutines'
     website = 'https://github.com/viartemev/the-white-rabbit'
     licences = ['MIT']
