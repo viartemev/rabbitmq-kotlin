@@ -56,7 +56,7 @@ connection.confirmChannel {
 Consume only n-messages:
 ```kotlin
 connection.channel {
-    consume(QUEUE_NAME) {
+    consume(QUEUE_NAME, PREFETCH_SIZE) {
         (1..n).map { asyncConsumeWithConfirm({ println(it) }) }.awaitAll()
     }
 }
