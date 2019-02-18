@@ -12,7 +12,7 @@ repositories {
     jcenter()
 }
 
-compile 'com.viartemev:the-white-rabbit:0.0.3'
+compile 'com.viartemev:the-white-rabbit:$version'
 ```
 ##### Maven:
 ```
@@ -26,7 +26,7 @@ compile 'com.viartemev:the-white-rabbit:0.0.3'
 <dependency>
   <groupId>com.viartemev</groupId>
   <artifactId>the-white-rabbit</artifactId>
-  <version>0.0.3</version>
+  <version>${version}</version>
   <type>pom</type>
 </dependency>
 ```
