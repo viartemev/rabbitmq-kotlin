@@ -15,7 +15,7 @@ import kotlinx.coroutines.channels.Channel as KChannel
 
 private val logger = KotlinLogging.logger {}
 
-class ConfirmConsumer internal constructor(private val amqpChannel: Channel, amqpQueue: String, prefetchSize: Int = 0) {
+class ConfirmConsumer internal constructor(private val amqpChannel: Channel, amqpQueue: String, prefetchSize: Int) {
     private val deliveries = KChannel<Delivery>()
     private val consTag: String
 
@@ -26,11 +26,11 @@ class ConfirmConsumer internal constructor(private val amqpChannel: Channel, amq
                 try {
                     deliveries.sendBlocking(message)
                 } catch (e: Exception) {
-                    logger.info { "Consumer $consumerTag has been cancelled" }
+                    logger.debug { "Can't send a message. Consumer $consumerTag has been cancelled" }
                 }
             },
             { consumerTag ->
-                logger.info { "Consumer $consumerTag has been cancelled" }
+                logger.debug { "Consumer $consumerTag has been cancelled" }
                 deliveries.cancel()
             }
         )
