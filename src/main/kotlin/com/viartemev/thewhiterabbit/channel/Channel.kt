@@ -3,11 +3,14 @@ package com.viartemev.thewhiterabbit.channel
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Connection
 import com.viartemev.thewhiterabbit.consumer.ConfirmConsumer
+import kotlin.concurrent.getOrSet
+
+private val localChannel = ThreadLocal<Channel>()
 
 fun Channel.consumer(queue: String, prefetchSize: Int) = ConfirmConsumer(this, queue, prefetchSize)
 
 suspend fun Connection.channel(block: suspend Channel.() -> Unit): Channel {
-    val channel = this.createChannel()
+    val channel = localChannel.getOrSet { this.createChannel() }
     channel.use { block(it) }
     return channel
 }
