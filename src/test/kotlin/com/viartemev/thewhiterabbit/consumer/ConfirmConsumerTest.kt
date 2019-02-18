@@ -33,7 +33,7 @@ class ConfirmConsumerTest {
             runBlocking {
                 connection.channel {
                     declareQueue(QueueSpecification(QUEUE_NAME))
-                    consume(QUEUE_NAME) {
+                    consume(QUEUE_NAME, 2) {
                         for (i in 1..3) consumeWithConfirm({ handleDelivery(it) })
                     }
                 }
