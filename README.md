@@ -27,7 +27,6 @@ compile 'com.viartemev:the-white-rabbit:$version'
   <groupId>com.viartemev</groupId>
   <artifactId>the-white-rabbit</artifactId>
   <version>${version}</version>
-  <type>pom</type>
 </dependency>
 ```
 
