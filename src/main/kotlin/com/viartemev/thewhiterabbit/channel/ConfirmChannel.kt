@@ -38,13 +38,16 @@ private class UncloseableConfirmChannel(private val channel: ConfirmChannel) : C
 
     override fun close(closeCode: Int, closeMessage: String?) {}
 
-    internal fun close0() = channel.close()
+    internal fun close0() {
+        if (channel.isOpen) channel.close()
+    }
 }
 
 private object ConfirmCleaner {
     init {
         Runtime.getRuntime().addShutdownHook(thread {
             localChannels.values.forEach { it.close0() }
+            localChannels.clear()
         })
     }
 }

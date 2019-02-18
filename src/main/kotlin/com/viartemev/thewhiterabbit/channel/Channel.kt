@@ -6,7 +6,7 @@ import com.viartemev.thewhiterabbit.consumer.ConfirmConsumer
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.concurrent.thread
 
-private val localChannels = ConcurrentHashMap<Thread, UncloseableChannel>()
+private val localChannels: MutableMap<Thread,UncloseableChannel> = ConcurrentHashMap()
 private val c = Cleaner
 fun Channel.consumer(queue: String, prefetchSize: Int) = ConfirmConsumer(this, queue, prefetchSize)
 
@@ -29,13 +29,16 @@ private class UncloseableChannel(private val channel: Channel) : Channel by chan
 
     override fun close(closeCode: Int, closeMessage: String?) {}
 
-    internal fun close0() = channel.close()
+    internal fun close0() {
+        if (channel.isOpen) channel.close()
+    }
 }
 
 private object Cleaner {
     init {
         Runtime.getRuntime().addShutdownHook(thread {
             localChannels.values.forEach { it.close0() }
+            localChannels.clear()
         })
     }
 }
