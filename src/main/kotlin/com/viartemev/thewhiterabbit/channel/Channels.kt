@@ -2,6 +2,8 @@ package com.viartemev.thewhiterabbit.channel
 
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Connection
+import com.viartemev.thewhiterabbit.channel.Channels.localChannels
+import com.viartemev.thewhiterabbit.channel.Channels.localConfirmChannels
 import com.viartemev.thewhiterabbit.consumer.ConfirmConsumer
 import com.viartemev.thewhiterabbit.publisher.ConfirmPublisher
 import java.util.concurrent.ConcurrentHashMap
@@ -12,7 +14,7 @@ object Channels {
     internal val localChannels = ConcurrentHashMap<Thread, UncloseableChannel>()
 
     init {
-        Runtime.getRuntime().addShutdownHook(thread {
+        Runtime.getRuntime().addShutdownHook(thread(start = false) {
             sequenceOf(localChannels.values.asSequence(), localConfirmChannels.values.asSequence())
                 .flatten()
                 .forEach { it.close0() }
@@ -27,7 +29,9 @@ object Channels {
     }
 
     internal class UncloseableChannel(private val channel: Channel) : IAmUncloseableChannel, Channel by channel {
-        override fun close() {}
+        override fun close() {
+
+        }
 
         override fun close(closeCode: Int, closeMessage: String?) {}
 
@@ -46,8 +50,6 @@ object Channels {
             if (channel.isOpen) channel.close()
         }
     }
-
-
 }
 
 /**
@@ -56,10 +58,16 @@ object Channels {
  */
 fun Connection.createConfirmChannel(): ConfirmChannel = ConfirmChannel(this.createChannel())
 
-suspend fun Connection.confirmChannel(block: suspend ConfirmChannel.() -> Unit): ConfirmChannel =
-    Channels.localConfirmChannels
-        .computeIfAbsent(Thread.currentThread()) { Channels.UncloseableConfirmChannel(this.createConfirmChannel()) }
+suspend fun Connection.confirmChannel(block: suspend ConfirmChannel.() -> Unit): ConfirmChannel {
+    var channel = Channels
+        .localConfirmChannels[Thread.currentThread()]
+    if (channel == null || !channel.isOpen) {
+        channel = Channels.UncloseableConfirmChannel(createConfirmChannel())
+        localConfirmChannels[Thread.currentThread()] = channel
+    }
+    return channel
         .also { block(it) }
+}
 
 suspend fun ConfirmChannel.publish(block: suspend ConfirmPublisher.() -> Unit) {
     val publisher = this.publisher()
@@ -68,10 +76,16 @@ suspend fun ConfirmChannel.publish(block: suspend ConfirmPublisher.() -> Unit) {
 
 fun Channel.consumer(queue: String, prefetchSize: Int) = ConfirmConsumer(this, queue, prefetchSize)
 
-suspend fun Connection.channel(block: suspend Channel.() -> Unit): Channel =
-    Channels.localChannels
-        .computeIfAbsent(Thread.currentThread()) { Channels.UncloseableChannel(this.createChannel()) }
+suspend fun Connection.channel(block: suspend Channel.() -> Unit): Channel {
+    var channel = Channels
+        .localChannels[Thread.currentThread()]
+    if (channel == null || !channel.isOpen) {
+        channel = Channels.UncloseableChannel(createConfirmChannel())
+        localChannels[Thread.currentThread()] = channel
+    }
+    return channel
         .also { block(it) }
+}
 
 suspend fun Channel.consume(queue: String, prefetchSize: Int = 0, block: suspend ConfirmConsumer.() -> Unit) {
     val consumer = this.consumer(queue, prefetchSize)

@@ -17,11 +17,9 @@ buildscript {
     dependencies {
         classpath "com.novoda:bintray-release:0.9"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath "org.junit.platform:junit-platform-gradle-plugin:$junit_plugin_version"
     }
 }
 
-apply plugin: "org.junit.platform.gradle.plugin"
 apply plugin: "com.novoda.bintray-release"
 apply plugin: "java"
 apply plugin: "kotlin"
@@ -79,3 +77,8 @@ compileKotlin {
 compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
+
+test {
+    useJUnitPlatform()
+}
+
