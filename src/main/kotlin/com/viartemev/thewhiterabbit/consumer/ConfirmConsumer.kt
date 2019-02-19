@@ -5,10 +5,9 @@ import com.rabbitmq.client.Delivery
 import com.viartemev.thewhiterabbit.exception.AcknowledgeException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.sendBlocking
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import mu.KotlinLogging
 import java.io.IOException
 import kotlinx.coroutines.channels.Channel as KChannel
@@ -40,14 +39,6 @@ class ConfirmConsumer internal constructor(private val amqpChannel: Channel, amq
      * Consume a message.
      * @throws com.viartemev.thewhiterabbit.exception.AcknowledgeException if can't send ack
      */
-    suspend fun asyncConsumeWithConfirm(handler: suspend (Delivery) -> Unit, handlerDispatcher: CoroutineDispatcher = Dispatchers.Default) = coroutineScope {
-        async { consumeWithConfirm(handler, handlerDispatcher) }
-    }
-
-    /**
-     * Consume a message.
-     * @throws com.viartemev.thewhiterabbit.exception.AcknowledgeException if can't send ack
-     */
     suspend fun consumeWithConfirm(handler: suspend (Delivery) -> Unit, handlerDispatcher: CoroutineDispatcher = Dispatchers.Default) {
         val delivery = deliveries.receive()
         val deliveryTag = delivery.envelope.deliveryTag
@@ -58,6 +49,16 @@ class ConfirmConsumer internal constructor(private val amqpChannel: Channel, amq
             val errorMessage = "Can't ack a message with deliveryTag: $deliveryTag"
             logger.error { errorMessage }
             throw AcknowledgeException(errorMessage)
+        }
+    }
+
+    /**
+     * Consume a message with timeout.
+     * @throws kotlinx.coroutines.TimeoutCancellationException if timeout expired
+     */
+    suspend fun consumeWithConfirmAndTimeout(handler: suspend (Delivery) -> Unit, timeMillis: Long, handlerDispatcher: CoroutineDispatcher = Dispatchers.Default) {
+        withTimeout(timeMillis) {
+            consumeWithConfirm(handler, handlerDispatcher)
         }
     }
 
