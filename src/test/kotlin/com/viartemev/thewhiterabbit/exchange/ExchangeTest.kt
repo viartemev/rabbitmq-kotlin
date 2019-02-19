@@ -2,33 +2,13 @@ package com.viartemev.thewhiterabbit.exchange
 
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.jackson.responseObject
-import com.rabbitmq.client.ConnectionFactory
-import com.viartemev.thewhiterabbit.utils.RabbitMQContainer
+import com.viartemev.thewhiterabbit.AbstractTestContainersTest
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
-import org.testcontainers.junit.jupiter.Container
-import org.testcontainers.junit.jupiter.Testcontainers
 
-@Disabled("FIXME")
-@Testcontainers
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class ExchangeTest {
-    @Container
-    private val rabbitmq = RabbitMQContainer()
-    lateinit var factory: ConnectionFactory
-
-    @BeforeAll
-    fun setUp() {
-        rabbitmq.start()
-        factory = ConnectionFactory()
-        factory.host = rabbitmq.containerIpAddress.toString()
-        factory.port = rabbitmq.connectionPort()
-    }
+class ExchangeTest : AbstractTestContainersTest() {
 
     @Test
     fun `exchange declaration test`() {
@@ -40,7 +20,10 @@ class ExchangeTest {
                 }
             }
         }
-        val (_, _, response) = Fuel.get("http://localhost:8080/api/exchanges").authenticate("guest", "guest").responseObject<List<ExchangesHttpResponse>>()
+        val (_, _, response) = Fuel.get("http://${rabbitmq.containerIpAddress}:${rabbitmq.managementPort()}/api/exchanges").authenticate(
+            "guest",
+            "guest"
+        ).responseObject<List<ExchangesHttpResponse>>()
         val exchanges = response.component1()
         assertNotNull(exchanges)
         if (exchanges == null) {
