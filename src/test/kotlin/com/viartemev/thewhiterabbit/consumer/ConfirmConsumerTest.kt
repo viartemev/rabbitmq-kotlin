@@ -1,31 +1,20 @@
 package com.viartemev.thewhiterabbit.consumer
 
-import com.rabbitmq.client.ConnectionFactory
 import com.rabbitmq.client.Delivery
+import com.viartemev.thewhiterabbit.AbstractTestContainersTest
 import com.viartemev.thewhiterabbit.channel.channel
 import com.viartemev.thewhiterabbit.channel.consume
 import com.viartemev.thewhiterabbit.queue.QueueSpecification
 import com.viartemev.thewhiterabbit.queue.declareQueue
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 
-@Disabled("FIXME add testcontainers and split local and CI env")
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class ConfirmConsumerTest {
+@Disabled("For demo purposes only")
+class ConfirmConsumerTest : AbstractTestContainersTest() {
 
     private val QUEUE_NAME = "test_queue"
-    lateinit var factory: ConnectionFactory
-
-    @BeforeAll
-    fun setUp() {
-        factory = ConnectionFactory()
-        factory.host = "localhost"
-        factory.useNio()
-    }
 
     @Test
     fun `test message consuming`() {
