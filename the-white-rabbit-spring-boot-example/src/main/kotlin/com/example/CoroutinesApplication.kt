@@ -3,8 +3,10 @@ package com.example
 import com.rabbitmq.client.Connection
 import com.rabbitmq.client.ConnectionFactory
 import com.rabbitmq.client.MessageProperties
-import com.viartemev.thewhiterabbit.channel.consumer
-import com.viartemev.thewhiterabbit.channel.createConfirmChannel
+import com.viartemev.thewhiterabbit.channel.channel
+import com.viartemev.thewhiterabbit.channel.confirmChannel
+import com.viartemev.thewhiterabbit.channel.consume
+import com.viartemev.thewhiterabbit.channel.publish
 import com.viartemev.thewhiterabbit.publisher.OutboundMessage
 import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.boot.autoconfigure.SpringBootApplication
@@ -39,21 +41,26 @@ data class Message(val message: String)
 class Handlers(private val connection: Connection) {
 
     suspend fun pull(request: ServerRequest): ServerResponse {
-        val channel = connection.createChannel()
-        val consumer = channel.consumer("test_queue", 1)
         var message = "default_value"
-        consumer.consumeWithConfirm({
-            println("Got a message!")
-            message = String(it.body)
-        })
+        connection.channel {
+            consume("test_queue", 1) {
+                consumeWithConfirm({
+                    println("Got a message!")
+                    message = String(it.body)
+                })
+            }
+        }
         return ServerResponse.ok().bodyAndAwait(Message(message))
     }
 
     suspend fun push(request: ServerRequest): ServerResponse {
         val message = request.awaitBody<Message>() ?: throw RuntimeException("A message can't be empty")
-        val confirmChannel = connection.createConfirmChannel()
-        val publisher = confirmChannel.publisher()
-        val ack = publisher.publishWithConfirm(OutboundMessage("", "test_queue", MessageProperties.PERSISTENT_BASIC, message.message))
+        var ack = false
+        connection.confirmChannel {
+            publish {
+                ack = publishWithConfirm(OutboundMessage("", "test_queue", MessageProperties.PERSISTENT_BASIC, message.message))
+            }
+        }
         return if (ack) ServerResponse.ok().bodyAndAwait("Done") else ServerResponse.status(500).build().awaitSingle()
     }
 }
