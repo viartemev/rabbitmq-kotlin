@@ -6,29 +6,34 @@ import com.viartemev.thewhiterabbit.channel.confirmChannel
 import com.viartemev.thewhiterabbit.channel.publish
 import com.viartemev.thewhiterabbit.queue.QueueSpecification
 import com.viartemev.thewhiterabbit.queue.declareQueue
+import com.viartemev.thewhiterabbit.utils.RabbitMQContainer
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
+import org.junit.BeforeClass
+import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Disabled
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
+import org.testcontainers.junit.jupiter.Container
+import org.testcontainers.junit.jupiter.Testcontainers
 
-@Disabled("FIXME add testcontainers and split local and CI env")
+@Testcontainers
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class PublisherTest {
 
     private val QUEUE_NAME = "test_queue"
     private val EXCHANGE_NAME = ""
+    companion object {
+        @Container @JvmStatic
+        private val rabbitmq = RabbitMQContainer()
+    }
     lateinit var factory: ConnectionFactory
 
-
-    @BeforeAll
+    @BeforeEach
     fun setUp() {
         factory = ConnectionFactory()
-        factory.host = "localhost"
+        factory.host = rabbitmq.containerIpAddress.toString()
+        factory.port = rabbitmq.connectionPort()
         factory.useNio()
     }
 
