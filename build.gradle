@@ -20,6 +20,10 @@ buildscript {
     }
 }
 
+plugins {
+    id 'jacoco'
+}
+
 apply plugin: "com.novoda.bintray-release"
 apply plugin: "java"
 apply plugin: "kotlin"
@@ -82,3 +86,9 @@ test {
     useJUnitPlatform()
 }
 
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        html.enabled true
+    }
+}
