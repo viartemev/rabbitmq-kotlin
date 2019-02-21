@@ -1,2 +1,3 @@
 rootProject.name = 'the-white-rabbit'
 
+include 'the-white-rabbit-ktor-example'
