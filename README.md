@@ -3,7 +3,7 @@
 [ ![Download](https://api.bintray.com/packages/viartemev/Maven/the-white-rabbit/images/download.svg) ](https://bintray.com/viartemev/Maven/the-white-rabbit/_latestVersion)
 [![Open Source Helpers](https://www.codetriage.com/viartemev/the-white-rabbit/badges/users.svg)](https://www.codetriage.com/viartemev/the-white-rabbit)
 
-The White Rabbit is an asynchronous RabbitMQ library based on Kotlin coroutines.
+The White Rabbit is an asynchronous RabbitMQ client based on Kotlin coroutines.
 
 ### Adding to project:
 ##### Gradle:
