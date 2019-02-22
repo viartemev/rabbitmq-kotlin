@@ -1,23 +1,20 @@
 package com.viartemev.thewhiterabbit.queue
 
-import com.github.kittinunf.fuel.Fuel
-import com.github.kittinunf.fuel.jackson.responseObject
-import com.rabbitmq.client.Channel
 import com.viartemev.thewhiterabbit.AbstractTestContainersTest
+import com.viartemev.thewhiterabbit.utils.getQueue
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.junit.jupiter.Testcontainers
+import kotlin.test.assertNull
 
 @Testcontainers
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class QueueTest : AbstractTestContainersTest() {
 
     @Test
-    fun `declare queue test`() {
+    fun `declare a queue test`() {
         val queueName = "declare_queue_test"
         factory.newConnection().use { connection ->
             connection.createChannel().use { channel ->
@@ -26,44 +23,22 @@ class QueueTest : AbstractTestContainersTest() {
                 }
             }
         }
-        assertTrue { getQueues().find { it.name == queueName } != null }
+        assertNotNull(getQueue(queueName))
     }
 
     @Test
-    @Disabled("FIXME")
-    fun `delete queue test`() {
+    fun `delete a queue test`() {
         val queueName = "delete_queue_test"
         factory.newConnection().use { connection ->
             connection.createChannel().use { channel ->
                 runBlocking {
-                    declareQueue(queueName, channel)
+                    channel.declareQueue(QueueSpecification(queueName))
+                    assertNotNull(getQueue(queueName))
                     channel.deleteQueue(DeleteQueueSpecification(queueName))
+                    assertNull(getQueue(queueName))
                 }
             }
         }
-        assertTrue { getQueues().isEmpty() }
-    }
-
-    private fun getQueues(): List<QueuesHttpResponse> {
-        val (_, _, response) = Fuel.get("http://localhost:${rabbitmq.managementPort()}/api/queues").authenticate(
-            "guest",
-            "guest"
-        ).responseObject<List<QueuesHttpResponse>>()
-        val queues = response.get()
-        assertNotNull(queues)
-        return queues
-    }
-
-    private suspend fun declareQueue(queueName: String, channel: Channel) {
-        channel.declareQueue(QueueSpecification(queueName))
-        val (_, _, response) = Fuel.get("http://localhost:${rabbitmq.managementPort()}/api/queues").authenticate(
-            "guest",
-            "guest"
-        ).responseObject<List<QueuesHttpResponse>>()
-        val queues = response.get()
-        assertNotNull(queues)
-        assertTrue { queues.isNotEmpty() }
-        assertTrue { queues.find { it.name == queueName } != null }
     }
 }
 
