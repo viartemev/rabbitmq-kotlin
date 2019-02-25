@@ -11,21 +11,36 @@ import com.viartemev.thewhiterabbit.queue.DeleteQueueSpecification
 import com.viartemev.thewhiterabbit.queue.QueueSpecification
 import com.viartemev.thewhiterabbit.queue.declareQueue
 import com.viartemev.thewhiterabbit.queue.deleteQueue
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
 import org.openjdk.jmh.annotations.Benchmark
 import org.openjdk.jmh.annotations.BenchmarkMode
+import org.openjdk.jmh.annotations.Fork
 import org.openjdk.jmh.annotations.Level
+import org.openjdk.jmh.annotations.Measurement
 import org.openjdk.jmh.annotations.Mode
 import org.openjdk.jmh.annotations.OutputTimeUnit
+import org.openjdk.jmh.annotations.Param
+import org.openjdk.jmh.annotations.Scope
 import org.openjdk.jmh.annotations.Setup
+import org.openjdk.jmh.annotations.State
 import org.openjdk.jmh.annotations.TearDown
+import org.openjdk.jmh.annotations.Threads
+import org.openjdk.jmh.annotations.Warmup
 import org.openjdk.jmh.infra.Blackhole
 import java.util.concurrent.TimeUnit
 
 @BenchmarkMode(Mode.Throughput)
-@OutputTimeUnit(TimeUnit.NANOSECONDS)
+@OutputTimeUnit(TimeUnit.SECONDS)
+@State(Scope.Benchmark)
+@Warmup(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
+@Measurement(iterations = 1, time = 5, timeUnit = TimeUnit.SECONDS)
+@Fork(1)
+@Threads(2)
 open class ConfirmPublisherBenchmark {
 
+    @Param("1", "10", "100", "1000")
+    private var numberOfMessages: Int = 0
     private val testQueueName = "jmh_test_queue"
     private lateinit var connection: Connection
     private lateinit var channel: ConfirmChannel
@@ -43,18 +58,23 @@ open class ConfirmPublisherBenchmark {
         channel = connection.createConfirmChannel()
         runBlocking { channel.declareQueue(QueueSpecification(testQueueName)) }
         publisher = channel.publisher()
-        messages = (1..1000).map { createMessage() }
+        messages = (1..numberOfMessages).map { createMessage() }
     }
 
     @TearDown(Level.Iteration)
-    fun tearDown() {
+    fun tearDownPublisher() {
         runBlocking { channel.deleteQueue(DeleteQueueSpecification(testQueueName)) }
         channel.close()
     }
 
+    @TearDown
+    fun tearDown() {
+        connection.close()
+    }
+
     @Benchmark
     fun sendWithPublishConfirm(blackhole: Blackhole) = runBlocking {
-        blackhole.consume(publisher.publishWithConfirm(messages))
+        blackhole.consume(publisher.asyncPublishWithConfirm(messages).awaitAll())
     }
 
     private fun createMessage(): OutboundMessage = OutboundMessage("", testQueueName, MessageProperties.MINIMAL_BASIC, "")
