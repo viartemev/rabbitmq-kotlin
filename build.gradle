@@ -40,9 +40,6 @@ repositories {
 }
 
 dependencies {
-    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.26'
-    compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
-    compile group: 'ch.qos.logback', name: 'logback-core', version: '1.2.3'
     compile 'io.github.microutils:kotlin-logging:1.6.25'
 
     compile "com.rabbitmq:amqp-client:$rabbitMqJavaClientVersion"
@@ -60,8 +57,11 @@ dependencies {
     testCompile "org.testcontainers:testcontainers:1.10.6"
     testCompile "org.testcontainers:junit-jupiter:1.10.6"
 
-    testCompile("org.junit.jupiter:junit-jupiter-api:$junit_jupiter_version")
-    testRuntime("org.junit.jupiter:junit-jupiter-engine:$junit_jupiter_version")
+    testCompile "org.junit.jupiter:junit-jupiter-api:$junit_jupiter_version"
+    testRuntime "org.junit.jupiter:junit-jupiter-engine:$junit_jupiter_version"
+    testRuntime "org.slf4j:slf4j-api:1.7.26"
+    testRuntime "ch.qos.logback:logback-classic:1.2.3"
+    testRuntime "ch.qos.logback:logback-core:1.2.3"
 }
 
 publish {
