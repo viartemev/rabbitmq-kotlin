@@ -39,7 +39,7 @@ import java.util.concurrent.TimeUnit
 @Threads(2)
 open class ConfirmPublisherBenchmark {
 
-    @Param("1", "10", "100", "1000")
+    @Param("1", "10", "100", "1000", "10000")
     private var numberOfMessages: Int = 0
     private val testQueueName = "jmh_test_queue"
     private lateinit var connection: Connection
