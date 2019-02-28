@@ -11,13 +11,15 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import mu.KotlinLogging
+import java.io.Closeable
 import java.io.IOException
 import kotlinx.coroutines.channels.Channel as KChannel
 
 private val logger = KotlinLogging.logger {}
 
-class ConfirmConsumer internal constructor(private val amqpChannel: Channel, amqpQueue: String, prefetchSize: Int) {
+class ConfirmConsumer internal constructor(private val amqpChannel: Channel, amqpQueue: String, prefetchSize: Int) : Closeable {
     private val deliveries = KChannel<Delivery>()
+
     private val consTag: String
 
     init {
@@ -76,7 +78,7 @@ class ConfirmConsumer internal constructor(private val amqpChannel: Channel, amq
         }
     }
 
-    fun cancel() {
+    override fun close() {
         amqpChannel.basicCancel(consTag)
         deliveries.cancel()
     }
