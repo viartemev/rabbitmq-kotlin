@@ -6,6 +6,8 @@ import com.viartemev.thewhiterabbit.exception.AcknowledgeException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.sendBlocking
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import mu.KotlinLogging
@@ -36,10 +38,10 @@ class ConfirmConsumer internal constructor(private val amqpChannel: Channel, amq
     }
 
     /**
-     * Consume a message.
+     * Consume a message and handle it.
      * @throws com.viartemev.thewhiterabbit.exception.AcknowledgeException if can't send ack
      */
-    suspend fun consumeWithConfirm(handler: suspend (Delivery) -> Unit, handlerDispatcher: CoroutineDispatcher = Dispatchers.Default) {
+    suspend fun consumeMessageWithConfirm(handler: suspend (Delivery) -> Unit, handlerDispatcher: CoroutineDispatcher = Dispatchers.Default) {
         val delivery = deliveries.receive()
         val deliveryTag = delivery.envelope.deliveryTag
         withContext(handlerDispatcher) { handler(delivery) }
@@ -53,12 +55,24 @@ class ConfirmConsumer internal constructor(private val amqpChannel: Channel, amq
     }
 
     /**
-     * Consume a message with timeout.
+     * Consume a message and handle it with timeout.
      * @throws kotlinx.coroutines.TimeoutCancellationException if timeout expired
      */
-    suspend fun consumeWithConfirmAndTimeout(handler: suspend (Delivery) -> Unit, timeMillis: Long, handlerDispatcher: CoroutineDispatcher = Dispatchers.Default) {
-        withTimeout(timeMillis) {
-            consumeWithConfirm(handler, handlerDispatcher)
+    suspend fun consumeMessageWithConfirmAndTimeout(handler: suspend (Delivery) -> Unit, timeMillis: Long, handlerDispatcher: CoroutineDispatcher = Dispatchers.Default) {
+        withTimeout(timeMillis) { consumeMessageWithConfirm(handler, handlerDispatcher) }
+    }
+
+    /**
+     * Infinite consume messages and handle them.
+     */
+    suspend fun consumeMessagesWithConfirm(parallelism: Int, handler: suspend (Delivery) -> Unit, handlerDispatcher: CoroutineDispatcher = Dispatchers.Default) = coroutineScope {
+        val channel = KChannel<Unit>(parallelism)
+        while (true) {
+            channel.send(Unit)
+            launch {
+                consumeMessageWithConfirm(handler, handlerDispatcher)
+                channel.receive()
+            }
         }
     }
 

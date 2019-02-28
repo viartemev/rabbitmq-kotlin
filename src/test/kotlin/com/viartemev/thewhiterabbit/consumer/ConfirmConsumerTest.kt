@@ -23,7 +23,7 @@ class ConfirmConsumerTest : AbstractTestContainersTest() {
                 connection.channel {
                     declareQueue(QueueSpecification(QUEUE_NAME))
                     consume(QUEUE_NAME, 2) {
-                        for (i in 1..3) consumeWithConfirm({ handleDelivery(it) })
+                        for (i in 1..3) consumeMessageWithConfirm({ handleDelivery(it) })
                     }
                 }
             }
