@@ -10,16 +10,19 @@ buildscript {
 
     repositories {
         mavenCentral()
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
+        maven { url "https://plugins.gradle.org/m2/" }
+        maven { url 'https://repo.spring.io/snapshot' }
+        maven { url 'https://repo.spring.io/milestone' }
         jcenter()
     }
+
     dependencies {
         classpath "com.novoda:bintray-release:0.9"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "com.github.jengelman.gradle.plugins:shadow:4.0.2"
         classpath "me.champeau.gradle:jmh-gradle-plugin:0.4.7"
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:2.2.0.BUILD-SNAPSHOT"
+        classpath "org.jetbrains.kotlin:kotlin-allopen:1.3.21"
     }
 }
 
@@ -130,6 +133,37 @@ project('the-white-rabbit-ktor-example') {
 
 }
 
+project('the-white-rabbit-spring-boot-example') {
+    repositories {
+        maven { url 'https://repo.spring.io/snapshot' }
+        maven { url 'https://repo.spring.io/milestone' }
+    }
+
+    apply plugin: "org.jetbrains.kotlin.plugin.spring"
+    apply plugin: "org.springframework.boot"
+    apply plugin: "io.spring.dependency-management"
+
+    test {
+        useJUnitPlatform()
+    }
+
+    dependencies {
+        compile rootProject
+        implementation 'org.springframework.boot:spring-boot-starter-webflux'
+        implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
+        implementation 'org.jetbrains.kotlin:kotlin-reflect'
+        implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
+        implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.1.1'
+        implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.1.1'
+        testImplementation('org.springframework.boot:spring-boot-starter-test') {
+            exclude module: 'junit'
+        }
+        testImplementation 'org.junit.jupiter:junit-jupiter-api'
+        testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+        testImplementation 'io.projectreactor:reactor-test'
+    }
+}
+
 project('benchmarks') {
     apply plugin: "com.github.johnrengelman.shadow"
     apply plugin: "me.champeau.gradle.jmh"
@@ -147,7 +181,6 @@ project('benchmarks') {
         compile rootProject
         compile "org.openjdk.jmh:jmh-core:1.21"
         jmh 'org.openjdk.jmh:jmh-generator-annprocess:1.21'
-
     }
 
     task deleteEmptyBmList(type: Delete) {
