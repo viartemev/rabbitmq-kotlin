@@ -5,6 +5,7 @@ buildscript {
         junit_jupiter_version = '5.4.0'
         junit_plugin_version = '1.2.0'
         kluent_version = '1.48'
+        ktor_version = '1.1.3'
     }
 
     repositories {
@@ -17,6 +18,7 @@ buildscript {
     dependencies {
         classpath "com.novoda:bintray-release:0.9"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "com.github.jengelman.gradle.plugins:shadow:4.0.2"
         classpath "me.champeau.gradle:jmh-gradle-plugin:0.4.7"
     }
 }
@@ -100,7 +102,36 @@ configure(rootProject) {
     }
 }
 
+project('the-white-rabbit-ktor-example') {
+    apply plugin: 'application'
+
+    repositories {
+        mavenLocal()
+        jcenter()
+        maven { url 'https://kotlin.bintray.com/ktor' }
+    }
+
+    sourceSets {
+        main.kotlin.srcDirs = main.java.srcDirs = ['src']
+        test.kotlin.srcDirs = test.java.srcDirs = ['test']
+        main.resources.srcDirs = ['resources']
+        test.resources.srcDirs = ['testresources']
+    }
+
+    dependencies {
+        compile rootProject
+        compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+        compile "io.ktor:ktor-server-netty:$ktor_version"
+        compile "ch.qos.logback:logback-classic:1.2.3"
+        compile "io.ktor:ktor-server-core:$ktor_version"
+        compile "io.ktor:ktor-jackson:$ktor_version"
+        testCompile "io.ktor:ktor-server-tests:$ktor_version"
+    }
+
+}
+
 project('benchmarks') {
+    apply plugin: "com.github.johnrengelman.shadow"
     apply plugin: "me.champeau.gradle.jmh"
 
     jmh.jmhVersion = '1.21'
@@ -115,5 +146,12 @@ project('benchmarks') {
     dependencies {
         compile rootProject
         compile "org.openjdk.jmh:jmh-core:1.21"
+        jmh 'org.openjdk.jmh:jmh-generator-annprocess:1.21'
+
     }
+
+    task deleteEmptyBmList(type: Delete) {
+        delete "$buildDir/jmh-generated-classes/META-INF/BenchmarkList"
+    }
+    jmhCompileGeneratedClasses.finalizedBy deleteEmptyBmList
 }

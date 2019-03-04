@@ -1,3 +1,4 @@
 rootProject.name = 'the-white-rabbit'
 
 include('benchmarks')
+include('the-white-rabbit-ktor-example')
