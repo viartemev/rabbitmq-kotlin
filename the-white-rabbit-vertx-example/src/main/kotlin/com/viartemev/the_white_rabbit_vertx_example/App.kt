@@ -41,7 +41,7 @@ class App : CoroutineVerticle() {
     suspend fun pull(ctx: RoutingContext) {
         connection.channel {
             consume("test_queue", 1) {
-                consumeWithConfirm({ ctx.response().setStatusCode(200).end(json { obj("message" to String(it.body)).encode() }) })
+                consumeMessageWithConfirm({ ctx.response().setStatusCode(200).end(json { obj("message" to String(it.body)).encode() }) })
             }
         }
     }
