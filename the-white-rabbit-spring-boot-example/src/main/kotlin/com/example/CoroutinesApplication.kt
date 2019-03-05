@@ -44,7 +44,7 @@ class Handlers(private val connection: Connection) {
         var message = "default_value"
         connection.channel {
             consume("test_queue", 1) {
-                consumeWithConfirm({
+                consumeMessageWithConfirm({
                     println("Got a message!")
                     message = String(it.body)
                 })

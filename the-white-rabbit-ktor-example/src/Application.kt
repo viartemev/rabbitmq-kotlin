@@ -37,7 +37,7 @@ fun Application.module(testing: Boolean = false) {
         get("/pull") {
             connection.channel {
                 consume("test_queue") {
-                    consumeWithConfirm({ call.respond(String(it.body)) })
+                    consumeMessageWithConfirm({ call.respond(String(it.body)) })
                 }
             }
         }
