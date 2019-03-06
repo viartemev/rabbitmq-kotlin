@@ -1,9 +1,10 @@
 package com.viartemev.thewhiterabbit.common
 
-import kotlinx.coroutines.newSingleThreadContext
+import kotlinx.coroutines.asCoroutineDispatcher
+import java.util.concurrent.Executors
 
 /**
  * Resource management dispatcher.
  * Used as a dispatcher only for managing exchanges and queues.
  */
-val resourceManagementDispatcher = newSingleThreadContext("ResourceManagementDispatcher")
+val resourceManagementDispatcher = Executors.newFixedThreadPool(1).asCoroutineDispatcher()
