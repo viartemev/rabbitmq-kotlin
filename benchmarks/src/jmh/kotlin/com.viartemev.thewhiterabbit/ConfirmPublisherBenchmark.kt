@@ -32,12 +32,12 @@ import java.util.concurrent.TimeUnit
 @Warmup(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 1, time = 5, timeUnit = TimeUnit.SECONDS)
 @Fork(value = 2)
-@BenchmarkMode(Mode.Throughput)
+@BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.MICROSECONDS)
 @State(Scope.Benchmark)
 open class ConfirmPublisherBenchmark {
 
-    @Param("1")
+    @Param("1", "10", "100", "1000", "10000", "100000")
     private var numberOfMessages: Int = 0
     private val testQueueName = "jmh_test_queue"
     private lateinit var connection: Connection

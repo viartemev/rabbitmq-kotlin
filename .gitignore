@@ -9,3 +9,7 @@ build/
 
 #tmp
 CONTENT.md
+
+#JMH
+benchmarks.jar
+
