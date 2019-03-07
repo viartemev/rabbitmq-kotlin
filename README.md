@@ -6,8 +6,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 
-The White Rabbit is an asynchronous RabbitMQ (AMQP) client based on Kotlin coroutines
-
+The White Rabbit is an asynchronous RabbitMQ (AMQP) client based on Kotlin coroutines  
+### [Benchmarks](https://github.com/viartemev/the-white-rabbit/issues/88#issuecomment-470461937)
 ### Adding to project:
 ##### Gradle:
 ```
