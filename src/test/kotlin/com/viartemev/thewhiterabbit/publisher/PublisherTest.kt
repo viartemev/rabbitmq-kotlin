@@ -66,7 +66,7 @@ class PublisherTest : AbstractTestContainersTest() {
                     declareQueue(QueueSpecification(QUEUE_NAME))
                     publish {
                         val messages = (1..times).map { createMessage("Hello #$it") }
-                        val acks = asyncPublishWithConfirm(messages).awaitAll()
+                        val acks = publishWithConfirmAsync(messages = messages).awaitAll()
                         assertTrue { acks.all { it } }
                     }
                 }

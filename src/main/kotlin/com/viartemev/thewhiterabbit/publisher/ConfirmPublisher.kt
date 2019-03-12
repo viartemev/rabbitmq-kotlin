@@ -1,15 +1,17 @@
 package com.viartemev.thewhiterabbit.publisher
 
 import com.rabbitmq.client.Channel
-import com.viartemev.thewhiterabbit.exception.PublishException
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.suspendCancellableCoroutine
 import mu.KotlinLogging
 import java.io.IOException
+import java.util.concurrent.CancellationException
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.Continuation
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 private val logger = KotlinLogging.logger {}
 
@@ -25,42 +27,21 @@ class ConfirmPublisher internal constructor(private val channel: Channel) {
      *
      * @see com.viartemev.thewhiterabbit.publisher.OutboundMessage
      * @return acknowledgement - represent messages handled successfully or lost by the broker.
-     * @throws com.viartemev.thewhiterabbit.exception.PublishException if can't publish the message
+     * @throws java.util.concurrent.CancellationException if can't publish the message
      */
     suspend fun publishWithConfirm(message: OutboundMessage): Boolean {
         val messageSequenceNumber = channel.nextPublishSeqNo
         logger.debug { "The message Sequence Number: $messageSequenceNumber" }
-        try {
-            return suspendCancellableCoroutine { continuation ->
-                continuations[messageSequenceNumber] = continuation
+        return suspendCancellableCoroutine { continuation ->
+            continuations[messageSequenceNumber] = continuation
+            continuation.invokeOnCancellation { continuations.remove(messageSequenceNumber) }
+            try {
                 message.run { channel.basicPublish(exchange, routingKey, properties, msg.toByteArray()) }
+            } catch (e: IOException) {
+                val cancelled = continuation.cancel(e)
+                if (!cancelled) throw CancellationException(e.message)
             }
-        } catch (e: IOException) {
-            continuations.remove(messageSequenceNumber)
-            throw PublishException("Can't publish message: $message")
         }
-    }
-
-    /**
-     * Asynchronously publish a message with the waiting of confirmation.
-     *
-     * @see com.viartemev.thewhiterabbit.publisher.OutboundMessage
-     * @return acknowledgement - represent messages handled successfully or lost by the broker.
-     * @throws java.io.IOException if an error is encountered
-     */
-    suspend fun asyncPublishWithConfirm(message: OutboundMessage): Deferred<Boolean> = coroutineScope {
-        async { publishWithConfirm(message) }
-    }
-
-    /**
-     * Publish a list of messages with the waiting of confirmation.
-     *
-     * @see com.viartemev.thewhiterabbit.publisher.OutboundMessage
-     * @return list of acknowledgements - represent messages handled successfully or lost by the broker.
-     * @throws java.io.IOException if an error is encountered
-     */
-    suspend fun publishWithConfirm(messages: List<OutboundMessage>): List<Boolean> {
-        return messages.map { publishWithConfirm(it) }
     }
 
     /**
@@ -68,9 +49,12 @@ class ConfirmPublisher internal constructor(private val channel: Channel) {
      *
      * @see com.viartemev.thewhiterabbit.publisher.OutboundMessage
      * @return list of acknowledgements - represent messages handled successfully or lost by the broker.
-     * @throws java.io.IOException if an error is encountered
+     * @throws java.util.concurrent.CancellationException if can't publish one of the messages
      */
-    suspend fun asyncPublishWithConfirm(messages: List<OutboundMessage>): List<Deferred<Boolean>> = coroutineScope {
-        messages.map { async { publishWithConfirm(it) } }
+    suspend fun publishWithConfirmAsync(
+        coroutineContext: CoroutineContext = EmptyCoroutineContext,
+        messages: List<OutboundMessage>
+    ): List<Deferred<Boolean>> = coroutineScope {
+        messages.map { async(coroutineContext) { publishWithConfirm(it) } }
     }
 }
