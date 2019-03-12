@@ -7,10 +7,6 @@ import com.viartemev.thewhiterabbit.channel.ConfirmChannel
 import com.viartemev.thewhiterabbit.channel.createConfirmChannel
 import com.viartemev.thewhiterabbit.publisher.ConfirmPublisher
 import com.viartemev.thewhiterabbit.publisher.OutboundMessage
-import com.viartemev.thewhiterabbit.queue.DeleteQueueSpecification
-import com.viartemev.thewhiterabbit.queue.QueueSpecification
-import com.viartemev.thewhiterabbit.queue.declareQueue
-import com.viartemev.thewhiterabbit.queue.deleteQueue
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
 import org.openjdk.jmh.annotations.Benchmark
@@ -40,39 +36,31 @@ open class ConfirmPublisherBenchmark {
     @Param("1", "10", "100", "1000", "10000", "100000")
     private var numberOfMessages: Int = 0
     private val testQueueName = "jmh_test_queue"
+    private val factory = ConnectionFactory().apply { useNio() }
     private lateinit var connection: Connection
     private lateinit var channel: ConfirmChannel
     private lateinit var publisher: ConfirmPublisher
     private lateinit var messages: List<OutboundMessage>
 
-    @Setup
-    fun setupConnection() {
-        val factory = ConnectionFactory().apply { useNio() }
-        connection = factory.newConnection()
-    }
-
     @Setup(Level.Iteration)
     fun setup() {
+        connection = factory.newConnection()
         channel = connection.createConfirmChannel()
-        runBlocking { channel.declareQueue(QueueSpecification(testQueueName)) }
+        channel.queueDeclare(testQueueName, false, false, false, mapOf())
         publisher = channel.publisher()
         messages = (1..numberOfMessages).map { createMessage() }
     }
 
     @TearDown(Level.Iteration)
     fun tearDownPublisher() {
-        runBlocking { channel.deleteQueue(DeleteQueueSpecification(testQueueName)) }
+        channel.queueDelete(testQueueName)
         channel.close()
-    }
-
-    @TearDown
-    fun tearDown() {
         connection.close()
     }
 
     @Benchmark
     fun sendWithPublishConfirm(blackhole: Blackhole) = runBlocking {
-        blackhole.consume(publisher.asyncPublishWithConfirm(messages).awaitAll())
+        blackhole.consume(publisher.publishWithConfirmAsync(messages = messages).awaitAll())
     }
 
     private fun createMessage(): OutboundMessage = OutboundMessage("", testQueueName, MessageProperties.MINIMAL_BASIC, "")
