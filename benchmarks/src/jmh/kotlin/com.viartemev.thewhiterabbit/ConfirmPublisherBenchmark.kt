@@ -72,7 +72,7 @@ open class ConfirmPublisherBenchmark {
 
     @Benchmark
     fun sendWithPublishConfirm(blackhole: Blackhole) = runBlocking {
-        blackhole.consume(publisher.asyncPublishWithConfirm(messages).awaitAll())
+        blackhole.consume(publisher.publishWithConfirmAsync(messages = messages).awaitAll())
     }
 
     private fun createMessage(): OutboundMessage = OutboundMessage("", testQueueName, MessageProperties.MINIMAL_BASIC, "")

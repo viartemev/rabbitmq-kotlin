@@ -39,7 +39,7 @@ compile 'com.viartemev:the-white-rabbit:$version'
 connection.confirmChannel {
      publish {
         coroutineScope {
-            (1..n).map { asyncPublishWithConfirm(createMessage("Hello #$it")) }.awaitAll()
+            (1..n).map { publishWithConfirm(createMessage("Hello #$it")) }.awaitAll()
         }
     }
 }
@@ -49,12 +49,12 @@ or
 connection.confirmChannel {
     publish {
         val messages = (1..n).map { createMessage("Hello #$it") }
-        asyncPublishWithConfirm(messages).awaitAll()
+        publishWithConfirmAsync(messages = messages).awaitAll()
     }
 }
 ```
 
-##### - Async message consuming with acknowledge: 
+##### - Async message consuming with acknowledgement: 
 Consume only n-messages:
 ```kotlin
 connection.channel {
