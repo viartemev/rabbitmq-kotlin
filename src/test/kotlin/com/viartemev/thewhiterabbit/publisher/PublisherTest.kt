@@ -3,7 +3,9 @@ package com.viartemev.thewhiterabbit.publisher
 import com.rabbitmq.client.MessageProperties
 import com.viartemev.thewhiterabbit.AbstractTestContainersTest
 import com.viartemev.thewhiterabbit.channel.confirmChannel
+import com.viartemev.thewhiterabbit.channel.consume
 import com.viartemev.thewhiterabbit.channel.publish
+import com.viartemev.thewhiterabbit.channel.txChannel
 import com.viartemev.thewhiterabbit.queue.QueueSpecification
 import com.viartemev.thewhiterabbit.queue.declareQueue
 import kotlinx.coroutines.async
@@ -11,7 +13,11 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import org.testcontainers.shaded.org.apache.commons.lang.RandomStringUtils
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 class PublisherTest : AbstractTestContainersTest() {
 
@@ -74,6 +80,60 @@ class PublisherTest : AbstractTestContainersTest() {
         }
     }
 
-    private fun createMessage(body: String) =
-        OutboundMessage(EXCHANGE_NAME, QUEUE_NAME, MessageProperties.PERSISTENT_BASIC, body)
+    @Test
+    fun `test one message publishing with tx commit`() {
+        val queue = randomQueue()
+        factory.newConnection().use { conn ->
+            runBlocking {
+                conn.txChannel {
+                    declareQueue(QueueSpecification(queue))
+                    publish {
+                        val message = createMessage("Hello", "", queue)
+                        publishInTx(message)
+                        commit()
+
+                        // todo consume ain't work properly on tx channel, BTW
+                        val latch = CountDownLatch(1)
+                        consume(queue) {
+                            consumeMessageWithConfirm({ latch.countDown() })
+                        }
+
+                        assertTrue(latch.await(1, TimeUnit.SECONDS))
+                    }
+                }
+            }
+        }
+    }
+
+    @Disabled("fix consume on tx channel")
+    @Test
+    fun `test one message publishing with tx rollback`() {
+
+        val queue = randomQueue()
+        factory.newConnection().use { conn ->
+            runBlocking {
+                conn.txChannel {
+                    declareQueue(QueueSpecification(queue))
+                    publish {
+                        val message = createMessage("Hello", "", queue)
+                        publishInTx(message)
+                        rollback()
+
+                        // consume ain't work properly on tx channel
+                        val latch = CountDownLatch(1)
+                        consume(queue) {
+                            consumeMessageWithConfirm({ latch.countDown() })
+                        }
+                        assertTrue(latch.await(1, TimeUnit.SECONDS))
+                    }
+                }
+            }
+        }
+    }
+
+
+    private fun randomQueue() = QUEUE_NAME + "_" + RandomStringUtils.randomNumeric(3)
+
+    private fun createMessage(body: String, exchange: String = EXCHANGE_NAME, queue: String = QUEUE_NAME) =
+        OutboundMessage(exchange, queue, MessageProperties.PERSISTENT_BASIC, body)
 }
