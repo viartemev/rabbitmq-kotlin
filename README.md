@@ -37,19 +37,20 @@ compile 'com.viartemev:the-white-rabbit:$version'
 ##### - Async message publishing with confirmation: 
 ```kotlin
 connection.confirmChannel {
-     publish {
-        coroutineScope {
-            (1..n).map { asyncPublishWithConfirm(createMessage("Hello #$it")) }.awaitAll()
-        }
+    publish {
+        val messages = (1..n).map { createMessage("Hello #$it") }
+        publishWithConfirmAsync(coroutineContext, messages).awaitAll()
     }
 }
 ```
 or
 ```kotlin
 connection.confirmChannel {
-    publish {
-        val messages = (1..n).map { createMessage("Hello #$it") }
-        asyncPublishWithConfirm(messages).awaitAll()
+     publish {
+        coroutineScope {
+            val messages = (1..n).map { createMessage("Hello #$it") }
+            messages.map { async { publishWithConfirm(it) } }
+        }
     }
 }
 ```
@@ -59,7 +60,7 @@ Consume only n-messages:
 ```kotlin
 connection.channel {
     consume(QUEUE_NAME, PREFETCH_COUNT) {
-        (1..n).map { asyncConsumeWithConfirm({ println(it) }) }.awaitAll()
+        (1..n).map { async { consumeMessageWithConfirm({ println(it) }) } }.awaitAll()
     }
 }
 ```
