@@ -28,8 +28,6 @@ import java.util.concurrent.TimeUnit
 @Warmup(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 1, time = 5, timeUnit = TimeUnit.SECONDS)
 @Fork(value = 2)
-@BenchmarkMode(Mode.AverageTime)
-@OutputTimeUnit(TimeUnit.MICROSECONDS)
 @State(Scope.Benchmark)
 open class ConfirmPublisherBenchmark {
 
@@ -59,9 +57,19 @@ open class ConfirmPublisherBenchmark {
     }
 
     @Benchmark
-    fun sendWithPublishConfirm(blackhole: Blackhole) = runBlocking {
+    @BenchmarkMode(Mode.AverageTime)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    fun avgTimeSendWithPublishConfirm(blackhole: Blackhole) = runBlocking {
         blackhole.consume(publisher.publishWithConfirmAsync(messages = messages).awaitAll())
     }
+
+    @Benchmark
+    @BenchmarkMode(Mode.Throughput)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    fun throughputSendWithPublishConfirm(blackhole: Blackhole) = runBlocking {
+        blackhole.consume(publisher.publishWithConfirmAsync(messages = messages).awaitAll())
+    }
+
 
     private fun createMessage(): OutboundMessage = OutboundMessage("", testQueueName, MessageProperties.MINIMAL_BASIC, "")
 }
