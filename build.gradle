@@ -82,7 +82,7 @@ configure(allprojects) { project ->
 }
 
 configure(rootProject) {
-    version = '0.0.4'
+    version = '0.0.5'
 
     apply plugin: "com.novoda.bintray-release"
     apply plugin: 'com.adarshr.test-logger'
@@ -103,7 +103,7 @@ configure(rootProject) {
         repoName = 'Maven'
         groupId = 'com.viartemev'
         artifactId = 'the-white-rabbit'
-        publishVersion = '0.0.4'
+        publishVersion = '0.0.5'
         desc = 'The White Rabbit is an asynchronous RabbitMQ library based on Kotlin coroutines'
         website = 'https://github.com/viartemev/the-white-rabbit'
         licences = ['MIT']
