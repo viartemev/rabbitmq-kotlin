@@ -70,7 +70,7 @@ configure(allprojects) { project ->
         testCompile "com.github.kittinunf.fuel:fuel-coroutines:1.16.0"
         testCompile 'com.github.kittinunf.fuel:fuel-jackson:1.16.0'
 
-        testCompile "org.testcontainers:testcontainers:1.10.6"
+        testCompile "org.testcontainers:testcontainers:1.10.7"
         testCompile "org.testcontainers:junit-jupiter:1.10.6"
 
         testCompile "org.junit.jupiter:junit-jupiter-api:$junit_jupiter_version"
