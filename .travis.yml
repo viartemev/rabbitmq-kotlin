@@ -7,6 +7,7 @@ before_script:
 script:
     - "./gradlew build jacocoTestReport"
     - "./gradlew benchmarks:build "
+    - "./gradlew the-white-rabbit-example:build "
     - "./gradlew the-white-rabbit-ktor-example:build "
     - "./gradlew the-white-rabbit-spring-boot-example:build "
     - "./gradlew the-white-rabbit-spring-boot-example:build "
