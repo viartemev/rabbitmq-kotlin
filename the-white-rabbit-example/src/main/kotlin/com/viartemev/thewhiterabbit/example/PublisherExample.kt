@@ -9,9 +9,9 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 
-val EXCHANGE_NAME = ""
-val QUEUE_NAME = "test_queue"
-val times = 100_000
+const val PUBLISHER_EXCHANGE_NAME = ""
+const val PUBLISHER_QUEUE_NAME = "test_queue"
+const val TIMES = 100_000
 
 fun main() {
     val connectionFactory = ConnectionFactory().apply { useNio() }
@@ -20,7 +20,7 @@ fun main() {
         connection.confirmChannel {
             publish {
                 coroutineScope {
-                    val messages = (1..times).map { createMessage("") }
+                    val messages = (1..TIMES).map { createMessage("") }
                     publishWithConfirmAsync(this.coroutineContext, messages).awaitAll()
                 }
             }
@@ -30,4 +30,4 @@ fun main() {
 }
 
 private fun createMessage(body: String) =
-    OutboundMessage(EXCHANGE_NAME, QUEUE_NAME, MessageProperties.PERSISTENT_BASIC, body)
+    OutboundMessage(PUBLISHER_EXCHANGE_NAME, PUBLISHER_QUEUE_NAME, MessageProperties.PERSISTENT_BASIC, body)

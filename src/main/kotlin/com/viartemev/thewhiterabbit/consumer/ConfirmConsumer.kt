@@ -3,16 +3,19 @@ package com.viartemev.thewhiterabbit.consumer
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Delivery
 import com.viartemev.thewhiterabbit.exception.AcknowledgeException
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.async
+import kotlinx.coroutines.channels.ClosedReceiveChannelException
+import kotlinx.coroutines.channels.ClosedSendChannelException
 import kotlinx.coroutines.channels.sendBlocking
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import mu.KotlinLogging
 import java.io.Closeable
 import java.io.IOException
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlinx.coroutines.channels.Channel as KChannel
 
 private val logger = KotlinLogging.logger {}
@@ -28,12 +31,12 @@ class ConfirmConsumer internal constructor(private val amqpChannel: Channel, amq
             { consumerTag, message ->
                 try {
                     deliveries.sendBlocking(message)
-                } catch (e: Exception) {
+                } catch (e: ClosedSendChannelException) {
                     logger.debug { "Can't send a message. Consumer $consumerTag has been cancelled" }
                 }
             },
             { consumerTag ->
-                logger.debug { "Consumer $consumerTag has been cancelled" }
+                logger.debug { "Consumer $consumerTag has been cancelled for reasons other than by a call to Channel#basicCancel" }
                 deliveries.cancel()
             }
         )
@@ -43,16 +46,23 @@ class ConfirmConsumer internal constructor(private val amqpChannel: Channel, amq
      * Consume a message and handle it.
      * @throws com.viartemev.thewhiterabbit.exception.AcknowledgeException if can't send ack
      */
-    suspend fun consumeMessageWithConfirm(handler: suspend (Delivery) -> Unit, handlerDispatcher: CoroutineDispatcher = Dispatchers.Default) {
-        val delivery = deliveries.receive()
-        val deliveryTag = delivery.envelope.deliveryTag
-        withContext(handlerDispatcher) { handler(delivery) }
+    suspend fun consumeMessageWithConfirm(handler: suspend (Delivery) -> Unit) {
         try {
-            amqpChannel.basicAck(deliveryTag, false)
-        } catch (e: IOException) {
-            val errorMessage = "Can't ack a message with deliveryTag: $deliveryTag"
-            logger.error { errorMessage }
-            throw AcknowledgeException(errorMessage)
+            val delivery = deliveries.receive()
+            val deliveryTag = delivery.envelope.deliveryTag
+            handler(delivery)
+            try {
+                amqpChannel.basicAck(deliveryTag, false)
+            } catch (e: IOException) {
+                val errorMessage = "Can't ack a message with deliveryTag: $deliveryTag"
+                logger.error { errorMessage }
+                throw AcknowledgeException(errorMessage)
+            }
+        } catch (e: Exception) {
+            when (e) {
+                is ClosedReceiveChannelException -> throw CancellationException()
+                else -> throw e
+            }
         }
     }
 
@@ -60,19 +70,32 @@ class ConfirmConsumer internal constructor(private val amqpChannel: Channel, amq
      * Consume a message and handle it with timeout.
      * @throws kotlinx.coroutines.TimeoutCancellationException if timeout expired
      */
-    suspend fun consumeMessageWithConfirmAndTimeout(handler: suspend (Delivery) -> Unit, timeMillis: Long, handlerDispatcher: CoroutineDispatcher = Dispatchers.Default) {
-        withTimeout(timeMillis) { consumeMessageWithConfirm(handler, handlerDispatcher) }
+    suspend fun consumeMessageWithConfirmAndTimeout(handler: suspend (Delivery) -> Unit, timeMillis: Long) {
+        withTimeout(timeMillis) { consumeMessageWithConfirm(handler) }
     }
 
     /**
-     * Infinite consume messages and handle them.
+     * Asynchronously consume and handle numberOfMessages.
      */
-    suspend fun consumeMessagesWithConfirm(parallelism: Int, handler: suspend (Delivery) -> Unit, handlerDispatcher: CoroutineDispatcher = Dispatchers.Default) = coroutineScope {
+    suspend fun consumeMessagesWithConfirm(
+        numberOfMessages: Int,
+        handler: suspend (Delivery) -> Unit,
+        coroutineContext: CoroutineContext = EmptyCoroutineContext
+    ) = coroutineScope {
+        (1..numberOfMessages).map { async(coroutineContext) { consumeMessageWithConfirm(handler) } }
+    }
+
+    /**
+     * @todo Infinite consuming and handling messages
+     * THIS FUNCTION IS NOT PRODUCTION READY.
+     * Infinite consuming and handling messages.
+     */
+    suspend fun consumeMessagesWithConfirm1(parallelism: Int, handler: suspend (Delivery) -> Unit) = coroutineScope {
         val channel = KChannel<Unit>(parallelism)
         while (true) {
             channel.send(Unit)
             launch {
-                consumeMessageWithConfirm(handler, handlerDispatcher)
+                consumeMessageWithConfirm(handler)
                 channel.receive()
             }
         }
