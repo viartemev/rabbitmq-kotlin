@@ -4,7 +4,7 @@
 [![Open Source Helpers](https://www.codetriage.com/viartemev/the-white-rabbit/badges/users.svg)](https://www.codetriage.com/viartemev/the-white-rabbit)
 [![codecov](https://codecov.io/gh/viartemev/the-white-rabbit/branch/master/graph/badge.svg)](https://codecov.io/gh/viartemev/the-white-rabbit)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
+[![Gitter](https://badges.gitter.im/kotlin-the-white-rabbit/community.svg)](https://gitter.im/kotlin-the-white-rabbit/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 The White Rabbit is an asynchronous RabbitMQ (AMQP) client based on Kotlin coroutines  
 ### [Benchmarks](https://github.com/viartemev/the-white-rabbit/issues/88#issuecomment-470461937)
@@ -37,29 +37,30 @@ compile 'com.viartemev:the-white-rabbit:$version'
 ##### - Async message publishing with confirmation: 
 ```kotlin
 connection.confirmChannel {
-     publish {
-        coroutineScope {
-            (1..n).map { publishWithConfirm(createMessage("Hello #$it")) }.awaitAll()
-        }
+    publish {
+        val messages = (1..n).map { createMessage("Hello #$it") }
+        publishWithConfirmAsync(coroutineContext, messages).awaitAll()
     }
 }
 ```
 or
 ```kotlin
 connection.confirmChannel {
-    publish {
-        val messages = (1..n).map { createMessage("Hello #$it") }
-        publishWithConfirmAsync(messages = messages).awaitAll()
+     publish {
+        coroutineScope {
+            val messages = (1..n).map { createMessage("Hello #$it") }
+            messages.map { async { publishWithConfirm(it) } }
+        }
     }
 }
 ```
 
-##### - Async message consuming with acknowledgement: 
+##### - Async message consuming with acknowledge: 
 Consume only n-messages:
 ```kotlin
 connection.channel {
     consume(QUEUE_NAME, PREFETCH_COUNT) {
-        (1..n).map { asyncConsumeWithConfirm({ println(it) }) }.awaitAll()
+        (1..n).map { async { consumeMessageWithConfirm({ println(it) }) } }.awaitAll()
     }
 }
 ```
