@@ -25,6 +25,7 @@ buildscript {
         classpath "org.springframework.boot:spring-boot-gradle-plugin:2.2.0.BUILD-SNAPSHOT"
         classpath "org.jetbrains.kotlin:kotlin-allopen:1.3.21"
         classpath "com.github.jengelman.gradle.plugins:shadow:5.0.0"
+        classpath 'com.adarshr:gradle-test-logger-plugin:1.6.0'
     }
 }
 
@@ -81,9 +82,10 @@ configure(allprojects) { project ->
 }
 
 configure(rootProject) {
-    version = '0.0.4'
+    version = '0.0.5'
 
     apply plugin: "com.novoda.bintray-release"
+    apply plugin: 'com.adarshr.test-logger'
 
     test {
         useJUnitPlatform()
@@ -101,7 +103,7 @@ configure(rootProject) {
         repoName = 'Maven'
         groupId = 'com.viartemev'
         artifactId = 'the-white-rabbit'
-        publishVersion = '0.0.4'
+        publishVersion = '0.0.5'
         desc = 'The White Rabbit is an asynchronous RabbitMQ library based on Kotlin coroutines'
         website = 'https://github.com/viartemev/the-white-rabbit'
         licences = ['MIT']
@@ -190,6 +192,15 @@ project('the-white-rabbit-vertx-example') {
     }
 }
 
+project('the-white-rabbit-example') {
+    dependencies {
+        compile rootProject
+        compile group: 'org.slf4j', name: 'slf4j-api', version: '1.8.0-beta4'
+        runtime group: 'ch.qos.logback', name: 'logback-classic', version: '1.3.0-alpha4'
+        runtime group: 'ch.qos.logback', name: 'logback-core', version: '1.3.0-alpha4'
+    }
+}
+
 project('benchmarks') {
     apply plugin: "com.github.johnrengelman.shadow"
     apply plugin: "me.champeau.gradle.jmh"
@@ -214,3 +225,4 @@ project('benchmarks') {
     }
     jmhCompileGeneratedClasses.finalizedBy deleteEmptyBmList
 }
+
