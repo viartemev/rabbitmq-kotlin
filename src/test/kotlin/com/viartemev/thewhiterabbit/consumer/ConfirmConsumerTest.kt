@@ -1,38 +1,42 @@
 package com.viartemev.thewhiterabbit.consumer
 
-import com.rabbitmq.client.Delivery
 import com.viartemev.thewhiterabbit.AbstractTestContainersTest
-import com.viartemev.thewhiterabbit.channel.channel
+import com.viartemev.thewhiterabbit.channel.confirmChannel
 import com.viartemev.thewhiterabbit.channel.consume
+import com.viartemev.thewhiterabbit.channel.publish
 import com.viartemev.thewhiterabbit.queue.QueueSpecification
 import com.viartemev.thewhiterabbit.queue.declareQueue
+import com.viartemev.thewhiterabbit.utils.createMessage
+import junit.framework.Assert.assertEquals
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import java.util.concurrent.atomic.AtomicInteger
 
-@Disabled("For demo purposes only")
 class ConfirmConsumerTest : AbstractTestContainersTest() {
 
     private val QUEUE_NAME = "test_queue"
 
     @Test
     fun `test message consuming`() {
+        val counter = AtomicInteger()
         factory.newConnection().use { connection ->
             runBlocking {
-                connection.channel {
+                connection.confirmChannel {
                     declareQueue(QueueSpecification(QUEUE_NAME))
-                    consume(QUEUE_NAME, 2) {
-                        for (i in 1..3) consumeMessageWithConfirm({ handleDelivery(it) })
+                    publish {
+                        val messages = (1..10).map { createMessage(queue = QUEUE_NAME, body = "1") }
+                        publishWithConfirmAsync(messages = messages)
                     }
+                    consume(QUEUE_NAME, 2) {
+                        for (i in 1..10) consumeMessageWithConfirm {
+                            delay(100)
+                            counter.getAndAdd(String(it.body).toInt())
+                        }
+                    }
+                    assertEquals(10, counter.get())
                 }
             }
         }
-    }
-
-    suspend fun handleDelivery(message: Delivery) {
-        println("Got a message: ${String(message.body)}. Let's do some async work...")
-        delay(100)
-        println("Work is done")
     }
 }
