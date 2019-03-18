@@ -84,12 +84,12 @@ class QueueTest : AbstractTestContainersTest() {
                 connection.confirmChannel {
                     declareQueue(QueueSpecification(queueName))
                     declareExchange(ExchangeSpecification(exchangeName))
-                    val queue = httpRabbitMQClient.getQueue(DEFAULT_VHOST, queueName)
-                    assertNotNull(queue)
+                    val queueBindingsBefore = httpRabbitMQClient.getQueueBindingsBetween(DEFAULT_VHOST, exchangeName, queueName)
+                    assertTrue(queueBindingsBefore.isEmpty())
 
                     bindQueue(BindQueueSpecification(queueName, exchangeName))
-                    val binding = httpRabbitMQClient.getQueueBindingsBetween(DEFAULT_VHOST, exchangeName, queueName)
-                    assertNotNull(binding.isNotEmpty())
+                    val queueBindingsAfter = httpRabbitMQClient.getQueueBindingsBetween(DEFAULT_VHOST, exchangeName, queueName)
+                    assertNotNull(queueBindingsAfter.isNotEmpty())
                 }
             }
         }
@@ -113,7 +113,6 @@ class QueueTest : AbstractTestContainersTest() {
 
                     unbindQueue(UnbindQueueSpecification(queueName, exchangeName, routingKey))
                     val bindingAfterUnbind = httpRabbitMQClient.getQueueBindingsBetween(DEFAULT_VHOST, exchangeName, queueName)
-                    delay(5000)
                     assertTrue(bindingAfterUnbind.isEmpty())
                 }
             }
