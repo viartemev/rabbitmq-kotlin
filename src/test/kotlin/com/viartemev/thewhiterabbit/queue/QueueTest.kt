@@ -1,7 +1,6 @@
 package com.viartemev.thewhiterabbit.queue
 
 import com.viartemev.thewhiterabbit.AbstractTestContainersTest
-import com.viartemev.thewhiterabbit.utils.getQueue
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -13,6 +12,7 @@ import org.testcontainers.junit.jupiter.Testcontainers
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class QueueTest : AbstractTestContainersTest() {
 
+
     @Test
     fun `declare a queue test`() {
         val queueName = "declare_queue_test"
@@ -23,7 +23,7 @@ class QueueTest : AbstractTestContainersTest() {
                 }
             }
         }
-        assertNotNull(getQueue(queueName))
+        assertNotNull(httpRabbitMQClient.getQueue(DEFAULT_VHOST, queueName))
     }
 
     @Test
@@ -33,13 +33,11 @@ class QueueTest : AbstractTestContainersTest() {
             connection.createChannel().use { channel ->
                 runBlocking {
                     channel.declareQueue(QueueSpecification(queueName))
-                    assertNotNull(getQueue(queueName))
+                    assertNotNull(httpRabbitMQClient.getQueue(DEFAULT_VHOST, queueName))
                     channel.deleteQueue(DeleteQueueSpecification(queueName))
-                    assertNull(getQueue(queueName))
+                    assertNull(httpRabbitMQClient.getQueue(DEFAULT_VHOST, queueName))
                 }
             }
         }
     }
 }
-
-data class QueuesHttpResponse(val name: String, val messages: Long)
