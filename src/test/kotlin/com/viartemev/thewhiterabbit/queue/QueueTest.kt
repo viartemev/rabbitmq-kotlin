@@ -113,7 +113,7 @@ class QueueTest : AbstractTestContainersTest() {
 
                     unbindQueue(UnbindQueueSpecification(queueName, exchangeName, routingKey))
                     val bindingAfterUnbind = httpRabbitMQClient.getQueueBindingsBetween(DEFAULT_VHOST, exchangeName, queueName)
-                    delay(1000)
+                    delay(5000)
                     assertTrue(bindingAfterUnbind.isEmpty())
                 }
             }
