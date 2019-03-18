@@ -13,9 +13,9 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.testcontainers.shaded.org.apache.commons.lang.RandomStringUtils
+import java.lang.RuntimeException
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -81,55 +81,115 @@ class PublisherTest : AbstractTestContainersTest() {
     }
 
     @Test
-    fun `test one message publishing with tx commit`() {
+    fun `test one message publishing with tx implicit commit`() {
         val queue = randomQueue()
+        factory.apply {
+            host = "172.17.0.2"
+            port = 5672
+        }
         factory.newConnection().use { conn ->
+
+            val latch = CountDownLatch(1)
+
             runBlocking {
                 conn.txChannel {
+
                     declareQueue(QueueSpecification(queue))
-                    publish {
-                        val message = createMessage("Hello", "", queue)
-                        publishInTx(message)
+
+// won't compile, good
+//                    transaction {
+//                        declareQueue(QueueSpecification(queue))
+//                    }
+// won't compile, good
+//                    transaction {
+//                        transaction {
+//                        }
+//                    }
+
+                    transaction {
+                        val message = createMessage("Hello from tx", "", queue)
+                        publish(message)
                         commit()
 
-                        // todo consume ain't work properly on tx channel, BTW
-                        val latch = CountDownLatch(1)
-                        consume(queue) {
+                        consume(queue, 1) {
                             consumeMessageWithConfirm({ latch.countDown() })
                         }
-
-                        assertTrue(latch.await(1, TimeUnit.SECONDS))
                     }
                 }
             }
+            assertTrue(latch.await(1, TimeUnit.SECONDS))
         }
     }
 
-    @Disabled("fix consume on tx channel")
-    @Test
-    fun `test one message publishing with tx rollback`() {
 
+    @Test
+    fun `test one message publishing with tx implicit rollback`() {
         val queue = randomQueue()
+        factory.apply {
+            host = "172.17.0.2"
+            port = 5672
+        }
         factory.newConnection().use { conn ->
             runBlocking {
                 conn.txChannel {
                     declareQueue(QueueSpecification(queue))
-                    publish {
-                        val message = createMessage("Hello", "", queue)
-                        publishInTx(message)
-                        rollback()
-
-                        // consume ain't work properly on tx channel
-                        val latch = CountDownLatch(1)
-                        consume(queue) {
-                            consumeMessageWithConfirm({ latch.countDown() })
-                        }
-                        assertTrue(latch.await(1, TimeUnit.SECONDS))
+                    transaction {
+                        val message = createMessage("Hello from tx", "", queue)
+                        publish(message)
+                        throw RuntimeException("sth happened")
                     }
                 }
             }
         }
     }
+
+    @Test
+    fun `test a message publishing with tx explicit rollback`() {
+        val queue = randomQueue()
+        factory.apply {
+            host = "172.17.0.2"
+            port = 5672
+        }
+        factory.newConnection().use { conn ->
+            runBlocking {
+                conn.txChannel {
+                    declareQueue(QueueSpecification(queue))
+                    transaction {
+                        val message = createMessage("Hello from tx", "", queue)
+                        publish(message)
+                        rollback()
+                    }
+                }
+            }
+        }
+    }
+
+
+//    @Disabled("fix consume on tx channel")
+//    @Test
+//    fun `test one message publishing with tx rollback`() {
+//
+//        val queue = randomQueue()
+//        factory.newConnection().use { conn ->
+//            runBlocking {
+//                conn.txChannel {
+//                    declareQueue(QueueSpecification(queue))
+//                    publish {
+//                        val message = createMessage("Hello", "", queue)
+//                        publishInTx(message)
+//                        rollback()
+//
+//                        // consume ain't work properly on tx channel
+//                        val latch = CountDownLatch(1)
+//                        consume(queue) {
+//                            consumeMessageWithConfirm({ latch.countDown() })
+//                        }
+//                        assertTrue(latch.await(1, TimeUnit.SECONDS))
+//                    }
+//                }
+//            }
+//        }
+//    }
 
 
     private fun randomQueue() = QUEUE_NAME + "_" + RandomStringUtils.randomNumeric(3)
