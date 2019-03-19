@@ -13,7 +13,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-class PublisherTest : AbstractTestContainersTest() {
+class PublisherIntegrationTest : AbstractTestContainersTest() {
 
     private val QUEUE_NAME = "test_queue"
 

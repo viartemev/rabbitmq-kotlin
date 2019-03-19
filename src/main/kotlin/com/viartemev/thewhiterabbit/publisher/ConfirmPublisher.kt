@@ -16,7 +16,7 @@ import kotlin.coroutines.EmptyCoroutineContext
 private val logger = KotlinLogging.logger {}
 
 class ConfirmPublisher internal constructor(private val channel: Channel) {
-    private val continuations = ConcurrentHashMap<Long, Continuation<Boolean>>()
+    internal val continuations = ConcurrentHashMap<Long, Continuation<Boolean>>()
 
     init {
         channel.addConfirmListener(AckListener(continuations))
@@ -38,7 +38,7 @@ class ConfirmPublisher internal constructor(private val channel: Channel) {
             try {
                 message.run { channel.basicPublish(exchange, routingKey, properties, msg.toByteArray()) }
             } catch (e: IOException) {
-                val cancelled = continuation.cancel(e)
+                val cancelled = continuation.cancel()
                 if (!cancelled) throw CancellationException(e.message)
             }
         }
