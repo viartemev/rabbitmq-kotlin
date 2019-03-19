@@ -71,7 +71,7 @@ suspend fun Connection.channel(block: suspend Channel.() -> Unit): Channel {
     var channel = Channels
         .localChannels[Thread.currentThread()]
     if (channel == null || !channel.isOpen) {
-        channel = Channels.UncloseableChannel(createConfirmChannel())
+        channel = Channels.UncloseableChannel(createChannel())
         localChannels[Thread.currentThread()] = channel
     }
     return channel
