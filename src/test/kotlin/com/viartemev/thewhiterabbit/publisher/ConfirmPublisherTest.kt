@@ -1,5 +1,6 @@
 package com.viartemev.thewhiterabbit.publisher
 
+import com.nhaarman.mockito_kotlin.any
 import com.nhaarman.mockito_kotlin.doThrow
 import com.nhaarman.mockito_kotlin.mock
 import com.rabbitmq.client.Channel
@@ -23,14 +24,12 @@ class ConfirmPublisherTest {
     @Test
     fun test_1() {
         val channel = mock<Channel> {
-            on { basicPublish("", "", MessageProperties.PERSISTENT_BASIC, "fail".toByteArray()) } doThrow IOException("Boom")
-            on { basicPublish("", "", MessageProperties.PERSISTENT_BASIC, "valid".toByteArray()) } doThrow IOException("Boom")
+            on { basicPublish(any(), any(), any(), any()) } doThrow IOException("Boom")
         }
         val counter = AtomicInteger()
         val confirmPublisher = ConfirmPublisher(channel)
 
         val failed = OutboundMessage("", "", MessageProperties.PERSISTENT_BASIC, "fail")
-        val valid = OutboundMessage("", "", MessageProperties.PERSISTENT_BASIC, "valid")
         runBlocking {
             try {
                 coroutineScope {
@@ -43,13 +42,18 @@ class ConfirmPublisherTest {
                     }
                     val task2 = async {
                         println("Task2 has started...")
-                        delay(600)
-                        confirmPublisher.publishWithConfirm(valid)
+                        delay(2000)
                         counter.getAndAdd(1)
-                        println("Task1 finished")
+                        println("Task2 finished")
                     }
-                    listOf(task1, task2)
-                }.awaitAll()
+                    val task3 = async {
+                        println("Task3 has started...")
+                        delay(10000)
+                        counter.getAndAdd(1)
+                        println("Task3 finished")
+                    }
+                    awaitAll(task1, task2, task3)
+                }
                 fail("The method didn't throw when I expected it to")
             } catch (e: CancellationException) {
                 println("CancellationException caught: $e")
