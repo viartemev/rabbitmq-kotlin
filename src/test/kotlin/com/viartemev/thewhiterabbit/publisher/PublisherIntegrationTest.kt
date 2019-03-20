@@ -1,11 +1,11 @@
 package com.viartemev.thewhiterabbit.publisher
 
-import com.rabbitmq.client.MessageProperties
 import com.viartemev.thewhiterabbit.AbstractTestContainersTest
 import com.viartemev.thewhiterabbit.channel.confirmChannel
 import com.viartemev.thewhiterabbit.channel.publish
 import com.viartemev.thewhiterabbit.queue.QueueSpecification
 import com.viartemev.thewhiterabbit.queue.declareQueue
+import com.viartemev.thewhiterabbit.utils.createMessage
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -13,10 +13,9 @@ import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-class PublisherTest : AbstractTestContainersTest() {
+class PublisherIntegrationTest : AbstractTestContainersTest() {
 
     private val QUEUE_NAME = "test_queue"
-    private val EXCHANGE_NAME = ""
 
     @Test
     fun `test one message publishing`() {
@@ -26,7 +25,7 @@ class PublisherTest : AbstractTestContainersTest() {
                 connection.confirmChannel {
                     declareQueue(QueueSpecification(QUEUE_NAME))
                     publish {
-                        val message = createMessage("Hello")
+                        val message = createMessage(queue = QUEUE_NAME, body = "Hello")
                         val ack = publishWithConfirm(message)
                         assertTrue { ack }
                     }
@@ -46,7 +45,7 @@ class PublisherTest : AbstractTestContainersTest() {
                         val acks = coroutineScope {
                             (1..times).map {
                                 async {
-                                    publishWithConfirm(createMessage("Hello #$it"))
+                                    publishWithConfirm(createMessage(queue = QUEUE_NAME, body = "Hello #$it"))
                                 }
                             }.awaitAll()
                         }
@@ -65,7 +64,7 @@ class PublisherTest : AbstractTestContainersTest() {
                 connection.confirmChannel {
                     declareQueue(QueueSpecification(QUEUE_NAME))
                     publish {
-                        val messages = (1..times).map { createMessage("Hello #$it") }
+                        val messages = (1..times).map { createMessage(queue = QUEUE_NAME, body = "Hello #$it") }
                         val acks = publishWithConfirmAsync(messages = messages).awaitAll()
                         assertTrue { acks.all { it } }
                     }
@@ -73,7 +72,4 @@ class PublisherTest : AbstractTestContainersTest() {
             }
         }
     }
-
-    private fun createMessage(body: String) =
-        OutboundMessage(EXCHANGE_NAME, QUEUE_NAME, MessageProperties.PERSISTENT_BASIC, body)
 }
