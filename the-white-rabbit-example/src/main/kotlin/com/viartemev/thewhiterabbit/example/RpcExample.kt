@@ -14,7 +14,7 @@ import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.thread
 import kotlin.concurrent.withLock
 
-
+//TODO main is working after getting result
 fun main() {
     val connectionFactory = ConnectionFactory().apply { useNio() }
     val connection = connectionFactory.newConnection()
