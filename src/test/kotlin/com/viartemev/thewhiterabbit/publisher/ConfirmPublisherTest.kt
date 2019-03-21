@@ -8,7 +8,6 @@ import com.rabbitmq.client.Channel
 import com.rabbitmq.client.MessageProperties
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertTrue
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -58,7 +57,7 @@ class ConfirmPublisherTest {
                     awaitAll(task1, task2, task3)
                 }
                 fail("The method didn't throw when I expected it to")
-            } catch (e: CancellationException) {
+            } catch (e: IOException) {
                 println("CancellationException caught: $e")
             }
         }
