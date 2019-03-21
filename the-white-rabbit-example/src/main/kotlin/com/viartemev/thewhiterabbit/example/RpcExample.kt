@@ -4,6 +4,7 @@ import com.rabbitmq.client.AMQP
 import com.rabbitmq.client.CancelCallback
 import com.rabbitmq.client.ConnectionFactory
 import com.rabbitmq.client.DeliverCallback
+import com.rabbitmq.client.MessageProperties
 import com.viartemev.thewhiterabbit.channel.channel
 import com.viartemev.thewhiterabbit.queue.QueueSpecification
 import com.viartemev.thewhiterabbit.queue.declareQueue
@@ -27,7 +28,7 @@ fun main() {
             val requestQueueName = declareQueue(QueueSpecification("rpc_request")).queue
             val replyQueueName = declareQueue(QueueSpecification("rpc_reply")).queue
             thread(isDaemon = true) { RpcServer().run(connectionFactory, requestQueueName) }
-            val message = RpcOutboundMessage("", requestQueueName, replyQueueName, "Slava".toByteArray())
+            val message = RpcOutboundMessage("", requestQueueName, replyQueueName, MessageProperties.PERSISTENT_BASIC, "Slava".toByteArray())
             val rpcClient = RpcClient(channel)
             println("Asking for greeting request...")
             coroutineScope {
