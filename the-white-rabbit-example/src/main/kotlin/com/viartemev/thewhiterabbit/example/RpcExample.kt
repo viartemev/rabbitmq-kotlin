@@ -9,6 +9,9 @@ import com.viartemev.thewhiterabbit.queue.QueueSpecification
 import com.viartemev.thewhiterabbit.queue.declareQueue
 import com.viartemev.thewhiterabbit.rpc.RpcClient
 import com.viartemev.thewhiterabbit.rpc.RpcOutboundMessage
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.thread
@@ -23,13 +26,18 @@ fun main() {
         connection.channel {
             val requestQueueName = declareQueue(QueueSpecification("rpc_request")).queue
             val replyQueueName = declareQueue(QueueSpecification("rpc_reply")).queue
-            val rpcServer = thread { RpcServer().run(connectionFactory, requestQueueName) }
-            val message = RpcOutboundMessage("", requestQueueName, replyQueueName, "Slava")
+            thread(isDaemon = true) { RpcServer().run(connectionFactory, requestQueueName) }
+            val message = RpcOutboundMessage("", requestQueueName, replyQueueName, "Slava".toByteArray())
             val rpcClient = RpcClient(channel)
             println("Asking for greeting request...")
-            val result = rpcClient.call(message)
-            println("Result: $result")
-            rpcServer.interrupt()
+            coroutineScope {
+                val result = async { rpcClient.call(message) }
+                async {
+                    delay(5000)
+                    println("Done job")
+                }.await()
+                println("Result: ${result.await()}")
+            }
         }
     }
     connection.close()
