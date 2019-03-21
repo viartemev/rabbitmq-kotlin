@@ -4,6 +4,7 @@ import com.rabbitmq.client.AMQP
 import com.rabbitmq.client.Channel
 import com.viartemev.thewhiterabbit.common.cancelOnIOException
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withTimeout
 import mu.KotlinLogging
 import java.util.*
 import kotlin.coroutines.resume
@@ -11,7 +12,6 @@ import kotlin.coroutines.resume
 
 private val logger = KotlinLogging.logger {}
 
-//TODO add timeout
 //TODO channel.basicPublish can throw an exception
 class RpcClient(val channel: Channel) {
 
@@ -39,5 +39,9 @@ class RpcClient(val channel: Channel) {
                 })
             }
         }
+    }
+
+    suspend fun callWithTimeout(message: RpcOutboundMessage, timeout: Long): RpcInboundMessage = withTimeout(timeout) {
+        call(message)
     }
 }
