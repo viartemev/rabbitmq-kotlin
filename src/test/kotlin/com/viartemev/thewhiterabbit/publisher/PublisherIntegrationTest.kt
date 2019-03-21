@@ -10,6 +10,8 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -32,6 +34,9 @@ class PublisherIntegrationTest : AbstractTestContainersTest() {
                 }
             }
         }
+        val info = httpRabbitMQClient.getQueue(DEFAULT_VHOST, QUEUE_NAME)
+        assertEquals(QUEUE_NAME, info.name)
+        assertEquals(1, info.messagesReady)
     }
 
     @Test
