@@ -7,6 +7,10 @@ import com.viartemev.thewhiterabbit.queue.DeleteQueueSpecification
 import com.viartemev.thewhiterabbit.queue.QueueSpecification
 import com.viartemev.thewhiterabbit.queue.declareQueue
 import com.viartemev.thewhiterabbit.queue.deleteQueue
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeout
 import mu.KotlinLogging
@@ -20,13 +24,19 @@ private val logger = KotlinLogging.logger {}
 //TODO channel.basicPublish can throw an exception
 class RpcClient(val channel: Channel) {
 
-    suspend fun call(exchangeName: String = "", message: RabbitMqMessage): RabbitMqMessage {
-        val requestQueue = channel.declareQueue(QueueSpecification(name = "", exclusive = true, autoDelete = true)).queue
-        val replyQueue = channel.declareQueue(QueueSpecification(name = "", exclusive = true, autoDelete = true)).queue
-        val result = call(exchangeName, requestQueue, replyQueue, message)
-        channel.deleteQueue(DeleteQueueSpecification(requestQueue))
-        channel.deleteQueue(DeleteQueueSpecification(replyQueue))
-        return result
+    @UseExperimental(ExperimentalCoroutinesApi::class)
+    suspend fun call(exchangeName: String = "", message: RabbitMqMessage): RabbitMqMessage = coroutineScope {
+        val requestQueue = async { channel.declareQueue(QueueSpecification(name = "", exclusive = true, autoDelete = true)).queue }
+        val replyQueue = async { channel.declareQueue(QueueSpecification(name = "", exclusive = true, autoDelete = true)).queue }
+        awaitAll(requestQueue, replyQueue)
+        val requestQueueName = requestQueue.getCompleted()
+        val replyQueueName = replyQueue.getCompleted()
+        val result = call(exchangeName, requestQueueName, replyQueueName, message)
+        val requestQueueDeletion = async { channel.deleteQueue(DeleteQueueSpecification(requestQueueName)) }
+        val replyQueueDeletion = async { channel.deleteQueue(DeleteQueueSpecification(replyQueueName)) }
+        awaitAll(replyQueueDeletion, requestQueueDeletion)
+
+        return@coroutineScope result
     }
 
     suspend fun callWithTimeout(
