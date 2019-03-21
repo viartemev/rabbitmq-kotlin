@@ -6,8 +6,6 @@ import com.viartemev.thewhiterabbit.queue.DeleteQueueSpecification
 import com.viartemev.thewhiterabbit.queue.QueueSpecification
 import com.viartemev.thewhiterabbit.queue.declareQueue
 import com.viartemev.thewhiterabbit.queue.deleteQueue
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeout
@@ -22,27 +20,20 @@ private val logger = KotlinLogging.logger {}
 //TODO channel.basicPublish can throw an exception
 class RpcClient(val channel: Channel) {
 
-    suspend fun call(exchangeName: String = "", message: RabbitMqMessage): RabbitMqMessage = coroutineScope {
-        val requestQueue = async { channel.declareQueue(QueueSpecification(name = "", exclusive = true, autoDelete = true)).queue }
-        val replyQueue = async { channel.declareQueue(QueueSpecification(name = "", exclusive = true, autoDelete = true)).queue }
-        val requestQueueName = requestQueue.await()
-        val replyQueueName = replyQueue.await()
-
+    suspend fun call(exchangeName: String = "", requestQueueName: String, message: RabbitMqMessage): RabbitMqMessage = coroutineScope {
+        val replyQueueName = channel.declareQueue(QueueSpecification(name = "", exclusive = true, autoDelete = true)).queue
         val result = call(exchangeName, requestQueueName, replyQueueName, message)
-
-        val requestQueueDeletion = async { channel.deleteQueue(DeleteQueueSpecification(requestQueueName)) }
-        val replyQueueDeletion = async { channel.deleteQueue(DeleteQueueSpecification(replyQueueName)) }
-        awaitAll(replyQueueDeletion, requestQueueDeletion)
-
+        channel.deleteQueue(DeleteQueueSpecification(replyQueueName))
         return@coroutineScope result
     }
 
     suspend fun callWithTimeout(
         exchangeName: String = "",
+        requestQueueName: String,
         message: RabbitMqMessage,
         timeout: Long
     ): RabbitMqMessage = withTimeout(timeout) {
-        call(exchangeName, message)
+        call(exchangeName, requestQueueName, message)
     }
 
     suspend fun call(exchangeName: String, requestQueueName: String, replyQueueName: String, message: RabbitMqMessage): RabbitMqMessage {

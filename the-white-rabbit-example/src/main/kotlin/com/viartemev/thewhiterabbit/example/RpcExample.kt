@@ -6,10 +6,10 @@ import com.rabbitmq.client.ConnectionFactory
 import com.rabbitmq.client.DeliverCallback
 import com.rabbitmq.client.MessageProperties
 import com.viartemev.thewhiterabbit.channel.channel
+import com.viartemev.thewhiterabbit.channel.rpc
 import com.viartemev.thewhiterabbit.queue.QueueSpecification
 import com.viartemev.thewhiterabbit.queue.declareQueue
 import com.viartemev.thewhiterabbit.rpc.RabbitMqMessage
-import com.viartemev.thewhiterabbit.rpc.RpcClient
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
@@ -22,23 +22,16 @@ import kotlin.concurrent.withLock
 fun main() {
     val connectionFactory = ConnectionFactory().apply { useNio() }
     val connection = connectionFactory.newConnection()
-    val channel = connection.createChannel()
     runBlocking {
         connection.channel {
             val requestQueueName = declareQueue(QueueSpecification("rpc_request")).queue
             val replyQueueName = declareQueue(QueueSpecification("rpc_reply")).queue
             thread(isDaemon = true) { RpcServer().run(connectionFactory, requestQueueName) }
             val message = RabbitMqMessage(MessageProperties.PERSISTENT_BASIC, "Slava".toByteArray())
-            val rpcClient = RpcClient(channel)
             println("Asking for greeting request...")
             coroutineScope {
                 val result = async {
-                    rpcClient.call(
-                        exchangeName = "",
-                        requestQueueName = requestQueueName,
-                        replyQueueName = replyQueueName,
-                        message = message
-                    )
+                    rpc { call(requestQueueName = "rpc_request", message = message) }
                 }
                 async {
                     delay(5000)
