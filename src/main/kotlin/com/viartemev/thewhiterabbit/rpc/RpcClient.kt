@@ -46,11 +46,11 @@ class RpcClient(val channel: Channel) {
             .replyTo(replyQueueName)
             .build()
 
-        channel.basicPublish(exchangeName, replyQueueName, props, message.body)
+        channel.basicPublish(exchangeName, requestQueueName, props, message.body)
 
         return suspendCancellableCoroutine { continuation ->
             cancelOnIOException(continuation) {
-                channel.basicConsume(requestQueueName, true, { consumerTag, delivery ->
+                channel.basicConsume(replyQueueName, true, { consumerTag, delivery ->
                     if (corrId == delivery.properties.correlationId) {
                         try {
                             continuation.resume(RabbitMqMessage(delivery.properties, delivery.body))
