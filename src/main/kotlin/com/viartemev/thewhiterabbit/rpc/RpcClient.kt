@@ -6,6 +6,7 @@ import com.viartemev.thewhiterabbit.common.cancelOnIOException
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeout
 import mu.KotlinLogging
+import java.io.IOException
 import java.util.*
 import kotlin.coroutines.resume
 
@@ -29,9 +30,14 @@ class RpcClient(val channel: Channel) {
             cancelOnIOException(continuation) {
                 channel.basicConsume(message.replyQueueName, true, { consumerTag, delivery ->
                     if (corrId == delivery.properties.correlationId) {
-                        cancelOnIOException(continuation) {
-                            channel.basicCancel(consumerTag)
+                        try {
                             continuation.resume(RpcInboundMessage(delivery.properties, delivery.body))
+                        } finally {
+                            try {
+                                channel.basicCancel(consumerTag)
+                            } catch (e: IOException) {
+                                logger.warn { "Can't cancel consumer with consumerTag: $consumerTag" }
+                            }
                         }
                     }
                 }, { consumerTag ->
