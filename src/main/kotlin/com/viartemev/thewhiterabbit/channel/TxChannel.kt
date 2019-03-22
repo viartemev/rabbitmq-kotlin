@@ -61,7 +61,7 @@ open class TxChannel internal constructor(private val channel: Channel) : Channe
 
     suspend fun transaction(block: suspend Tx.() -> Unit) {
 
-        if (tx.active.compareAndExchange(false, true))
+        if (!tx.active.compareAndSet(false, true))
             throw IllegalStateException("active tx is detected")
 
         try {
