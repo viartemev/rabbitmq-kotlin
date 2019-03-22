@@ -4,11 +4,11 @@ import com.viartemev.thewhiterabbit.AbstractTestContainersTest
 import com.viartemev.thewhiterabbit.queue.QueueSpecification
 import com.viartemev.thewhiterabbit.queue.declareQueue
 import com.viartemev.thewhiterabbit.utils.createMessage
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.testcontainers.shaded.org.apache.commons.lang.RandomStringUtils
@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit
 
 private val logger = KotlinLogging.logger {}
 
-class TxPublisherTest : AbstractTestContainersTest() {
+class TxChannelTest : AbstractTestContainersTest() {
 
     private lateinit var oneTimeQueue: String
 
@@ -29,6 +29,31 @@ class TxPublisherTest : AbstractTestContainersTest() {
     }
 
     private fun randomQueue() = "test-queue-" + RandomStringUtils.randomNumeric(5)
+
+    @Test
+    fun `nested tx are not supported`() {
+        assertThrows(IllegalStateException::class.java) {
+            factory.newConnection().use { conn ->
+                runBlocking {
+                    conn.txChannel {
+                        declareQueue(QueueSpecification(oneTimeQueue))
+
+                        async {
+                            transaction {
+                                delay(1000)
+                            }
+                        }
+
+                        async {
+                            transaction {
+                                // shell throw IllegalStateException, because reentrant transaction block is prohibited
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     @Test
     fun `test message publishing with tx implicit commit`() {
