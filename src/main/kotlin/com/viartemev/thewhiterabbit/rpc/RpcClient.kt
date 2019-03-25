@@ -1,12 +1,9 @@
 package com.viartemev.thewhiterabbit.rpc
 
 import com.rabbitmq.client.Channel
+import com.viartemev.thewhiterabbit.common.RabbitMqMessage
 import com.viartemev.thewhiterabbit.common.cancelOnIOException
-import com.viartemev.thewhiterabbit.queue.DeleteQueueSpecification
-import com.viartemev.thewhiterabbit.queue.QueueSpecification
 import com.viartemev.thewhiterabbit.queue.declareQueue
-import com.viartemev.thewhiterabbit.queue.deleteQueue
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeout
 import mu.KotlinLogging
@@ -17,15 +14,7 @@ import kotlin.coroutines.resume
 
 private val logger = KotlinLogging.logger {}
 
-//TODO channel.basicPublish can throw an exception
 class RpcClient(val channel: Channel) {
-
-    suspend fun call(exchangeName: String = "", requestQueueName: String, message: RabbitMqMessage): RabbitMqMessage = coroutineScope {
-        val replyQueueName = channel.declareQueue(QueueSpecification(name = "", exclusive = true, autoDelete = true)).queue
-        val result = call(exchangeName, requestQueueName, replyQueueName, message)
-        channel.deleteQueue(DeleteQueueSpecification(replyQueueName))
-        return@coroutineScope result
-    }
 
     suspend fun callWithTimeout(
         exchangeName: String = "",
@@ -36,7 +25,9 @@ class RpcClient(val channel: Channel) {
         call(exchangeName, requestQueueName, message)
     }
 
-    suspend fun call(exchangeName: String, requestQueueName: String, replyQueueName: String, message: RabbitMqMessage): RabbitMqMessage {
+    suspend fun call(exchangeName: String = "", requestQueueName: String, message: RabbitMqMessage): RabbitMqMessage {
+        val replyQueueName = channel.declareQueue(RpcQueueSpecification).queue
+
         val corrId = UUID.randomUUID().toString()
 
         val props = message
@@ -46,6 +37,8 @@ class RpcClient(val channel: Channel) {
             .replyTo(replyQueueName)
             .build()
 
+        //TODO channel.basicQos and channel.basicPublish can throw an exception
+        channel.basicQos(1)
         channel.basicPublish(exchangeName, requestQueueName, props, message.body)
 
         return suspendCancellableCoroutine { continuation ->
@@ -68,14 +61,4 @@ class RpcClient(val channel: Channel) {
             }
         }
     }
-
-    suspend fun callWithTimeout(exchangeName: String,
-                                requestQueueName: String,
-                                replyQueueName: String,
-                                message: RabbitMqMessage,
-                                timeout: Long
-    ): RabbitMqMessage = withTimeout(timeout) {
-        call(exchangeName, requestQueueName, replyQueueName, message)
-    }
-
 }

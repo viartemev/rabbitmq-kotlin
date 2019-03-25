@@ -1,4 +1,4 @@
-package com.viartemev.thewhiterabbit.rpc
+package com.viartemev.thewhiterabbit.common
 
 import com.rabbitmq.client.AMQP
 

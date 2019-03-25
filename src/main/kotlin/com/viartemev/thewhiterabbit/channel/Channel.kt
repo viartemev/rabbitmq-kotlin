@@ -2,7 +2,7 @@ package com.viartemev.thewhiterabbit.channel
 
 import com.rabbitmq.client.Channel
 import com.viartemev.thewhiterabbit.consumer.ConfirmConsumer
-import com.viartemev.thewhiterabbit.rpc.RabbitMqMessage
+import com.viartemev.thewhiterabbit.common.RabbitMqMessage
 import com.viartemev.thewhiterabbit.rpc.RpcClient
 
 fun Channel.consumer(queue: String, prefetchSize: Int) = ConfirmConsumer(this, queue, prefetchSize)
