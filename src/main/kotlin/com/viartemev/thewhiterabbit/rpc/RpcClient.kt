@@ -41,23 +41,24 @@ class RpcClient(val channel: Channel) {
         channel.basicQos(1)
         channel.basicPublish(exchangeName, requestQueueName, props, message.body)
 
-        return suspendCancellableCoroutine { continuation ->
-            cancelOnIOException(continuation) {
-                channel.basicConsume(replyQueueName, true, { consumerTag, delivery ->
-                    if (corrId == delivery.properties.correlationId) {
-                        try {
+        var consumerTag: String? = null
+        try {
+            return suspendCancellableCoroutine { continuation ->
+                cancelOnIOException(continuation) {
+                    consumerTag = channel.basicConsume(replyQueueName, true, { consumerTag, delivery ->
+                        if (corrId == delivery.properties.correlationId) {
                             continuation.resume(RabbitMqMessage(delivery.properties, delivery.body))
-                        } finally {
-                            try {
-                                channel.basicCancel(consumerTag)
-                            } catch (e: IOException) {
-                                logger.warn { "Can't cancel consumer with consumerTag: $consumerTag" }
-                            }
                         }
-                    }
-                }, { consumerTag ->
-                    logger.debug { "Consumer $consumerTag has been cancelled for reasons other than by a call to Channel#basicCancel" }
-                })
+                    }, { consumerTag ->
+                        logger.debug { "Consumer $consumerTag has been cancelled for reasons other than by a call to Channel#basicCancel" }
+                    })
+                }
+            }
+        } finally {
+            try {
+                consumerTag?.let { channel.basicCancel(it) }
+            } catch (e: IOException) {
+                logger.warn { "Can't cancel consumer with consumerTag: $consumerTag" }
             }
         }
     }

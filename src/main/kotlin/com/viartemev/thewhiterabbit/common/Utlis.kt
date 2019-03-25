@@ -4,7 +4,7 @@ import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.CancellationException
 import java.io.IOException
 
-fun <T> cancelOnIOException(cancellableContinuation: CancellableContinuation<T>, block: () -> Any) {
+fun <T> cancelOnIOException(cancellableContinuation: CancellableContinuation<T>, block: () -> Unit) {
     try {
         block()
     } catch (e: IOException) {
