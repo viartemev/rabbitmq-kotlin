@@ -69,7 +69,7 @@ class TxChannelTest : AbstractTestContainersTest() {
             }
         }
 
-        sleep(5000)
+        sleep(7000)
         val info = httpRabbitMQClient.getQueue(DEFAULT_VHOST, oneTimeQueue)
         assertEquals(1, info.messagesReady)
     }
@@ -89,7 +89,7 @@ class TxChannelTest : AbstractTestContainersTest() {
             }
         }
 
-        sleep(5000)
+        sleep(7000)
         val info = httpRabbitMQClient.getQueue(DEFAULT_VHOST, oneTimeQueue)
         assertEquals(1, info.messagesReady)
     }
@@ -109,7 +109,7 @@ class TxChannelTest : AbstractTestContainersTest() {
             }
         }
 
-        sleep(5000)
+        sleep(7000)
         val info = httpRabbitMQClient.getQueue(DEFAULT_VHOST, oneTimeQueue)
         assertEquals(0, info.messagesReady)
     }
@@ -129,7 +129,7 @@ class TxChannelTest : AbstractTestContainersTest() {
             }
         }
 
-        sleep(5000)
+        sleep(7000)
         val info = httpRabbitMQClient.getQueue(DEFAULT_VHOST, oneTimeQueue)
         assertEquals(0, info.messagesReady)
     }
@@ -152,7 +152,7 @@ class TxChannelTest : AbstractTestContainersTest() {
             }
         }
 
-        sleep(5000)
+        sleep(7000)
         val info = httpRabbitMQClient.getQueue(DEFAULT_VHOST, oneTimeQueue)
         assertEquals(2, info.messagesReady)
     }
@@ -176,7 +176,7 @@ class TxChannelTest : AbstractTestContainersTest() {
             }
         }
 
-        sleep(5000)
+        sleep(7000)
         val info = httpRabbitMQClient.getQueue(DEFAULT_VHOST, oneTimeQueue)
         assertEquals(1, info.messagesReady)
     }
@@ -213,7 +213,7 @@ class TxChannelTest : AbstractTestContainersTest() {
             }
 
             assertTrue(latch.await(1, TimeUnit.SECONDS))
-            sleep(5000)
+            sleep(7000)
             assertEquals(0, httpRabbitMQClient.getQueue(DEFAULT_VHOST, oneTimeQueue).messagesReady)
         }
     }
@@ -236,7 +236,7 @@ class TxChannelTest : AbstractTestContainersTest() {
                         }
                     }
 
-                    delay(5000)
+                    delay(7000)
                     assertEquals(count, httpRabbitMQClient.getQueue(DEFAULT_VHOST, oneTimeQueue).messagesReady.toInt())
 
                     transaction {
@@ -254,7 +254,7 @@ class TxChannelTest : AbstractTestContainersTest() {
                 }
             }
 
-            sleep(5000)
+            sleep(7000)
             assertEquals(count, httpRabbitMQClient.getQueue(DEFAULT_VHOST, oneTimeQueue).messagesReady.toInt())
         }
     }
@@ -277,7 +277,7 @@ class TxChannelTest : AbstractTestContainersTest() {
                         }
                     }
 
-                    delay(5000)
+                    delay(7000)
                     assertEquals(count, httpRabbitMQClient.getQueue(DEFAULT_VHOST, oneTimeQueue).messagesReady.toInt())
 
                     transaction {
@@ -297,7 +297,7 @@ class TxChannelTest : AbstractTestContainersTest() {
                 }
             }
 
-            sleep(5000)
+            sleep(7000)
             assertEquals(count, httpRabbitMQClient.getQueue(DEFAULT_VHOST, oneTimeQueue).messagesReady.toInt())
         }
     }
