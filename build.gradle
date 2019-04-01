@@ -6,7 +6,7 @@ buildscript {
         junit_plugin_version = '1.2.0'
         kluent_version = '1.48'
         ktor_version = '1.1.3'
-        vertx_version = '3.6.3'
+        vertx_version = '3.7.0'
     }
 
     repositories {
