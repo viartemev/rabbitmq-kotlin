@@ -5,7 +5,6 @@ import com.viartemev.thewhiterabbit.common.RabbitMqMessage
 import com.viartemev.thewhiterabbit.common.cancelOnIOException
 import com.viartemev.thewhiterabbit.queue.declareQueue
 import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.withTimeout
 import mu.KotlinLogging
 import java.io.IOException
 import java.util.*
@@ -15,15 +14,6 @@ import kotlin.coroutines.resume
 private val logger = KotlinLogging.logger {}
 
 class RpcClient(val channel: Channel) {
-
-    suspend fun callWithTimeout(
-        exchangeName: String = "",
-        requestQueueName: String,
-        message: RabbitMqMessage,
-        timeout: Long
-    ): RabbitMqMessage = withTimeout(timeout) {
-        call(exchangeName, requestQueueName, message)
-    }
 
     suspend fun call(exchangeName: String = "", requestQueueName: String, message: RabbitMqMessage): RabbitMqMessage {
         val replyQueueName = channel.declareQueue(RpcQueueSpecification).queue
