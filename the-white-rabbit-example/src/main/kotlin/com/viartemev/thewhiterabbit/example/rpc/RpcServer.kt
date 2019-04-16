@@ -9,10 +9,13 @@ fun main() {
     val connection = connectionFactory.newConnection()
     val channel = connection.createChannel()
     val rpcQueueName = "rpc_request"
+    channel.queueDeclare(rpcQueueName, false, false, false, null)
     val rpcServer = object : com.rabbitmq.client.RpcServer(channel, rpcQueueName) {
         override fun handleCall(request: Delivery?, replyProperties: AMQP.BasicProperties?): ByteArray {
             return request?.body?.let {
-                ("Hello, " + String(it)).toByteArray()
+                val body = String(it)
+                println("Request: $body")
+                ("Hello, $body").toByteArray()
             } ?: "Body is empty".toByteArray()
         }
     }

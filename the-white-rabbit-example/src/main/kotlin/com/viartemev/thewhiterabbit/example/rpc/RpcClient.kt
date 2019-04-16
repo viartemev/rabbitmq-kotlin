@@ -6,6 +6,7 @@ import com.viartemev.thewhiterabbit.channel.channel
 import com.viartemev.thewhiterabbit.channel.rpc
 import com.viartemev.thewhiterabbit.common.RabbitMqMessage
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -19,8 +20,14 @@ fun main() {
                 val message = RabbitMqMessage(MessageProperties.PERSISTENT_BASIC, "Slava".toByteArray())
                 println("Asking for greeting request...")
                 val job = coroutineScope {
-                    val result = async {
-                        rpc { call(requestQueueName = "rpc_request", message = message) }
+                    val result = (1..10).map {
+                        async {
+                            rpc {
+                                val result = call(requestQueueName = "rpc_request", message = message)
+                                println("Got a message: ${String(result.body)}")
+                                result
+                            }
+                        }
                     }
                     launch {
                         println("Another important job is in process...")
@@ -29,7 +36,9 @@ fun main() {
                     }
                     return@coroutineScope result
                 }
-                println("Result: ${String(job.await().body)}")
+                val result = job.awaitAll().map { String(it.body) }
+                println("Result size: ${result.size}")
+                println("Result: $result")
             }
         }
     }
