@@ -9,13 +9,13 @@ import com.viartemev.thewhiterabbit.utils.createMessage
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class PublisherIntegrationTest : AbstractTestContainersTest() {
-
-    private val QUEUE_NAME = "test_queue"
 
     @Test
     fun `test one message publishing`() {
@@ -23,12 +23,16 @@ class PublisherIntegrationTest : AbstractTestContainersTest() {
             val connection = it
             runBlocking {
                 connection.confirmChannel {
-                    declareQueue(QueueSpecification(QUEUE_NAME))
+                    val queue = declareQueue(QueueSpecification("")).queue
                     publish {
-                        val message = createMessage(queue = QUEUE_NAME, body = "Hello")
+                        val message = createMessage(queue = queue, body = "Hello")
                         val ack = publishWithConfirm(message)
                         assertTrue { ack }
                     }
+                    delay(5000)
+                    val info = httpRabbitMQClient.getQueue(DEFAULT_VHOST, queue)
+                    assertEquals(queue, info.name)
+                    assertEquals(1, info.messagesReady)
                 }
             }
         }
@@ -40,12 +44,12 @@ class PublisherIntegrationTest : AbstractTestContainersTest() {
         factory.newConnection().use { connection ->
             runBlocking {
                 connection.confirmChannel {
-                    declareQueue(QueueSpecification(QUEUE_NAME))
+                    val queue = declareQueue(QueueSpecification("")).queue
                     publish {
                         val acks = coroutineScope {
                             (1..times).map {
                                 async {
-                                    publishWithConfirm(createMessage(queue = QUEUE_NAME, body = "Hello #$it"))
+                                    publishWithConfirm(createMessage(queue = queue, body = "Hello #$it"))
                                 }
                             }.awaitAll()
                         }
@@ -62,9 +66,9 @@ class PublisherIntegrationTest : AbstractTestContainersTest() {
         factory.newConnection().use { connection ->
             runBlocking {
                 connection.confirmChannel {
-                    declareQueue(QueueSpecification(QUEUE_NAME))
+                    val queue = declareQueue(QueueSpecification("")).queue
                     publish {
-                        val messages = (1..times).map { createMessage(queue = QUEUE_NAME, body = "Hello #$it") }
+                        val messages = (1..times).map { createMessage(queue = queue, body = "Hello #$it") }
                         val acks = publishWithConfirmAsync(messages = messages).awaitAll()
                         assertTrue { acks.all { it } }
                     }

@@ -6,14 +6,13 @@ import com.nhaarman.mockito_kotlin.doThrow
 import com.nhaarman.mockito_kotlin.mock
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.MessageProperties
-import junit.framework.Assert.assertEquals
-import junit.framework.Assert.assertTrue
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
 import org.mockito.AdditionalMatchers
@@ -58,7 +57,7 @@ class ConfirmPublisherTest {
                     awaitAll(task1, task2, task3)
                 }
                 fail("The method didn't throw when I expected it to")
-            } catch (e: CancellationException) {
+            } catch (e: IOException) {
                 println("CancellationException caught: $e")
             }
         }
@@ -72,7 +71,6 @@ class ConfirmPublisherTest {
         doNothing().`when`(channel).basicPublish(any(), any(), any(), AdditionalMatchers.aryEq("validMessage".toByteArray()))
         doThrow(IOException("Boom")).`when`(channel).basicPublish(any(), any(), any(), AdditionalMatchers.aryEq("poisonMessage".toByteArray()))
 
-        val counter = AtomicInteger()
         val confirmPublisher = ConfirmPublisher(channel)
 
         runBlocking {
@@ -81,11 +79,10 @@ class ConfirmPublisherTest {
                     confirmPublisher.publishWithConfirmAsync(this.coroutineContext, messages = listOf(validMessage, poisonMessage)).awaitAll()
                 }
                 fail("The method didn't throw when I expected it to")
-            } catch (e: CancellationException) {
-                println("CancellationException caught: $e")
+            } catch (e: IOException) {
+                println("IOException caught: $e")
             }
         }
-        assertEquals(0, counter.get())
         assertTrue(confirmPublisher.continuations.isEmpty())
     }
 }
