@@ -71,7 +71,6 @@ class ConfirmPublisherTest {
         doNothing().`when`(channel).basicPublish(any(), any(), any(), AdditionalMatchers.aryEq("validMessage".toByteArray()))
         doThrow(IOException("Boom")).`when`(channel).basicPublish(any(), any(), any(), AdditionalMatchers.aryEq("poisonMessage".toByteArray()))
 
-        val counter = AtomicInteger()
         val confirmPublisher = ConfirmPublisher(channel)
 
         runBlocking {
@@ -80,11 +79,10 @@ class ConfirmPublisherTest {
                     confirmPublisher.publishWithConfirmAsync(this.coroutineContext, messages = listOf(validMessage, poisonMessage)).awaitAll()
                 }
                 fail("The method didn't throw when I expected it to")
-            } catch (e: CancellationException) {
-                println("CancellationException caught: $e")
+            } catch (e: IOException) {
+                println("IOException caught: $e")
             }
         }
-        assertEquals(0, counter.get())
         assertTrue(confirmPublisher.continuations.isEmpty())
     }
 }
