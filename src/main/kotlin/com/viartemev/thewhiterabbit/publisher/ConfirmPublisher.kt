@@ -1,13 +1,12 @@
 package com.viartemev.thewhiterabbit.publisher
 
 import com.rabbitmq.client.Channel
+import com.viartemev.thewhiterabbit.common.cancelOnIOException
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.suspendCancellableCoroutine
 import mu.KotlinLogging
-import java.io.IOException
-import java.util.concurrent.CancellationException
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.CoroutineContext
@@ -35,11 +34,8 @@ class ConfirmPublisher internal constructor(private val channel: Channel) {
         return suspendCancellableCoroutine { continuation ->
             continuations[messageSequenceNumber] = continuation
             continuation.invokeOnCancellation { continuations.remove(messageSequenceNumber) }
-            try {
+            cancelOnIOException(continuation) {
                 message.run { channel.basicPublish(exchange, routingKey, properties, msg.toByteArray()) }
-            } catch (e: IOException) {
-                val cancelled = continuation.cancel()
-                if (!cancelled) throw CancellationException(e.message)
             }
         }
     }
