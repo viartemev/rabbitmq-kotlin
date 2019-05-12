@@ -77,3 +77,21 @@ channel.declareQueue(QueueSpecification(QUEUE_NAME))
 ```kotlin
 channel.bindQueue(BindQueueSpecification(EXCHANGE_NAME, QUEUE_NAME))
 ```
+##### - Transactional support:
+
+RabbitMQ and AQMP itself offer rather scarce support for transaction. When considering using of transactions you should be aware that:
+* a transaction could only span one channel and one queue;
+* `com.rabbitmq.client.Channel` is not thread-safe;
+* channel can be either in confirm mode or in transaction mode at a time;
+* transactions cannot be nested into each other;
+
+ The library provides a convenient way to perform transactional publishing and receiving based on `transaction` extension function. This function commits a transaction upon normal execution of a block and rolls it back if a `RuntimeException` occurs. Exceptions are always propagated further. Coroutines are not used for publishing though, since there are no asynchronous operations involved.
+ 
+```kotlin
+connection.txChannel {
+    transaction {
+        val message = createMessage(queue = oneTimeQueue, body = "Hello from tx")
+        publish(message)
+    }
+}
+```

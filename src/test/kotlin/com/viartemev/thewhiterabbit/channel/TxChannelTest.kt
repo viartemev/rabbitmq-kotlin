@@ -4,8 +4,9 @@ import com.viartemev.thewhiterabbit.AbstractTestContainersTest
 import com.viartemev.thewhiterabbit.queue.QueueSpecification
 import com.viartemev.thewhiterabbit.queue.declareQueue
 import com.viartemev.thewhiterabbit.utils.createMessage
-import kotlinx.coroutines.async
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import org.junit.jupiter.api.Assertions.*
@@ -31,22 +32,22 @@ class TxChannelTest : AbstractTestContainersTest() {
     private fun randomQueue() = "test-queue-" + RandomStringUtils.randomNumeric(5)
 
     @Test
-    fun `nested tx are not supported`() {
-        assertThrows(IllegalStateException::class.java) {
+    fun `parallel transactions are not supported`() {
+        assertThrows(TransactionException::class.java) {
             factory.newConnection().use { conn ->
                 runBlocking {
                     conn.txChannel {
                         declareQueue(QueueSpecification(oneTimeQueue))
 
-                        async {
+                        launch(CoroutineName("tx1")) {
                             transaction {
                                 delay(1000)
                             }
                         }
 
-                        async {
+                        launch(CoroutineName("tx2")) {
                             transaction {
-                                // shell throw IllegalStateException, because reentrant transaction block is prohibited
+                                // should throw TransactionException, because parallel transactions on the channel are prohibited
                             }
                         }
                     }
@@ -75,55 +76,17 @@ class TxChannelTest : AbstractTestContainersTest() {
     }
 
     @Test
-    fun `test message publishing with tx explicit commit`() {
-        factory.newConnection().use { conn ->
-            runBlocking {
-                conn.txChannel {
-                    declareQueue(QueueSpecification(oneTimeQueue))
-                    transaction {
-                        val message = createMessage(queue = oneTimeQueue, body = "Hello from tx")
-                        publish(message)
-                        commit()
-                    }
-                }
-            }
-        }
-
-        sleep(7000)
-        val info = httpRabbitMQClient.getQueue(DEFAULT_VHOST, oneTimeQueue)
-        assertEquals(1, info.messagesReady)
-    }
-
-    @Test
     fun `test message publishing with tx implicit rollback`() {
-        factory.newConnection().use { conn ->
-            runBlocking {
-                conn.txChannel {
-                    declareQueue(QueueSpecification(oneTimeQueue))
-                    transaction {
-                        val message = createMessage(queue = oneTimeQueue, body = "Hello from tx")
-                        publish(message)
-                        throw RuntimeException("sth bad happened")
-                    }
-                }
-            }
-        }
-
-        sleep(7000)
-        val info = httpRabbitMQClient.getQueue(DEFAULT_VHOST, oneTimeQueue)
-        assertEquals(0, info.messagesReady)
-    }
-
-    @Test
-    fun `test message publishing with tx explicit rollback`() {
-        factory.newConnection().use { conn ->
-            runBlocking {
-                conn.txChannel {
-                    declareQueue(QueueSpecification(oneTimeQueue))
-                    transaction {
-                        val message = createMessage(queue = oneTimeQueue, body = "Hello from tx")
-                        publish(message)
-                        rollback()
+        assertThrows(RuntimeException::class.java) {
+            factory.newConnection().use { conn ->
+                runBlocking {
+                    conn.txChannel {
+                        declareQueue(QueueSpecification(oneTimeQueue))
+                        transaction {
+                            val message = createMessage(queue = oneTimeQueue, body = "Hello from tx")
+                            publish(message)
+                            throw RuntimeException("sth bad happened")
+                        }
                     }
                 }
             }
@@ -158,31 +121,6 @@ class TxChannelTest : AbstractTestContainersTest() {
     }
 
     @Test
-    fun `test 3 mixed tx series`() {
-        factory.newConnection().use { conn ->
-            runBlocking {
-                conn.txChannel {
-                    declareQueue(QueueSpecification(oneTimeQueue))
-                    transaction {
-                        val message = createMessage(queue = oneTimeQueue, body = "Hello from successful tx")
-                        publish(message)
-                    }
-                    transaction {
-                        val message = createMessage(queue = oneTimeQueue, body = "Hello from failed tx")
-                        publish(message)
-                        rollback()
-                    }
-                }
-            }
-        }
-
-        sleep(7000)
-        val info = httpRabbitMQClient.getQueue(DEFAULT_VHOST, oneTimeQueue)
-        assertEquals(1, info.messagesReady)
-    }
-
-
-    @Test
     fun `test consume message within successful tx`() {
 
         factory.newConnection().use { conn ->
@@ -190,7 +128,7 @@ class TxChannelTest : AbstractTestContainersTest() {
             val count = 10
             val latch = CountDownLatch(count)
 
-            runBlocking {
+            runBlocking(CoroutineName("root")) {
                 conn.txChannel {
                     declareQueue(QueueSpecification(oneTimeQueue))
 
@@ -219,80 +157,45 @@ class TxChannelTest : AbstractTestContainersTest() {
     }
 
     @Test
-    fun `test consume several messages with explicit rollback`() {
-
-        factory.newConnection().use { conn ->
-
-            val count = 10
-            val latch = CountDownLatch(count)
-
-            runBlocking {
-                conn.txChannel {
-                    declareQueue(QueueSpecification(oneTimeQueue))
-
-                    transaction {
-                        (1..count).map {
-                            publish(createMessage(queue = oneTimeQueue, body = "message #$it"))
-                        }
-                    }
-
-                    delay(7000)
-                    assertEquals(count, httpRabbitMQClient.getQueue(DEFAULT_VHOST, oneTimeQueue).messagesReady.toInt())
-
-                    transaction {
-                        consume(oneTimeQueue) {
-                            for (i in 1..count) {
-                                delay(50)
-                                consumeMessageWithConfirm {
-                                    logger.info { "processing msg:" + String(it.body) }
-                                    latch.countDown()
-                                }
-                            }
-                        }
-                        rollback()
-                    }
-                }
-            }
-
-            sleep(7000)
-            assertEquals(count, httpRabbitMQClient.getQueue(DEFAULT_VHOST, oneTimeQueue).messagesReady.toInt())
-        }
-    }
-
-    @Test
     fun `test consume several messages with implicit rollback`() {
+
 
         factory.newConnection().use { conn ->
 
             val count = 100
             val latch = CountDownLatch(count)
 
-            runBlocking {
-                conn.txChannel {
-                    declareQueue(QueueSpecification(oneTimeQueue))
+            assertThrows(RuntimeException::class.java) {
+                runBlocking {
+                    conn.txChannel {
+                        declareQueue(QueueSpecification(oneTimeQueue))
 
-                    transaction {
-                        (1..count).map {
-                            publish(createMessage(queue = oneTimeQueue, body = "message #$it"))
-                        }
-                    }
-
-                    delay(7000)
-                    assertEquals(count, httpRabbitMQClient.getQueue(DEFAULT_VHOST, oneTimeQueue).messagesReady.toInt())
-
-                    transaction {
-                        consume(oneTimeQueue) {
-                            for (i in 1..count) {
-                                delay(50)
-                                if (ThreadLocalRandom.current().nextBoolean())
-                                    throw RuntimeException("sth wrong while processing msg #$i")
-                                consumeMessageWithConfirm {
-                                    logger.info { "processing msg:" + String(it.body) }
-                                    latch.countDown()
-                                }
+                        transaction {
+                            (1..count).map {
+                                publish(createMessage(queue = oneTimeQueue, body = "message #$it"))
                             }
                         }
-                        throw RuntimeException("sth bad happened")
+
+                        delay(7000)
+                        assertEquals(
+                            count,
+                            httpRabbitMQClient.getQueue(DEFAULT_VHOST, oneTimeQueue).messagesReady.toInt()
+                        )
+
+                        transaction {
+                            consume(oneTimeQueue) {
+                                for (i in 1..count) {
+                                    delay(50)
+                                    if (ThreadLocalRandom.current().nextBoolean())
+                                        throw RuntimeException("sth wrong while processing msg #$i")
+                                    consumeMessageWithConfirm {
+                                        logger.info { "processing msg:" + String(it.body) }
+                                        latch.countDown()
+                                    }
+                                }
+                            }
+                            throw RuntimeException("sth bad happened")
+                        }
                     }
                 }
             }
