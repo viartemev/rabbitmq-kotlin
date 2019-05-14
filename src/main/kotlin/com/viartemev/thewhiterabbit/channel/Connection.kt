@@ -32,3 +32,16 @@ suspend fun Connection.channel(block: suspend Channel.() -> Unit): Channel {
         .also { block(it) }
 }
 
+fun Connection.createTxChannel(): TxChannel = TxChannel(this.createChannel())
+
+suspend fun Connection.txChannel(block: suspend TxChannel.() -> Unit): TxChannel {
+    var channel = Channels.localTxChannels[Thread.currentThread()]
+    if (channel == null || !channel.isOpen) {
+        channel = Channels.UnclosableTxChannel(createTxChannel())
+        Channels.localTxChannels.put(Thread.currentThread(), channel)
+    }
+    return channel
+        .also {
+            block(it)
+        }
+}

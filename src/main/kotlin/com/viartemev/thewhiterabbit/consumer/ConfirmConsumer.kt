@@ -3,14 +3,10 @@ package com.viartemev.thewhiterabbit.consumer
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Delivery
 import com.viartemev.thewhiterabbit.exception.AcknowledgeException
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.async
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.channels.ClosedSendChannelException
 import kotlinx.coroutines.channels.sendBlocking
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeout
 import mu.KotlinLogging
 import java.io.Closeable
 import java.io.IOException
@@ -32,7 +28,7 @@ class ConfirmConsumer internal constructor(private val amqpChannel: Channel, amq
                 try {
                     deliveries.sendBlocking(message)
                 } catch (e: ClosedSendChannelException) {
-                    logger.debug { "Can't send a message. Consumer $consumerTag has been cancelled" }
+                    logger.debug { "Can't receive a message. Consumer $consumerTag has been cancelled" }
                 }
             },
             { consumerTag ->
@@ -102,6 +98,7 @@ class ConfirmConsumer internal constructor(private val amqpChannel: Channel, amq
     }
 
     override fun close() {
+        logger.debug { "closing ConfirmConsumer" }
         amqpChannel.basicCancel(consTag)
         deliveries.cancel()
     }
