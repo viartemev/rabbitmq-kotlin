@@ -6,7 +6,7 @@ buildscript {
         junit_plugin_version = '1.2.0'
         kluent_version = '1.48'
         ktor_version = '1.2.0'
-        vertx_version = '3.7.0'
+        vertx_version = '3.7.1'
     }
 
     repositories {
@@ -92,7 +92,7 @@ configure(rootProject) {
         testImplementation "org.springframework:spring-web:5.1.7.RELEASE"
         testImplementation "org.apache.httpcomponents:httpclient:4.5.8"
         testCompile "org.testcontainers:testcontainers:1.11.3"
-        testCompile "org.testcontainers:junit-jupiter:1.11.2"
+        testCompile "org.testcontainers:junit-jupiter:1.11.3"
         testCompile "com.nhaarman:mockito-kotlin:1.6.0"
         testCompile "org.junit.jupiter:junit-jupiter-api:$junit_jupiter_version"
         testRuntime "org.junit.jupiter:junit-jupiter-engine:$junit_jupiter_version"
