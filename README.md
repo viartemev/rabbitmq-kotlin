@@ -6,10 +6,15 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Gitter](https://badges.gitter.im/kotlin-the-white-rabbit/community.svg)](https://gitter.im/kotlin-the-white-rabbit/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
-The White Rabbit is an asynchronous RabbitMQ (AMQP) client based on Kotlin coroutines  
-### [Benchmarks](https://github.com/viartemev/the-white-rabbit/issues/88#issuecomment-470461937)
-### Adding to project:
-##### Gradle:
+The White Rabbit is a [fast](https://github.com/viartemev/the-white-rabbit/issues/88#issuecomment-470461937) and asynchronous RabbitMQ (AMQP) client library based on Kotlin coroutines. Currently the following features are supported:
+* Queue and exchange manipulations
+* Message publishing with confirmation
+* Message consuming with acknowledgment
+* Transactional publishing and consuming
+* RPC pattern
+ 
+## Adding to project
+### Gradle
 ```
 repositories {
     jcenter()
@@ -17,7 +22,7 @@ repositories {
 
 compile 'com.viartemev:the-white-rabbit:$version'
 ```
-##### Maven:
+### Maven
 ```
 <repositories>
     <repository>
@@ -33,8 +38,49 @@ compile 'com.viartemev:the-white-rabbit:$version'
 </dependency>
 ```
 
-### Usage:
-##### - Async message publishing with confirmation: 
+## Usage notes and examples
+
+Use one of the extension methods on `com.rabbitmq.client.Connection` to get a channel you need: 
+
+```kotlin
+connection.channel { 
+    /*
+    The plain channel with consumer acknowledgments, supports:
+        -- queue and exchange manipulations
+        -- asynchronous consuming
+        -- RPC pattern
+     */
+}
+
+connection.confirmChannel { // 
+    /*
+    Channel with publisher confirmations, additionally supports:
+        -- asynchronous message publishing
+     */
+}
+
+connection.txChannel { // transactional support
+    /*
+    Supports transactional publishing and consuming.
+     */
+}
+```
+
+### Queue and exchange manipulations
+#### Asynchronous exchange declaration
+```kotlin
+connection.channel.declareExchange(ExchangeSpecification(EXCHANGE_NAME))
+```
+#### Asynchronous queue declaration
+```kotlin
+connection.channel.declareQueue(QueueSpecification(QUEUE_NAME))
+```
+#### Asynchronous queue binding to an exchange
+```kotlin
+connection.channel.bindQueue(BindQueueSpecification(EXCHANGE_NAME, QUEUE_NAME))
+```
+
+### Asynchronous message publishing with confirmation 
 ```kotlin
 connection.confirmChannel {
     publish {
@@ -55,7 +101,7 @@ connection.confirmChannel {
 }
 ```
 
-##### - Async message consuming with acknowledge: 
+### Asynchronous message consuming with acknowledgement
 Consume only n-messages:
 ```kotlin
 connection.channel {
@@ -65,27 +111,15 @@ connection.channel {
 }
 ```
 
-##### - Async exchange declaration:
-```kotlin
-channel.declareExchange(ExchangeSpecification(EXCHANGE_NAME))
-```
-##### - Async queue declaration:
-```kotlin
-channel.declareQueue(QueueSpecification(QUEUE_NAME))
-```
-##### - Async queue binding to an exchange:
-```kotlin
-channel.bindQueue(BindQueueSpecification(EXCHANGE_NAME, QUEUE_NAME))
-```
-##### - Transactional support:
+### Transactional publishing and consuming
 
-RabbitMQ and AQMP itself offer rather scarce support for transaction. When considering using of transactions you should be aware that:
+RabbitMQ and AMQP itself offer rather scarce support for transaction. When considering using transactions you should be aware that:
 * a transaction could only span one channel and one queue;
 * `com.rabbitmq.client.Channel` is not thread-safe;
 * channel can be either in confirm mode or in transaction mode at a time;
 * transactions cannot be nested into each other;
 
- The library provides a convenient way to perform transactional publishing and receiving based on `transaction` extension function. This function commits a transaction upon normal execution of a block and rolls it back if a `RuntimeException` occurs. Exceptions are always propagated further. Coroutines are not used for publishing though, since there are no asynchronous operations involved.
+ The library provides a convenient way to perform transactional publishing and receiving based on `transaction` extension function. This function commits a transaction upon normal execution of the block and rolls it back if a `RuntimeException` occurs. Exceptions are always propagated further. Coroutines are not used for publishing though, since there are no any asynchronous operations involved.
  
 ```kotlin
 connection.txChannel {
@@ -95,3 +129,9 @@ connection.txChannel {
     }
 }
 ```
+
+### RPC pattern
+TBD
+
+## Links
+* [Benchmarks](https://github.com/viartemev/the-white-rabbit/issues/88#issuecomment-470461937)
