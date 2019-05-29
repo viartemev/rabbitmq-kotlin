@@ -44,6 +44,7 @@ class ConfirmPublisher internal constructor(private val channel: Channel) {
      * Asynchronously publish a list of messages with the waiting of confirmation.
      *
      * @see com.viartemev.thewhiterabbit.publisher.OutboundMessage
+     * @param coroutineContext strictly one-thread context to execute coroutines
      * @return list of acknowledgements - represent messages handled successfully or lost by the broker.
      * @throws java.util.concurrent.CancellationException if can't publish one of the messages
      */
