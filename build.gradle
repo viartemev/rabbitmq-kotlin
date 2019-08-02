@@ -5,7 +5,7 @@ buildscript {
         junit_jupiter_version = '5.5.0'
         junit_plugin_version = '1.2.0'
         kluent_version = '1.48'
-        ktor_version = '1.2.2'
+        ktor_version = '1.2.3'
         vertx_version = '3.8.0'
     }
 
