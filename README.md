@@ -14,7 +14,8 @@ The White Rabbit is a [fast](https://github.com/viartemev/the-white-rabbit/issue
 * RPC pattern
  
 ## Adding to project
-### Gradle
+<details><summary>Gradle</summary>
+
 ```
 repositories {
     jcenter()
@@ -22,7 +23,10 @@ repositories {
 
 compile 'com.viartemev:the-white-rabbit:$version'
 ```
-### Maven
+</details>
+
+<details><summary>Maven</summary>
+
 ```
 <repositories>
     <repository>
@@ -37,6 +41,7 @@ compile 'com.viartemev:the-white-rabbit:$version'
   <version>${version}</version>
 </dependency>
 ```
+</details>
 
 ## Usage notes and examples
 
@@ -131,7 +136,21 @@ connection.txChannel {
 ```
 
 ### RPC pattern
-TBD
+```kotlin
+connection.channel {
+    val message = RabbitMqMessage(MessageProperties.PERSISTENT_BASIC, "Hello world".toByteArray())
+    coroutineScope {
+        (1..10).map {
+            async {
+                rpc {
+                    call(requestQueueName = "rpc_request", message = message)
+                        .also { println("Reply: ${String(it.body)}") }
+                }
+            }
+        }.awaitAll()
+    }
+}
+```
 
 ## Links
 * [Benchmarks](https://github.com/viartemev/the-white-rabbit/issues/88#issuecomment-470461937)
