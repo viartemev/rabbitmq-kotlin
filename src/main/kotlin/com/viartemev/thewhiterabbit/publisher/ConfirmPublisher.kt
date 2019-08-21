@@ -35,7 +35,7 @@ class ConfirmPublisher internal constructor(private val channel: Channel) {
             continuations[messageSequenceNumber] = continuation
             continuation.invokeOnCancellation { continuations.remove(messageSequenceNumber) }
             cancelOnIOException(continuation) {
-                message.run { channel.basicPublish(exchange, routingKey, properties, msg.toByteArray()) }
+                message.run { channel.basicPublish(exchange, routingKey, properties, msg) }
             }
         }
     }
