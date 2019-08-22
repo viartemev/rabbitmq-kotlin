@@ -3,8 +3,12 @@ package com.viartemev.thewhiterabbit.rpc
 import com.rabbitmq.client.Channel
 import com.viartemev.thewhiterabbit.common.RabbitMqMessage
 import com.viartemev.thewhiterabbit.common.cancelOnIOException
+import com.viartemev.thewhiterabbit.queue.DeleteQueueSpecification
 import com.viartemev.thewhiterabbit.queue.declareQueue
+import com.viartemev.thewhiterabbit.queue.deleteQueue
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import mu.KotlinLogging
 import java.io.IOException
 import java.util.*
@@ -27,9 +31,7 @@ class RpcClient(val channel: Channel) {
             .replyTo(replyQueueName)
             .build()
 
-        //TODO channel.basicQos and channel.basicPublish can throw an exception
-        channel.basicQos(1)
-        channel.basicPublish(exchangeName, requestQueueName, props, message.body)
+        withContext(Dispatchers.IO) { channel.basicPublish(exchangeName, requestQueueName, props, message.body) }
 
         var consumerTag: String? = null
         try {
@@ -46,9 +48,12 @@ class RpcClient(val channel: Channel) {
             }
         } finally {
             try {
-                consumerTag?.let { channel.basicCancel(it) }
+                withContext(Dispatchers.IO) {
+                    consumerTag?.let { channel.basicCancel(it) }
+                    channel.deleteQueue(DeleteQueueSpecification(replyQueueName))
+                }
             } catch (e: IOException) {
-                logger.warn { "Can't cancel consumer with consumerTag: $consumerTag" }
+                logger.warn(e) { "Can't finalyze RPC for consumer tag: $consumerTag" }
             }
         }
     }
