@@ -89,7 +89,7 @@ configure(rootProject) {
     dependencies {
         testImplementation "com.rabbitmq:http-client:3.3.0.RELEASE"
         testImplementation "org.springframework:spring-web:5.1.9.RELEASE"
-        testImplementation "org.apache.httpcomponents:httpclient:4.5.9"
+        testImplementation "org.apache.httpcomponents:httpclient:4.5.10"
         testCompile "org.testcontainers:testcontainers:1.12.0"
         testCompile "org.testcontainers:junit-jupiter:1.11.4"
         testCompile "com.nhaarman:mockito-kotlin:1.6.0"
