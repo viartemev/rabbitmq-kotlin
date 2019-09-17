@@ -16,7 +16,6 @@ import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.awaitBody
-import org.springframework.web.reactive.function.server.bodyAndAwait
 import org.springframework.web.reactive.function.server.coRouter
 
 @SpringBootApplication
@@ -44,13 +43,13 @@ class Handlers(private val connection: Connection) {
         var message = "default_value"
         connection.channel {
             consume("test_queue", 1) {
-                consumeMessageWithConfirm({
+                consumeMessageWithConfirm {
                     println("Got a message!")
                     message = String(it.body)
-                })
+                }
             }
         }
-        return ServerResponse.ok().bodyAndAwait(Message(message))
+        return ServerResponse.ok().bodyValue(Message(message)).awaitSingle()
     }
 
     suspend fun push(request: ServerRequest): ServerResponse {
@@ -58,10 +57,17 @@ class Handlers(private val connection: Connection) {
         var ack = false
         connection.confirmChannel {
             publish {
-                ack = publishWithConfirm(OutboundMessage("", "test_queue", MessageProperties.PERSISTENT_BASIC, message.message))
+                ack = publishWithConfirm(
+                    OutboundMessage(
+                        "",
+                        "test_queue",
+                        MessageProperties.PERSISTENT_BASIC,
+                        message.message
+                    )
+                )
             }
         }
-        return if (ack) ServerResponse.ok().bodyAndAwait("Done") else ServerResponse.status(500).build().awaitSingle()
+        return if (ack) ServerResponse.ok().bodyValue("Done").awaitSingle() else ServerResponse.status(500).build().awaitSingle()
     }
 }
 
