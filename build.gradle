@@ -6,7 +6,7 @@ buildscript {
         junit_plugin_version = '1.2.0'
         kluent_version = '1.48'
         ktor_version = '1.2.5'
-        vertx_version = '3.8.3'
+        vertx_version = '3.8.4'
         testcontainers_version = '1.12.3'
         httpclient_version = '4.5.10'
         rabbitmq_http_client_version = '3.4.0.RELEASE'
