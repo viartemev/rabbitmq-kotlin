@@ -59,13 +59,13 @@ configure(allprojects) { project ->
     sourceCompatibility = 1.8
 
     dependencies {
-        compile 'io.github.microutils:kotlin-logging:1.7.8'
+        compile 'io.github.microutils:kotlin-logging:1.7.9'
 
         compile "com.rabbitmq:amqp-client:$rabbitmq_java_client_version"
         compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
         compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
         compile "org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.3.5"
-        implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.3-native-mt'
+        implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.5'
         testCompile 'org.slf4j:slf4j-api:2.0.0-alpha1'
         testRuntime 'ch.qos.logback:logback-classic:1.3.0-alpha5'
         testRuntime 'ch.qos.logback:logback-core:1.3.0-alpha5'
@@ -161,7 +161,7 @@ project('the-white-rabbit-spring-boot-example') {
         implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
         implementation 'org.jetbrains.kotlin:kotlin-reflect'
         implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
-        implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.3-native-mt'
+        implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.5'
         implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.3.2-1.3.60'
         testImplementation('org.springframework.boot:spring-boot-starter-test') {
             exclude module: 'junit'
