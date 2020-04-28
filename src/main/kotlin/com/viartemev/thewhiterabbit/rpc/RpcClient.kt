@@ -37,7 +37,7 @@ class RpcClient(val channel: Channel) {
         try {
             return suspendCancellableCoroutine { continuation ->
                 cancelOnIOException(continuation) {
-                    consumerTag = channel.basicConsume(replyQueueName, true, { consumerTag, delivery ->
+                    consumerTag = channel.basicConsume(replyQueueName, true, { _, delivery ->
                         if (corrId == delivery.properties.correlationId) {
                             continuation.resume(RabbitMqMessage(delivery.properties, delivery.body))
                         }

@@ -1,3 +1,4 @@
+/*
 pluginManagement {
     repositories {
         maven { url 'https://repo.spring.io/snapshot' }
@@ -13,11 +14,12 @@ pluginManagement {
         }
     }
 }
+*/
 
 rootProject.name = 'the-white-rabbit'
 
 include('benchmarks')
 include('the-white-rabbit-example')
 include('the-white-rabbit-ktor-example')
-include('the-white-rabbit-spring-boot-example')
+//include('the-white-rabbit-spring-boot-example')
 include('the-white-rabbit-vertx-example')
