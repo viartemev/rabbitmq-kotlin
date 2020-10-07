@@ -8,7 +8,7 @@ buildscript {
         ktor_version = '1.4.0'
         vertx_version = '3.9.3'
         testcontainers_version = '1.14.3'
-        httpclient_version = '4.5.12'
+        httpclient_version = '4.5.13'
         rabbitmq_http_client_version = '3.7.0.RELEASE'
     }
 
