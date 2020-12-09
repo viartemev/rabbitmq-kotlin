@@ -6,7 +6,7 @@ buildscript {
         junit_plugin_version = '1.2.0'
         kluent_version = '1.48'
         ktor_version = '1.4.3'
-        vertx_version = '3.9.3'
+        vertx_version = '4.0.0'
         testcontainers_version = '1.15.0'
         httpclient_version = '4.5.13'
         rabbitmq_http_client_version = '3.7.0.RELEASE'
@@ -25,7 +25,7 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "com.github.jengelman.gradle.plugins:shadow:5.1.0"
         classpath "me.champeau.gradle:jmh-gradle-plugin:0.5.2"
-        classpath "org.jetbrains.kotlin:kotlin-allopen:1.4.20"
+        classpath "org.jetbrains.kotlin:kotlin-allopen:1.4.21"
         classpath "com.github.jengelman.gradle.plugins:shadow:5.1.0"
         classpath 'com.adarshr:gradle-test-logger-plugin:2.1.1'
         //classpath("org.springframework.boot:spring-boot-gradle-plugin:2.2.6.RELEASE")
