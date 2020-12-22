@@ -5,7 +5,7 @@ buildscript {
         junit_jupiter_version = '5.7.0'
         junit_plugin_version = '1.2.0'
         kluent_version = '1.48'
-        ktor_version = '1.4.2'
+        ktor_version = '1.5.0'
         vertx_version = '4.0.0'
         testcontainers_version = '1.15.0'
         httpclient_version = '4.5.13'
