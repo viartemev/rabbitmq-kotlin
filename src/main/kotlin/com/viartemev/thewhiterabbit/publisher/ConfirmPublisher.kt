@@ -1,7 +1,6 @@
 package com.viartemev.thewhiterabbit.publisher
 
 import com.rabbitmq.client.Channel
-import com.viartemev.thewhiterabbit.common.cancelOnIOException
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -11,10 +10,10 @@ import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
-
-private val logger = KotlinLogging.logger {}
+import kotlin.coroutines.resumeWithException
 
 class ConfirmPublisher internal constructor(private val channel: Channel) {
+    private val logger = KotlinLogging.logger {}
     internal val continuations = ConcurrentHashMap<Long, Continuation<Boolean>>()
 
     init {
@@ -22,11 +21,10 @@ class ConfirmPublisher internal constructor(private val channel: Channel) {
     }
 
     /**
-     * Publish a message with the waiting of confirmation.
+     * Publish a message and expect confirmations.
      *
-     * @see com.viartemev.thewhiterabbit.publisher.OutboundMessage
-     * @return acknowledgement - represent messages handled successfully or lost by the broker.
-     * @throws java.util.concurrent.CancellationException if can't publish the message
+     * @return acknowledgement - confirmation of the message delivery.
+     * @see <a href="https://www.rabbitmq.com/confirms.html#publisher-confirms">Publisher Confirms</a>
      */
     suspend fun publishWithConfirm(message: OutboundMessage): Boolean {
         val messageSequenceNumber = channel.nextPublishSeqNo
@@ -34,8 +32,11 @@ class ConfirmPublisher internal constructor(private val channel: Channel) {
         return suspendCancellableCoroutine { continuation ->
             continuations[messageSequenceNumber] = continuation
             continuation.invokeOnCancellation { continuations.remove(messageSequenceNumber) }
-            cancelOnIOException(continuation) {
-                message.run { channel.basicPublish(exchange, routingKey, properties, msg) }
+            try {
+                channel.basicPublish(message.exchange, message.routingKey, message.properties, message.msg)
+            } catch (e: Throwable) {
+                logger.error(e) { "Can't publish them message" }
+                continuation.resumeWithException(e)
             }
         }
     }
@@ -48,6 +49,7 @@ class ConfirmPublisher internal constructor(private val channel: Channel) {
      * @return list of acknowledgements - represent messages handled successfully or lost by the broker.
      * @throws java.util.concurrent.CancellationException if can't publish one of the messages
      */
+    @Deprecated(message = "TODO: Link to WIKI")
     suspend fun publishWithConfirmAsync(
         coroutineContext: CoroutineContext = EmptyCoroutineContext,
         messages: List<OutboundMessage>

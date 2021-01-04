@@ -6,6 +6,7 @@ data class OutboundMessage(
     val exchange: String,
     val routingKey: String,
     val properties: BasicProperties,
+    //todo rename to body
     val msg: ByteArray
 ) {
     constructor(

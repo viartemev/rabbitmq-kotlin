@@ -7,10 +7,11 @@ import java.util.concurrent.atomic.AtomicLong
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 
-private val logger = KotlinLogging.logger {}
+internal class AckListener(
+    private val continuations: ConcurrentHashMap<Long, Continuation<Boolean>>
+) : ConfirmListener {
 
-internal class AckListener(private val continuations: ConcurrentHashMap<Long, Continuation<Boolean>>) : ConfirmListener {
-
+    private val logger = KotlinLogging.logger {}
     private val lowerBoundOfMultiple = AtomicLong(1)
 
     override fun handleAck(deliveryTag: Long, multiple: Boolean) {
