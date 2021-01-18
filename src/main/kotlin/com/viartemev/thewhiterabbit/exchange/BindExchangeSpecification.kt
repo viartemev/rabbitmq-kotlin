@@ -5,21 +5,21 @@ package com.viartemev.thewhiterabbit.exchange
  */
 data class BindExchangeSpecification(
     /**
-     * The name of the exchange to which messages flow across the binding
-     */
-    val destination: String,
-    /**
      * The name of the exchange from which messages flow across the binding
      */
     val source: String,
     /**
-     * True to don't wait for a response from the server
+     * The name of the exchange to which messages flow across the binding
      */
-    val noWait: Boolean = false,
+    val destination: String,
     /**
      * The routing key to use for the binding
      */
     val routingKey: String,
+    /**
+     * True to don't wait for a response from the server
+     */
+    val noWait: Boolean = false,
     /**
      * Other properties (binding parameters)
      */

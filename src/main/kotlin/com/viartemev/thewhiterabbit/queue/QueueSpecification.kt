@@ -3,7 +3,7 @@ package com.viartemev.thewhiterabbit.queue
 /**
  * A queue declaration specification
  */
-data class QueueSpecification(
+open class QueueSpecification(
     /**
      * The name of the queue
      */

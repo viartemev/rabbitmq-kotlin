@@ -1,4 +1,4 @@
-# The White Rabbit 
+# The White Rabbit
 [![Build Status](https://travis-ci.org/viartemev/the-white-rabbit.svg?branch=master)](https://travis-ci.org/viartemev/the-white-rabbit)
 [ ![Download](https://api.bintray.com/packages/viartemev/Maven/the-white-rabbit/images/download.svg) ](https://bintray.com/viartemev/Maven/the-white-rabbit/_latestVersion)
 [![Open Source Helpers](https://www.codetriage.com/viartemev/the-white-rabbit/badges/users.svg)](https://www.codetriage.com/viartemev/the-white-rabbit)
@@ -12,11 +12,18 @@ The White Rabbit is a [fast](https://github.com/viartemev/the-white-rabbit/issue
 * Message consuming with acknowledgment
 * Transactional publishing and consuming
 * RPC pattern
- 
-## Adding to project
+
+## Motivation
+TODO
+
+## JMH Benchmarks
+TODO
+
+## Building applications using The White Rabbit
+You need to have Java 8 installed.
 <details><summary>Gradle</summary>
 
-```
+```groovy
 repositories {
     jcenter()
 }
@@ -27,7 +34,7 @@ compile 'com.viartemev:the-white-rabbit:$version'
 
 <details><summary>Maven</summary>
 
-```
+```xml
 <repositories>
     <repository>
         <id>jcenter</id>
@@ -45,10 +52,60 @@ compile 'com.viartemev:the-white-rabbit:$version'
 
 ## Usage notes and examples
 
-Use one of the extension methods on `com.rabbitmq.client.Connection` to get a channel you need: 
+### An exchange manipulation
+```kotlin
+fun main() {
+    val singleThreadDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher() // ①
+    singleThreadDispatcher.use { dispatcher ->
+        val connectionFactory = ConnectionFactory().apply { useNio() }
+        connectionFactory.newConnection().use { connection ->
+            runBlocking {
+                connection.channel {
+                    declareExchange(ExchangeSpecification("exchange-1"), dispatcher)
+                    declareExchange(ExchangeSpecification("exchange-2"), dispatcher)
+
+                    bindExchange(BindExchangeSpecification("exchange-1", "exchange-2", "key"))
+                    unbindExchange(UnbindExchangeSpecification("exchange-1", "exchange-2", "key"))
+
+                    deleteExchange(DeleteExchangeSpecification("exchange-1"), dispatcher)
+                    deleteExchange(DeleteExchangeSpecification("exchange-2"), dispatcher)
+                }
+            }
+        }
+    }
+}
+```
+
+### A queue manipulation
+```kotlin
+fun main() {
+    val singleThreadDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+    singleThreadDispatcher.use { dispatcher ->
+        val connectionFactory = ConnectionFactory().apply { useNio() }
+        connectionFactory.newConnection().use { connection ->
+            runBlocking {
+                connection.channel {
+                    declareQueue(QueueSpecification("queue-1"), dispatcher)
+                    bindQueue(BindQueueSpecification("queue-1", "exchange-1", "key"))
+                    purgeQueue(PurgeQueueSpecification("queue-1"))
+                    unbindQueue(UnbindQueueSpecification("queue-1", "exchange-1", "key"))
+                    deleteQueue(DeleteQueueSpecification("queue-1"), dispatcher)
+                }
+            }
+        }
+    }
+}
+```
+
+### Publishing
+
+#### Publishing with confirmation
+
+
+Use one of the extension methods on `com.rabbitmq.client.Connection` to get a channel you need:
 
 ```kotlin
-connection.channel { 
+connection.channel {
     /*
     The plain channel with consumer acknowledgments, supports:
         -- queue and exchange manipulations
@@ -57,7 +114,7 @@ connection.channel {
      */
 }
 
-connection.confirmChannel { // 
+connection.confirmChannel { //
     /*
     Channel with publisher confirmations, additionally supports:
         -- asynchronous message publishing
@@ -69,6 +126,12 @@ connection.txChannel { // transactional support
     Supports transactional publishing and consuming.
      */
 }
+```
+
+Bla
+```dotenv
+BLA=123123
+BLA=123123
 ```
 
 ### Queue and exchange manipulations
@@ -85,7 +148,7 @@ connection.channel.declareQueue(QueueSpecification(QUEUE_NAME))
 connection.channel.bindQueue(BindQueueSpecification(EXCHANGE_NAME, QUEUE_NAME))
 ```
 
-### Asynchronous message publishing with confirmation 
+### Asynchronous message publishing with confirmation
 ```kotlin
 connection.confirmChannel {
     publish {
@@ -125,7 +188,7 @@ RabbitMQ and AMQP itself offer rather scarce support for transaction. When consi
 * transactions cannot be nested into each other;
 
  The library provides a convenient way to perform transactional publishing and receiving based on `transaction` extension function. This function commits a transaction upon normal execution of the block and rolls it back if a `RuntimeException` occurs. Exceptions are always propagated further. Coroutines are not used for publishing though, since there are no any asynchronous operations involved.
- 
+
 ```kotlin
 connection.txChannel {
     transaction {
