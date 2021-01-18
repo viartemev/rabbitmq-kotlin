@@ -2,6 +2,9 @@ package com.viartemev.thewhiterabbit.exchange
 
 import com.rabbitmq.client.BuiltinExchangeType
 
+/**
+ * An exchange declaration specification
+ */
 data class ExchangeSpecification(
     /**
      * The name of the exchange
