@@ -7,12 +7,11 @@ import kotlinx.coroutines.future.await
 import kotlinx.coroutines.withContext
 import java.io.IOException
 
-
 /**
  * Declare an exchange following the specification on resource management dispatcher context.
  * @see com.viartemev.thewhiterabbit.exchange.ExchangeSpecification
  * @return a declare-confirm method to indicate the exchange was successfully declared.
- * @throws IOException the server will raise a 404 channel exception if the named exchange does not exist.
+ * @throws java.io.IOException if an error is encountered
  */
 suspend fun Channel.declareExchange(exchangeSpecification: ExchangeSpecification): AMQP.Exchange.DeclareOk {
     val channel = this
