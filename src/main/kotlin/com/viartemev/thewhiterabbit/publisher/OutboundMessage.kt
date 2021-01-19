@@ -6,8 +6,7 @@ data class OutboundMessage(
     val exchange: String,
     val routingKey: String,
     val properties: BasicProperties,
-    //todo rename to body
-    val msg: ByteArray
+    val body: ByteArray
 ) {
     constructor(
         exchange: String,
@@ -25,7 +24,7 @@ data class OutboundMessage(
         if (exchange != other.exchange) return false
         if (routingKey != other.routingKey) return false
         if (properties != other.properties) return false
-        if (!msg.contentEquals(other.msg)) return false
+        if (!body.contentEquals(other.body)) return false
 
         return true
     }
@@ -34,7 +33,7 @@ data class OutboundMessage(
         var result = exchange.hashCode()
         result = 31 * result + routingKey.hashCode()
         result = 31 * result + properties.hashCode()
-        result = 31 * result + msg.contentHashCode()
+        result = 31 * result + body.contentHashCode()
         return result
     }
 }

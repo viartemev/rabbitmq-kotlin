@@ -11,14 +11,12 @@ import com.rabbitmq.client.Connection
 fun Connection.createConfirmChannel(): ConfirmChannel = ConfirmChannel(this.createChannel())
 
 suspend fun Connection.confirmChannel(block: suspend ConfirmChannel.() -> Unit): ConfirmChannel {
-    var channel = Channels
-        .localConfirmChannels[Thread.currentThread()]
+    var channel = Channels.localConfirmChannels[Thread.currentThread()]
     if (channel == null || !channel.isOpen) {
         channel = Channels.UncloseableConfirmChannel(createConfirmChannel())
         Channels.localConfirmChannels[Thread.currentThread()] = channel
     }
-    return channel
-        .also { block(it) }
+    return channel.also { block(it) }
 }
 
 suspend fun Connection.channel(block: suspend Channel.() -> Unit): Channel {

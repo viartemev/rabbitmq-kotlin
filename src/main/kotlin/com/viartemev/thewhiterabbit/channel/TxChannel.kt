@@ -34,7 +34,7 @@ open class TxChannel internal constructor(private val channel: Channel) : Channe
 
         fun publish(message: OutboundMessage) {
             message.apply {
-                this@TxChannel.channel.basicPublish(exchange, routingKey, properties, msg)
+                this@TxChannel.channel.basicPublish(exchange, routingKey, properties, body)
             }
         }
 
