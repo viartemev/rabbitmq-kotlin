@@ -21,7 +21,7 @@ asynchronous RabbitMQ (AMQP) client library based on Kotlin coroutines. Currentl
 TODO
 
 ## JMH Benchmarks
-The code can be found [here](https://github.com/viartemev/the-white-rabbit/tree/master/benchmarks/src/jmh).  
+The code can be found [here](https://github.com/viartemev/the-white-rabbit/tree/master/benchmarks/src/jmh).
 Results of the benchmark and comparison with [reactor-rabbitmq](https://github.com/reactor/reactor-rabbitmq) are presented below, for details you can check the [discussion](https://github.com/viartemev/the-white-rabbit/issues/88#issuecomment-470461937).
 ```kotlin
 The White Rabbit
@@ -88,7 +88,7 @@ Channel instances must not be shared between threads.
 
 [From the RabbitMQ docs](https://www.rabbitmq.com/api-guide.html#concurrency)
 
-The White Rabbit connection DSL **is thread-safe**.
+The White Rabbit connection DSL **is thread-safe**.  
 One channel per a thread approach is used.
 You should take care about thread-safety, if you don't use The White Rabbit DSL.
 
