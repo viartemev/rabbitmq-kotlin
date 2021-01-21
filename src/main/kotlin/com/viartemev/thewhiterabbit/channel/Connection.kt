@@ -5,11 +5,19 @@ import com.rabbitmq.client.Connection
 
 
 /**
- * Create a channel with enabled publisher acknowledgements on it.Channel by channel
+ * Create a channel with enabled publisher acknowledgements on this channel.
+ *
  * @see com.rabbitmq.client.Channel.confirmSelect()
  */
 fun Connection.createConfirmChannel(): ConfirmChannel = ConfirmChannel(this.createChannel())
 
+/**
+ * DSL for creating a channel with enabled publisher acknowledgements on this channel.
+ * Channel instances must not be shared between threads.
+ * One channel per a thread approach is used.
+ *
+ * @see <a href="RabbitMQ Concurrency">https://www.rabbitmq.com/api-guide.html#concurrency</a>
+ */
 suspend fun Connection.confirmChannel(block: suspend ConfirmChannel.() -> Unit): ConfirmChannel {
     var channel = Channels.localConfirmChannels[Thread.currentThread()]
     if (channel == null || !channel.isOpen) {
@@ -19,6 +27,13 @@ suspend fun Connection.confirmChannel(block: suspend ConfirmChannel.() -> Unit):
     return channel.also { block(it) }
 }
 
+/**
+ * DSL for creating a channel.
+ * Channel instances must not be shared between threads.
+ * One channel per a thread approach is used.
+ *
+ * @see <a href="RabbitMQ Concurrency">https://www.rabbitmq.com/api-guide.html#concurrency</a>
+ */
 suspend fun Connection.channel(block: suspend Channel.() -> Unit): Channel {
     var channel = Channels
         .localChannels[Thread.currentThread()]
@@ -26,20 +41,27 @@ suspend fun Connection.channel(block: suspend Channel.() -> Unit): Channel {
         channel = Channels.UncloseableChannel(createChannel())
         Channels.localChannels[Thread.currentThread()] = channel
     }
-    return channel
-        .also { block(it) }
+    return channel.also { block(it) }
 }
 
-fun Connection.createTxChannel(): TxChannel = TxChannel(this.createChannel())
+/**
+ * Create a channel with enabled TX mode on this channel.
+ *
+ * @see com.rabbitmq.client.Channel.txSelect()
+ */fun Connection.createTxChannel(): TxChannel = TxChannel(this.createChannel())
 
+/**
+ * DSL for creating a channel with enabled TX mode on this channel.
+ * Channel instances must not be shared between threads.
+ * One channel per a thread approach is used.
+ *
+ * @see <a href="RabbitMQ Concurrency">https://www.rabbitmq.com/api-guide.html#concurrency</a>
+ */
 suspend fun Connection.txChannel(block: suspend TxChannel.() -> Unit): TxChannel {
     var channel = Channels.localTxChannels[Thread.currentThread()]
     if (channel == null || !channel.isOpen) {
         channel = Channels.UnclosableTxChannel(createTxChannel())
         Channels.localTxChannels.put(Thread.currentThread(), channel)
     }
-    return channel
-        .also {
-            block(it)
-        }
+    return channel.also { block(it) }
 }
