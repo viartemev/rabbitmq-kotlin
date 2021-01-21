@@ -60,7 +60,7 @@ class QueueTest : AbstractTestContainersTest() {
                     assertNotNull(queue)
                     assertEquals(0, queue.totalMessages)
 
-                    publish { publishWithConfirmAsync(messages = (1..10).map { createMessage(queue = queueName, body = "") }) }
+                    //publish { publishWithConfirmAsync(messages = (1..10).map { createMessage(queue = queueName, body = "") }) }
                     delay(5000)
                     val queueWithPublishedMessages = httpRabbitMQClient.getQueue(DEFAULT_VHOST, queueName)
                     assertNotNull(queueWithPublishedMessages)
