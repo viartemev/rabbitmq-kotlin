@@ -1,7 +1,7 @@
 # The White Rabbit
 
 [![Build Status](https://travis-ci.org/viartemev/the-white-rabbit.svg?branch=master)](https://travis-ci.org/viartemev/the-white-rabbit)
-[ ![Download](https://api.bintray.com/packages/viartemev/Maven/the-white-rabbit/images/download.svg) ](https://bintray.com/viartemev/Maven/the-white-rabbit/_latestVersion)
+[![Download](https://api.bintray.com/packages/viartemev/Maven/the-white-rabbit/images/download.svg) ](https://bintray.com/viartemev/Maven/the-white-rabbit/_latestVersion)
 [![Open Source Helpers](https://www.codetriage.com/viartemev/the-white-rabbit/badges/users.svg)](https://www.codetriage.com/viartemev/the-white-rabbit)
 [![codecov](https://codecov.io/gh/viartemev/the-white-rabbit/branch/master/graph/badge.svg)](https://codecov.io/gh/viartemev/the-white-rabbit)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -63,7 +63,7 @@ compile 'com.viartemev:the-white-rabbit:$version'
 
 ```kotlin
 fun main() {
-    val singleThreadDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher() // ①
+    val singleThreadDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
     singleThreadDispatcher.use { dispatcher ->
         val connectionFactory = ConnectionFactory().apply { useNio() }
         connectionFactory.newConnection().use { connection ->
@@ -81,6 +81,7 @@ fun main() {
     }
 }
 ```
+TODO explain the code snippet
 
 ### A queue manipulation
 
@@ -104,6 +105,8 @@ fun main() {
 }
 ```
 
+TODO explain the code snippet
+
 ### Publishing with confirmation
 
 #### Single message
@@ -126,6 +129,7 @@ fun main() {
 }
 ```
 
+TODO explain the code snippet
 ?? - you need to care about concurrent access by yourself
 
 #### Batch of messages
@@ -170,6 +174,9 @@ fun main() {
 }
 ```
 
+TODO explain the code snippet
+
+### Channel extension methods
 Use one of the extension methods on `com.rabbitmq.client.Connection` to get a channel you need:
 
 ```kotlin
@@ -249,6 +256,8 @@ connection.channel {
     }
 }
 ```
+
+TODO explain the code snippet
 
 ## Links
 

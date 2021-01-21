@@ -15,7 +15,7 @@ class ConfirmPublisher internal constructor(private val channel: Channel) {
     }
 
     /**
-     * Publish a message and expect confirmations.
+     * Publish a message and suspend until confirmation.
      *
      * @return acknowledgement - confirmation of the message delivery.
      * @see <a href="https://www.rabbitmq.com/confirms.html#publisher-confirms">Publisher Confirms</a>

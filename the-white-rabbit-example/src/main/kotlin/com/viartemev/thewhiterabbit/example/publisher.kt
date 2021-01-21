@@ -40,7 +40,6 @@ fun main() {
                                 }
                             }
                         delay(2000)
-                        println("Size is: ${publ.continuations.size}")
                         println("Confirms list size: ${messages.size}")
                         val partitions: Pair<List<Boolean>, List<Boolean>> = messages.partition { it }
                         println("Delivered: ${partitions.first.size}")
