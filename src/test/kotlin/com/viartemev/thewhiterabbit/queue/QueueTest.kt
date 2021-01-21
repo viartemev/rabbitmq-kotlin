@@ -3,22 +3,21 @@ package com.viartemev.thewhiterabbit.queue
 import com.viartemev.thewhiterabbit.AbstractTestContainersTest
 import com.viartemev.thewhiterabbit.channel.confirmChannel
 import com.viartemev.thewhiterabbit.channel.publish
+import com.viartemev.thewhiterabbit.common.RabbitMqDispatchers
 import com.viartemev.thewhiterabbit.exchange.ExchangeSpecification
 import com.viartemev.thewhiterabbit.exchange.declareExchange
 import com.viartemev.thewhiterabbit.utils.createMessage
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
+import kotlinx.coroutines.withContext
+import org.awaitility.kotlin.await
+import org.awaitility.kotlin.untilAsserted
+import org.awaitility.kotlin.withPollInterval
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
-import org.testcontainers.junit.jupiter.Testcontainers
+import java.time.Duration
 
-@Testcontainers
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class QueueTest : AbstractTestContainersTest() {
 
     @Test
@@ -60,17 +59,26 @@ class QueueTest : AbstractTestContainersTest() {
                     assertNotNull(queue)
                     assertEquals(0, queue.totalMessages)
 
-                    //publish { publishWithConfirmAsync(messages = (1..10).map { createMessage(queue = queueName, body = "") }) }
-                    delay(5000)
-                    val queueWithPublishedMessages = httpRabbitMQClient.getQueue(DEFAULT_VHOST, queueName)
-                    assertNotNull(queueWithPublishedMessages)
-                    assertEquals(10, queueWithPublishedMessages.totalMessages)
+                    publish {
+                        withContext(RabbitMqDispatchers.SingleThreadDispatcher) {
+                            publishWithConfirm(createMessage(queue = queue.name, body = "Hello world"))
+                        }
+                    }
+
+                    await withPollInterval Duration.ofMillis(1000) untilAsserted {
+                        val queueWithPublishedMessages = httpRabbitMQClient.getQueue(DEFAULT_VHOST, queueName)
+                        assertNotNull(queueWithPublishedMessages)
+                        assertEquals(1, queueWithPublishedMessages.totalMessages)
+                    }
 
                     purgeQueue(PurgeQueueSpecification(queueName))
                     delay(5000)
-                    val purgedQueue = httpRabbitMQClient.getQueue(DEFAULT_VHOST, queueName)
-                    assertNotNull(purgedQueue)
-                    assertEquals(0, purgedQueue.totalMessages)
+
+                    await withPollInterval Duration.ofMillis(1000) untilAsserted {
+                        val purgedQueue = httpRabbitMQClient.getQueue(DEFAULT_VHOST, queueName)
+                        assertNotNull(purgedQueue)
+                        assertEquals(0, purgedQueue.totalMessages)
+                    }
                 }
             }
         }
@@ -85,11 +93,12 @@ class QueueTest : AbstractTestContainersTest() {
                 connection.confirmChannel {
                     declareQueue(QueueSpecification(queueName))
                     declareExchange(ExchangeSpecification(exchangeName))
-                    val queueBindingsBefore = httpRabbitMQClient.getQueueBindingsBetween(DEFAULT_VHOST, exchangeName, queueName)
+                    val queueBindingsBefore =
+                        httpRabbitMQClient.getQueueBindingsBetween(DEFAULT_VHOST, exchangeName, queueName)
                     assertTrue(queueBindingsBefore.isEmpty())
-
                     bindQueue(BindQueueSpecification(queueName, exchangeName))
-                    val queueBindingsAfter = httpRabbitMQClient.getQueueBindingsBetween(DEFAULT_VHOST, exchangeName, queueName)
+                    val queueBindingsAfter =
+                        httpRabbitMQClient.getQueueBindingsBetween(DEFAULT_VHOST, exchangeName, queueName)
                     assertNotNull(queueBindingsAfter.isNotEmpty())
                 }
             }
@@ -109,14 +118,18 @@ class QueueTest : AbstractTestContainersTest() {
                     declareExchange(ExchangeSpecification(exchangeName))
                     val queue = httpRabbitMQClient.getQueue(DEFAULT_VHOST, queueName)
                     assertNotNull(queue)
+
                     bindQueue(BindQueueSpecification(queueName, exchangeName, routingKey))
                     val binding = httpRabbitMQClient.getQueueBindingsBetween(DEFAULT_VHOST, exchangeName, queueName)
                     assertTrue(binding.isNotEmpty())
 
                     unbindQueue(UnbindQueueSpecification(queueName, exchangeName, routingKey))
-                    delay(4000)
-                    val bindingAfterUnbind = httpRabbitMQClient.getQueueBindingsBetween(DEFAULT_VHOST, exchangeName, queueName)
-                    assertTrue(bindingAfterUnbind.isEmpty())
+
+                    await withPollInterval Duration.ofMillis(1000) untilAsserted {
+                        val bindingAfterUnbind =
+                            httpRabbitMQClient.getQueueBindingsBetween(DEFAULT_VHOST, exchangeName, queueName)
+                        assertTrue(bindingAfterUnbind.isEmpty())
+                    }
                 }
             }
         }
