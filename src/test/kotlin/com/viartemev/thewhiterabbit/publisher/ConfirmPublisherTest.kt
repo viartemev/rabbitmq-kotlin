@@ -81,6 +81,7 @@ class ConfirmPublisherTest {
                     delay(1000)
                     confirmPublisher.continuations
                         .forEach { entry: Map.Entry<Long, Continuation<Boolean>> -> entry.value.resume(true) }
+                    confirmPublisher.continuations.clear()
                 }
                 val acks: List<Boolean> = supervisorScope {
                     val task1 = async(RabbitMqDispatchers.SingleThreadDispatcher) {
