@@ -21,8 +21,29 @@ asynchronous RabbitMQ (AMQP) client library based on Kotlin coroutines. Currentl
 TODO
 
 ## JMH Benchmarks
+The code can be found [here](https://github.com/viartemev/the-white-rabbit/tree/master/benchmarks/src/jmh).  
+Results of the benchmark and comparison with [reactor-rabbitmq](https://github.com/reactor/reactor-rabbitmq) are presented below.
+```kotlin
+The White Rabbit
 
-TODO
+Benchmark                                         (numberOfMessages)  Mode  Cnt        Score   Error  Units
+ConfirmPublisherBenchmark.sendWithPublishConfirm                   1  avgt    2      104.172          us/op
+ConfirmPublisherBenchmark.sendWithPublishConfirm                  10  avgt    2      598.625          us/op
+ConfirmPublisherBenchmark.sendWithPublishConfirm                 100  avgt    2     3845.833          us/op
+ConfirmPublisherBenchmark.sendWithPublishConfirm                1000  avgt    2    36108.709          us/op
+ConfirmPublisherBenchmark.sendWithPublishConfirm               10000  avgt    2   392132.353          us/op
+ConfirmPublisherBenchmark.sendWithPublishConfirm              100000  avgt    2  4098567.349          us/op
+
+Reactor RabbitMQ
+
+Benchmark                                (nbMessages)  Mode  Cnt        Score   Error  Units
+SenderBenchmark.sendWithPublishConfirms             1  avgt    2      697.424          us/op
+SenderBenchmark.sendWithPublishConfirms            10  avgt    2     1306.490          us/op
+SenderBenchmark.sendWithPublishConfirms           100  avgt    2     4819.441          us/op
+SenderBenchmark.sendWithPublishConfirms          1000  avgt    2    39597.671          us/op
+SenderBenchmark.sendWithPublishConfirms         10000  avgt    2   373226.865          us/op
+SenderBenchmark.sendWithPublishConfirms        100000  avgt    2  3900685.520          us/op
+```
 
 ## Building applications using The White Rabbit
 
@@ -58,6 +79,44 @@ compile 'com.viartemev:the-white-rabbit:$version'
 </details>
 
 ## Usage notes and examples
+
+### Important note
+Channel instances must not be shared between threads.
+> As a rule of thumb, sharing Channel instances between threads is something to be avoided.
+> Applications should prefer using a Channel per thread instead of sharing the same Channel across multiple threads.
+> While some operations on channels are safe to invoke concurrently, some are not and will result in incorrect frame interleaving on the wire, double acknowledgements and so on.
+
+[From the RabbitMQ docs](https://www.rabbitmq.com/api-guide.html#concurrency)
+
+The White Rabbit connection DSL **is thread-safe**. One channel per a thread approach is used.
+You should take care about thread-safety, if you don't use The White Rabbit DSL.
+
+### Connection extension methods
+
+Use one of the extension methods on `com.rabbitmq.client.Connection` to get a channel you need:
+```kotlin
+connection.channel {
+    /**
+     * The plain channel with consumer acknowledgments, supports:
+     *   -- queue and exchange manipulations
+     *   -- asynchronous consuming
+     *   -- RPC pattern
+     */
+}
+
+connection.confirmChannel {
+    /**
+     * Channel with publisher confirmations, additionally supports:
+     *   -- asynchronous message publishing
+     */
+}
+
+connection.txChannel {
+    /**
+     *  Supports transactional publishing and consuming.
+     */
+}
+```
 
 ### An exchange manipulation
 
@@ -175,33 +234,6 @@ fun main() {
 ```
 
 TODO explain the code snippet
-
-### Channel extension methods
-Use one of the extension methods on `com.rabbitmq.client.Connection` to get a channel you need:
-
-```kotlin
-connection.channel {
-    /*
-    The plain channel with consumer acknowledgments, supports:
-        -- queue and exchange manipulations
-        -- asynchronous consuming
-        -- RPC pattern
-     */
-}
-
-connection.confirmChannel { //
-    /*
-    Channel with publisher confirmations, additionally supports:
-        -- asynchronous message publishing
-     */
-}
-
-connection.txChannel { // transactional support
-    /*
-    Supports transactional publishing and consuming.
-     */
-}
-```
 
 ### Asynchronous message consuming with acknowledgement
 
