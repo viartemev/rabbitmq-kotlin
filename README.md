@@ -21,7 +21,7 @@ asynchronous RabbitMQ (AMQP) client library based on Kotlin coroutines. Currentl
 TODO
 
 ## JMH Benchmarks
-The code can be found [here](https://github.com/viartemev/the-white-rabbit/tree/master/benchmarks/src/jmh).
+The code can be found [here](https://github.com/viartemev/the-white-rabbit/tree/master/benchmarks/src/jmh).  
 Results of the benchmark and comparison with [reactor-rabbitmq](https://github.com/reactor/reactor-rabbitmq) are presented below, for details you can check the [discussion](https://github.com/viartemev/the-white-rabbit/issues/88#issuecomment-470461937).
 ```kotlin
 The White Rabbit
