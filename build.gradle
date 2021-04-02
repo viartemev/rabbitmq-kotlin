@@ -1,13 +1,13 @@
 buildscript {
     ext {
         kotlin_version = '1.4.10'
-        rabbitmq_java_client_version = '5.10.0'
-        junit_jupiter_version = '5.7.0'
+        rabbitmq_java_client_version = '5.11.0'
+        junit_jupiter_version = '5.7.1'
         junit_plugin_version = '1.2.0'
         kluent_version = '1.48'
-        ktor_version = '1.4.2'
-        vertx_version = '4.0.0'
-        testcontainers_version = '1.15.0'
+        ktor_version = '1.5.2'
+        vertx_version = '4.0.2'
+        testcontainers_version = '1.15.2'
         httpclient_version = '4.5.13'
         rabbitmq_http_client_version = '3.7.0.RELEASE'
     }
@@ -22,8 +22,8 @@ buildscript {
         classpath "com.novoda:bintray-release:0.9.2"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "com.github.jengelman.gradle.plugins:shadow:5.1.0"
-        classpath "me.champeau.gradle:jmh-gradle-plugin:0.5.2"
-        classpath "org.jetbrains.kotlin:kotlin-allopen:1.4.21"
+        classpath "me.champeau.gradle:jmh-gradle-plugin:0.5.3"
+        classpath "org.jetbrains.kotlin:kotlin-allopen:1.4.31"
         classpath "com.github.jengelman.gradle.plugins:shadow:5.1.0"
         classpath 'com.adarshr:gradle-test-logger-plugin:2.1.1'
     }
@@ -57,7 +57,7 @@ configure(allprojects) { project ->
     sourceCompatibility = 1.8
 
     dependencies {
-        compile 'io.github.microutils:kotlin-logging:2.0.3'
+        compile 'io.github.microutils:kotlin-logging:2.0.6'
 
         compile "com.rabbitmq:amqp-client:$rabbitmq_java_client_version"
         compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
@@ -90,7 +90,7 @@ configure(rootProject) {
     dependencies {
         testImplementation "com.rabbitmq:http-client:$rabbitmq_http_client_version"
         testImplementation "org.awaitility:awaitility-kotlin:4.0.3"
-        testImplementation "org.springframework:spring-web:5.3.1"
+        testImplementation "org.springframework:spring-web:5.3.5"
         testImplementation "org.apache.httpcomponents:httpclient:$httpclient_version"
         testCompile "org.testcontainers:testcontainers:$testcontainers_version"
         testCompile "org.testcontainers:junit-jupiter:$testcontainers_version"
@@ -218,7 +218,7 @@ project('benchmarks') {
     dependencies {
         compile rootProject
         compile "org.openjdk.jmh:jmh-core:1.25.1"
-        jmh 'org.openjdk.jmh:jmh-generator-annprocess:1.26'
+        jmh 'org.openjdk.jmh:jmh-generator-annprocess:1.29'
     }
 
     task deleteEmptyBmList(type: Delete) {
