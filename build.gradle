@@ -9,7 +9,7 @@ buildscript {
         vertx_version = '4.0.2'
         testcontainers_version = '1.15.2'
         httpclient_version = '4.5.13'
-        rabbitmq_http_client_version = '3.7.0.RELEASE'
+        rabbitmq_http_client_version = '3.10.0'
     }
 
     repositories {
