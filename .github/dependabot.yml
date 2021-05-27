@@ -6,32 +6,3 @@ updates:
     interval: daily
     time: "03:00"
   open-pull-requests-limit: 10
-  ignore:
-  - dependency-name: org.jetbrains.kotlin:kotlin-allopen
-    versions:
-    - 1.4.32
-  - dependency-name: org.jetbrains.kotlin:kotlin-reflect
-    versions:
-    - 1.4.21-2
-    - 1.4.31
-  - dependency-name: org.jetbrains.kotlin:kotlin-stdlib-jdk8
-    versions:
-    - 1.4.21-2
-    - 1.4.31
-  - dependency-name: org.jetbrains.kotlin:kotlin-gradle-plugin
-    versions:
-    - 1.4.21-2
-    - 1.4.31
-  - dependency-name: org.springframework:spring-web
-    versions:
-    - 5.3.3
-    - 5.3.4
-  - dependency-name: io.github.microutils:kotlin-logging
-    versions:
-    - 2.0.4
-  - dependency-name: org.testcontainers:junit-jupiter
-    versions:
-    - 1.15.1
-  - dependency-name: org.testcontainers:testcontainers
-    versions:
-    - 1.15.1
