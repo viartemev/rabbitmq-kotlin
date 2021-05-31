@@ -218,7 +218,7 @@ project('benchmarks') {
 
     dependencies {
         compile rootProject
-        compile "org.openjdk.jmh:jmh-core:1.25.1"
+        compile "org.openjdk.jmh:jmh-core:1.32"
         jmh 'org.openjdk.jmh:jmh-generator-annprocess:1.29'
     }
 
