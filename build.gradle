@@ -219,7 +219,7 @@ project('benchmarks') {
     dependencies {
         compile rootProject
         compile "org.openjdk.jmh:jmh-core:1.25.1"
-        jmh 'org.openjdk.jmh:jmh-generator-annprocess:1.29'
+        jmh 'org.openjdk.jmh:jmh-generator-annprocess:1.32'
     }
 
     task deleteEmptyBmList(type: Delete) {
