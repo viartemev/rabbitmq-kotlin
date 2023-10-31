@@ -15,9 +15,6 @@ buildscript {
     repositories {
         mavenCentral()
         maven { url "https://plugins.gradle.org/m2/" }
-        //maven { url 'https://repo.spring.io/snapshot' }
-        //maven { url 'https://repo.spring.io/milestone' }
-        jcenter()
     }
 
     dependencies {
@@ -109,88 +106,6 @@ configure(rootProject) {
         desc = 'The White Rabbit is an asynchronous RabbitMQ library based on Kotlin coroutines'
         website = 'https://github.com/viartemev/the-white-rabbit'
         licences = ['MIT']
-    }
-}
-
-project('the-white-rabbit-ktor-example') {
-    apply plugin: 'application'
-    mainClassName = "io.ktor.server.netty.EngineMain"
-
-    repositories {
-        mavenLocal()
-        jcenter()
-        maven { url 'https://kotlin.bintray.com/ktor' }
-    }
-
-    sourceSets {
-        main.kotlin.srcDirs = main.java.srcDirs = ['src']
-        test.kotlin.srcDirs = test.java.srcDirs = ['test']
-        main.resources.srcDirs = ['resources']
-        test.resources.srcDirs = ['testresources']
-    }
-
-    dependencies {
-        compile rootProject
-        compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-        compile "io.ktor:ktor-server-netty:$ktor_version"
-        compile "ch.qos.logback:logback-classic:1.3.0-alpha5"
-        compile "io.ktor:ktor-server-core:$ktor_version"
-        compile "io.ktor:ktor-jackson:$ktor_version"
-        testCompile "io.ktor:ktor-server-tests:$ktor_version"
-    }
-
-}
-
-/*project('the-white-rabbit-spring-boot-example') {
-    repositories {
-        maven { url 'https://repo.spring.io/snapshot' }
-        maven { url 'https://repo.spring.io/milestone' }
-    }
-
-    apply plugin: "org.jetbrains.kotlin.plugin.spring"
-    apply plugin: org.springframework.boot.gradle.plugin.SpringBootPlugin
-    apply plugin: "io.spring.dependency-management"
-
-    test {
-        useJUnitPlatform()
-    }
-
-    dependencies {
-        compile rootProject
-        implementation 'org.springframework.boot:spring-boot-starter-webflux'
-        implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
-        implementation 'org.jetbrains.kotlin:kotlin-reflect'
-        implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
-        implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.3-native-mt'
-        implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.3'
-        testImplementation('org.springframework.boot:spring-boot-starter-test') {
-            exclude module: 'junit'
-        }
-        testImplementation 'org.junit.jupiter:junit-jupiter-api'
-        testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
-        testImplementation 'io.projectreactor:reactor-test'
-    }
-}*/
-
-project('the-white-rabbit-vertx-example') {
-    apply plugin: "com.github.johnrengelman.shadow"
-    apply plugin: "application"
-
-    mainClassName = 'io.vertx.core.Launcher'
-    def mainVerticleName = 'com.viartemev.the_white_rabbit_vertx_example.App'
-
-    shadowJar {
-        classifier = 'fat'
-        mergeServiceFiles {
-            include 'META-INF/services/io.vertx.core.spi.VerticleFactory'
-        }
-    }
-
-    dependencies {
-        compile rootProject
-        compile "io.vertx:vertx-lang-kotlin:$vertx_version"
-        compile "io.vertx:vertx-lang-kotlin-coroutines:$vertx_version"
-        compile "io.vertx:vertx-web:$vertx_version"
     }
 }
 

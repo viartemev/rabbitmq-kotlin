@@ -1,25 +1,4 @@
-/*
-pluginManagement {
-    repositories {
-        maven { url 'https://repo.spring.io/snapshot' }
-        maven { url 'https://repo.spring.io/milestone' }
-        maven {url "https://plugins.gradle.org/m2/"}
-        gradlePluginPortal()
-    }
-    resolutionStrategy {
-        eachPlugin {
-            if(requested.id.id == 'org.springframework.boot') {
-                useModule("org.springframework.boot:spring-boot-gradle-plugin:${requested.version}")
-            }
-        }
-    }
-}
-*/
-
 rootProject.name = 'the-white-rabbit'
 
 include('benchmarks')
 include('the-white-rabbit-example')
-include('the-white-rabbit-ktor-example')
-//include('the-white-rabbit-spring-boot-example')
-include('the-white-rabbit-vertx-example')
