@@ -1,15 +1,15 @@
 buildscript {
     ext {
-        kotlin_version = '1.4.10'
-        rabbitmq_java_client_version = '5.11.0'
-        junit_jupiter_version = '5.7.1'
-        junit_plugin_version = '1.2.0'
-        kluent_version = '1.48'
-        ktor_version = '1.5.2'
-        vertx_version = '4.0.2'
-        testcontainers_version = '1.15.2'
-        httpclient_version = '4.5.13'
-        rabbitmq_http_client_version = '3.7.0.RELEASE'
+        kotlin_version = "1.4.10"
+        rabbitmq_java_client_version = "5.11.0"
+        junit_jupiter_version = "5.7.1"
+        junit_plugin_version = "1.2.0"
+        kluent_version = "1.48"
+        ktor_version = "1.5.2"
+        vertx_version = "4.0.2"
+        testcontainers_version = "1.15.2"
+        httpclient_version = "4.5.13"
+        rabbitmq_http_client_version = "3.7.0.RELEASE"
     }
 
     repositories {
@@ -24,17 +24,17 @@ buildscript {
         classpath "me.champeau.gradle:jmh-gradle-plugin:0.5.3"
         classpath "org.jetbrains.kotlin:kotlin-allopen:1.4.31"
         classpath "com.github.jengelman.gradle.plugins:shadow:5.1.0"
-        classpath 'com.adarshr:gradle-test-logger-plugin:2.1.1'
+        classpath "com.adarshr:gradle-test-logger-plugin:2.1.1"
     }
 }
 
 plugins {
-    id 'jacoco'
-    id 'com.github.johnrengelman.shadow' version '6.1.0'
+    id "jacoco"
+    id "com.github.johnrengelman.shadow" version "6.1.0"
 }
 
 configure(allprojects) { project ->
-    group = 'com.viartemev'
+    group = "com.viartemev"
 
     apply plugin: "java"
     apply plugin: "kotlin"
@@ -42,7 +42,6 @@ configure(allprojects) { project ->
 
     repositories {
         mavenCentral()
-        jcenter()
     }
 
     compileKotlin {
@@ -55,24 +54,24 @@ configure(allprojects) { project ->
     sourceCompatibility = 1.8
 
     dependencies {
-        compile 'io.github.microutils:kotlin-logging:2.0.6'
+        implementation "io.github.microutils:kotlin-logging:2.0.6"
 
-        compile "com.rabbitmq:amqp-client:$rabbitmq_java_client_version"
-        compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-        compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
-        compile "org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.3.7-mpp-dev-11"
-        implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2-native-mt'
-        testCompile 'org.slf4j:slf4j-api:2.0.0-alpha1'
-        testRuntime 'ch.qos.logback:logback-classic:1.3.0-alpha5'
-        testRuntime 'ch.qos.logback:logback-core:1.3.0-alpha5'
+        implementation "com.rabbitmq:amqp-client:$rabbitmq_java_client_version"
+        implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+        implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+        implementation "org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.3.7-mpp-dev-11"
+        implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2-native-mt"
+        testImplementation "org.slf4j:slf4j-api:2.0.0-alpha1"
+        testRuntimeOnly "ch.qos.logback:logback-classic:1.3.0-alpha5"
+        testRuntimeOnly "ch.qos.logback:logback-core:1.3.0-alpha5"
     }
 }
 
 configure(rootProject) {
-    version = '0.0.6'
+    version = "0.0.6"
 
     apply plugin: "com.novoda.bintray-release"
-    apply plugin: 'com.adarshr.test-logger'
+    apply plugin: "com.adarshr.test-logger"
 
     test {
         useJUnitPlatform()
@@ -89,51 +88,51 @@ configure(rootProject) {
         testImplementation "com.rabbitmq:http-client:$rabbitmq_http_client_version"
         testImplementation "org.springframework:spring-web:5.3.5"
         testImplementation "org.apache.httpcomponents:httpclient:$httpclient_version"
-        testCompile "org.testcontainers:testcontainers:$testcontainers_version"
-        testCompile "org.testcontainers:junit-jupiter:$testcontainers_version"
-        testCompile "com.nhaarman:mockito-kotlin:1.6.0"
-        testCompile "org.junit.jupiter:junit-jupiter-api:$junit_jupiter_version"
-        testRuntime "org.junit.jupiter:junit-jupiter-engine:$junit_jupiter_version"
+        testImplementation "org.testcontainers:testcontainers:$testcontainers_version"
+        testImplementation "org.testcontainers:junit-jupiter:$testcontainers_version"
+        testImplementation "com.nhaarman:mockito-kotlin:1.6.0"
+        testImplementation "org.junit.jupiter:junit-jupiter-api:$junit_jupiter_version"
+        testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junit_jupiter_version"
     }
 
     publish {
-        userOrg = 'viartemev'
-        repoName = 'Maven'
-        groupId = 'com.viartemev'
-        artifactId = 'the-white-rabbit'
-        publishVersion = '0.0.6'
-        desc = 'The White Rabbit is an asynchronous RabbitMQ library based on Kotlin coroutines'
-        website = 'https://github.com/viartemev/the-white-rabbit'
-        licences = ['MIT']
+        userOrg = "viartemev"
+        repoName = "Maven"
+        groupId = "com.viartemev"
+        artifactId = "the-white-rabbit"
+        publishVersion = "0.0.6"
+        desc = "The White Rabbit is an asynchronous RabbitMQ library based on Kotlin coroutines"
+        website = "https://github.com/viartemev/the-white-rabbit"
+        licences = ["MIT"]
     }
 }
 
-project('the-white-rabbit-example') {
+project("the-white-rabbit-example") {
     dependencies {
-        compile rootProject
-        compile group: 'org.slf4j', name: 'slf4j-api', version: '2.0.0-alpha1'
-        runtime group: 'ch.qos.logback', name: 'logback-classic', version: '1.3.0-alpha4'
-        runtime group: 'ch.qos.logback', name: 'logback-core', version: '1.3.0-alpha4'
+        implementation rootProject
+        implementation group: "org.slf4j", name: "slf4j-api", version: "2.0.0-alpha1"
+        runtimeOnly group: "ch.qos.logback", name: "logback-classic", version: "1.3.0-alpha4"
+        runtimeOnly group: "ch.qos.logback", name: "logback-core", version: "1.3.0-alpha4"
     }
 }
 
-project('benchmarks') {
+project("benchmarks") {
     apply plugin: "com.github.johnrengelman.shadow"
     apply plugin: "me.champeau.gradle.jmh"
 
-    jmh.jmhVersion = '1.21'
+    jmh.jmhVersion = "1.21"
 
     jmhJar {
-        baseName 'benchmarks'
+        baseName "benchmarks"
         classifier = null
         version = null
         destinationDir = file("$rootDir")
     }
 
     dependencies {
-        compile rootProject
-        compile "org.openjdk.jmh:jmh-core:1.25.1"
-        jmh 'org.openjdk.jmh:jmh-generator-annprocess:1.29'
+        implementation rootProject
+        implementation "org.openjdk.jmh:jmh-core:1.25.1"
+        jmh "org.openjdk.jmh:jmh-generator-annprocess:1.29"
     }
 
     task deleteEmptyBmList(type: Delete) {
