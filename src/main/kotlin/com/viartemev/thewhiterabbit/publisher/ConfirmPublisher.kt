@@ -2,18 +2,20 @@ package com.viartemev.thewhiterabbit.publisher
 
 import com.rabbitmq.client.Channel
 import com.viartemev.thewhiterabbit.common.cancelOnIOException
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.suspendCancellableCoroutine
 import mu.KotlinLogging
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.Continuation
-import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.EmptyCoroutineContext
 
 private val logger = KotlinLogging.logger {}
 
+/**
+ * A class that represents a publisher for confirmations in RabbitMQ.
+ *
+ * @property channel The channel used for communication with RabbitMQ.
+ * @property continuations A thread-safe map of message sequence numbers to continuations.
+ * @constructor Creates a ConfirmPublisher with the specified channel.
+ */
 class ConfirmPublisher internal constructor(private val channel: Channel) {
     internal val continuations = ConcurrentHashMap<Long, Continuation<Boolean>>()
 
@@ -22,11 +24,10 @@ class ConfirmPublisher internal constructor(private val channel: Channel) {
     }
 
     /**
-     * Publish a message with the waiting of confirmation.
+     * Publishes a message with confirmation to the specified exchange and routing key.
      *
-     * @see com.viartemev.thewhiterabbit.publisher.OutboundMessage
-     * @return acknowledgement - represent messages handled successfully or lost by the broker.
-     * @throws java.util.concurrent.CancellationException if can't publish the message
+     * @param message The {@link OutboundMessage} to publish.
+     * @return True if the message was published successfully, false otherwise.
      */
     suspend fun publishWithConfirm(message: OutboundMessage): Boolean {
         val messageSequenceNumber = channel.nextPublishSeqNo
@@ -38,20 +39,5 @@ class ConfirmPublisher internal constructor(private val channel: Channel) {
                 message.run { channel.basicPublish(exchange, routingKey, properties, msg) }
             }
         }
-    }
-
-    /**
-     * Asynchronously publish a list of messages with the waiting of confirmation.
-     *
-     * @see com.viartemev.thewhiterabbit.publisher.OutboundMessage
-     * @param coroutineContext strictly one-thread context to execute coroutines
-     * @return list of acknowledgements - represent messages handled successfully or lost by the broker.
-     * @throws java.util.concurrent.CancellationException if can't publish one of the messages
-     */
-    suspend fun publishWithConfirmAsync(
-        coroutineContext: CoroutineContext = EmptyCoroutineContext,
-        messages: List<OutboundMessage>
-    ): List<Deferred<Boolean>> = coroutineScope {
-        messages.map { async(coroutineContext) { publishWithConfirm(it) } }
     }
 }

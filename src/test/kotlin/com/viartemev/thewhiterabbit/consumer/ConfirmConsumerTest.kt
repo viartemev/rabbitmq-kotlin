@@ -26,7 +26,7 @@ class ConfirmConsumerTest : AbstractTestContainersTest() {
                     declareQueue(QueueSpecification(QUEUE_NAME))
                     publish {
                         val messages = (1..10).map { createMessage(queue = QUEUE_NAME, body = "1") }
-                        publishWithConfirmAsync(messages = messages)
+                        messages.forEach { m -> publishWithConfirm(m) }
                     }
                     consume(QUEUE_NAME, 2) {
                         for (i in 1..10) consumeMessageWithConfirm {

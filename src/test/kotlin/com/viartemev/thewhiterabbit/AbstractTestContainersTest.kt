@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
+import java.net.URL
 
 @Testcontainers
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -24,8 +25,9 @@ abstract class AbstractTestContainersTest {
     @BeforeAll
     fun setUp() {
         factory = ConnectionFactory()
-        factory.host = rabbitmq.containerIpAddress.toString()
+        factory.host = rabbitmq.host.toString()
         factory.port = rabbitmq.connectionPort()
-        httpRabbitMQClient = Client("http://${rabbitmq.containerIpAddress}:${rabbitmq.managementPort()}/api/", "guest", "guest")
+        httpRabbitMQClient =
+            Client(URL("http://${rabbitmq.host}:${rabbitmq.managementPort()}/api/"), "guest", "guest")
     }
 }

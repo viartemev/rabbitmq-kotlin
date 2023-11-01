@@ -6,11 +6,7 @@ import com.viartemev.thewhiterabbit.channel.publish
 import com.viartemev.thewhiterabbit.queue.QueueSpecification
 import com.viartemev.thewhiterabbit.queue.declareQueue
 import com.viartemev.thewhiterabbit.utils.createMessage
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -53,23 +49,6 @@ class PublisherIntegrationTest : AbstractTestContainersTest() {
                                 }
                             }.awaitAll()
                         }
-                        assertTrue { acks.all { it } }
-                    }
-                }
-            }
-        }
-    }
-
-    @Test
-    fun `test n-messages publishing`() {
-        val times = 10
-        factory.newConnection().use { connection ->
-            runBlocking {
-                connection.confirmChannel {
-                    val queue = declareQueue(QueueSpecification("")).queue
-                    publish {
-                        val messages = (1..times).map { createMessage(queue = queue, body = "Hello #$it") }
-                        val acks = publishWithConfirmAsync(messages = messages).awaitAll()
                         assertTrue { acks.all { it } }
                     }
                 }
