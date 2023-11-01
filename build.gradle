@@ -1,15 +1,11 @@
 buildscript {
     ext {
-        kotlin_version = "1.4.10"
-        rabbitmq_java_client_version = "5.11.0"
-        junit_jupiter_version = "5.7.1"
-        junit_plugin_version = "1.2.0"
-        kluent_version = "1.48"
-        ktor_version = "1.5.2"
-        vertx_version = "4.0.2"
-        testcontainers_version = "1.15.2"
-        httpclient_version = "4.5.13"
-        rabbitmq_http_client_version = "3.7.0.RELEASE"
+        kotlin_version = "1.9.10"
+        rabbitmq_java_client_version = "5.20.0"
+        junit_jupiter_version = "5.10.0"
+        testcontainers_version = "1.19.1"
+        httpclient_version = "5.2.1"
+        rabbitmq_http_client_version = "5.2.0"
     }
 
     repositories {
@@ -18,19 +14,16 @@ buildscript {
     }
 
     dependencies {
-        classpath("com.novoda:bintray-release:0.9.2")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
-        classpath("com.github.jengelman.gradle.plugins:shadow:5.1.0")
-        classpath("me.champeau.gradle:jmh-gradle-plugin:0.5.3")
-        classpath("org.jetbrains.kotlin:kotlin-allopen:1.4.31")
-        classpath("com.github.jengelman.gradle.plugins:shadow:5.1.0")
+        classpath("org.jetbrains.kotlin:kotlin-allopen:$kotlin_version")
         classpath("com.adarshr:gradle-test-logger-plugin:2.1.1")
+        classpath("me.champeau.jmh:jmh-gradle-plugin:0.7.2")
     }
 }
 
 plugins {
     id("jacoco")
-    id("com.github.johnrengelman.shadow") version("6.1.0")
+    id "com.github.johnrengelman.shadow" version "8.1.1"
 }
 
 configure(allprojects) { project ->
@@ -70,40 +63,22 @@ configure(allprojects) { project ->
 configure(rootProject) {
     version = "0.0.6"
 
-    apply plugin: "com.novoda.bintray-release"
     apply plugin: "com.adarshr.test-logger"
 
     test {
         useJUnitPlatform()
     }
 
-    jacocoTestReport {
-        reports {
-            xml.enabled true
-            html.enabled true
-        }
-    }
 
     dependencies {
         testImplementation("com.rabbitmq:http-client:$rabbitmq_http_client_version")
         testImplementation("org.springframework:spring-web:5.3.5")
-        testImplementation("org.apache.httpcomponents:httpclient:$httpclient_version")
+        testImplementation("org.apache.httpcomponents.client5:httpclient5:$httpclient_version")
         testImplementation("org.testcontainers:testcontainers:$testcontainers_version")
         testImplementation("org.testcontainers:junit-jupiter:$testcontainers_version")
         testImplementation("com.nhaarman:mockito-kotlin:1.6.0")
         testImplementation("org.junit.jupiter:junit-jupiter-api:$junit_jupiter_version")
         testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junit_jupiter_version")
-    }
-
-    publish {
-        userOrg = "viartemev"
-        repoName = "Maven"
-        groupId = "com.viartemev"
-        artifactId = "the-white-rabbit"
-        publishVersion = "0.0.6"
-        desc = "The White Rabbit is an asynchronous RabbitMQ library based on Kotlin coroutines"
-        website = "https://github.com/viartemev/the-white-rabbit"
-        licences = ["MIT"]
     }
 }
 
@@ -118,21 +93,19 @@ project("the-white-rabbit-example") {
 
 project("benchmarks") {
     apply plugin: "com.github.johnrengelman.shadow"
-    apply plugin: "me.champeau.gradle.jmh"
+    apply plugin: "me.champeau.jmh"
 
-    jmh.jmhVersion = "1.21"
+    jmh.jmhVersion = "1.37"
+    compileJmhKotlin.kotlinOptions.jvmTarget = "1.8"
 
     jmhJar {
-        baseName "benchmarks"
-        classifier = null
-        version = null
-        destinationDir = file("$rootDir")
+        exclude 'LICENSE'
     }
 
     dependencies {
         implementation(rootProject)
-        implementation("org.openjdk.jmh:jmh-core:1.25.1")
-        jmh("org.openjdk.jmh:jmh-generator-annprocess:1.29")
+        implementation("org.openjdk.jmh:jmh-core:1.37")
+        jmh("org.openjdk.jmh:jmh-generator-annprocess:1.37")
     }
 
     task deleteEmptyBmList(type: Delete) {

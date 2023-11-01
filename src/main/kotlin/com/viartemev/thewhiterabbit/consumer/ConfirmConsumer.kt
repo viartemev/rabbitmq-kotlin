@@ -26,7 +26,8 @@ class ConfirmConsumer internal constructor(private val amqpChannel: Channel, amq
         consTag = amqpChannel.basicConsume(amqpQueue, false,
             { consumerTag, message ->
                 try {
-                    deliveries.sendBlocking(message)
+                    //FIXME
+                    //deliveries.sendBlocking(message)
                 } catch (e: ClosedSendChannelException) {
                     logger.debug { "Can't receive a message. Consumer $consumerTag has been cancelled" }
                 }
