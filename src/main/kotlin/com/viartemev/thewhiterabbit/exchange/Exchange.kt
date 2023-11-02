@@ -9,9 +9,11 @@ import java.io.IOException
 
 
 /**
- * Asynchronously Declare an exchange passively; that is, check if the named exchange exists.
- * @see com.viartemev.thewhiterabbit.exchange.ExchangeSpecification
- * @throws IOException the server will raise a 404 channel exception if the named exchange does not exist.
+ * Asynchronously declares an exchange passively by checking if the named exchange exists.
+ *
+ * @param exchangeSpecification the specification of the exchange to declare
+ * @return the declaration result as an instance of AMQP.Exchange.DeclareOk
+ * @throws IOException the server will raise a 404 channel exception if the named exchange does not exist
  */
 suspend fun Channel.declareExchange(exchangeSpecification: ExchangeSpecification): AMQP.Exchange.DeclareOk {
     val channel = this
@@ -30,9 +32,10 @@ suspend fun Channel.declareExchange(exchangeSpecification: ExchangeSpecification
 }
 
 /**
- * Asynchronously delete an exchange.
- * @see com.viartemev.thewhiterabbit.exchange.DeleteExchangeSpecification
- * @return a deletion-confirm method to indicate the exchange was successfully deleted
+ * Asynchronously deletes an exchange.
+ *
+ * @param specification the specification of the exchange to be deleted
+ * @return the deletion-confirm method to indicate the exchange was successfully deleted
  * @throws java.io.IOException if an error is encountered
  */
 suspend fun Channel.deleteExchange(specification: DeleteExchangeSpecification): AMQP.Exchange.DeleteOk {
@@ -49,8 +52,9 @@ suspend fun Channel.deleteExchange(specification: DeleteExchangeSpecification): 
 }
 
 /**
- * Asynchronously bind an exchange to an exchange.
- * @see com.viartemev.thewhiterabbit.exchange.BindExchangeSpecification
+ * Asynchronously binds an exchange to another exchange.
+ *
+ * @param specification the specification for the binding
  * @return a binding-confirm method if the binding was successfully created
  * @throws java.io.IOException if an error is encountered
  */
@@ -70,10 +74,12 @@ suspend fun Channel.bindExchange(specification: BindExchangeSpecification): AMQP
 }
 
 /**
- * Asynchronously unbind an exchange from an exchange.
- * @see com.viartemev.thewhiterabbit.exchange.UnbindExchangeSpecification
- * @return a binding-confirm method if the binding was successfully created
- * @throws java.io.IOException if an error is encountered
+ * Asynchronously unbinds an exchange from another exchange.
+ *
+ * @param specification the unbind exchange specification containing the necessary parameters
+ *                      such as source exchange, destination exchange, routing key, arguments, etc.
+ * @return a binding-confirm method if the unbinding was successful
+ * @throws IOException if an error is encountered during the unbinding operation
  */
 suspend fun Channel.unbindExchange(specification: UnbindExchangeSpecification): AMQP.Exchange.UnbindOk {
     val channel = this
