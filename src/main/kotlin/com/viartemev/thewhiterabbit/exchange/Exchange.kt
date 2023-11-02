@@ -2,7 +2,7 @@ package com.viartemev.thewhiterabbit.exchange
 
 import com.rabbitmq.client.AMQP
 import com.rabbitmq.client.Channel
-import com.viartemev.thewhiterabbit.common.resourceManagementDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.withContext
 import java.io.IOException
@@ -24,7 +24,7 @@ suspend fun Channel.declareExchange(exchangeSpecification: ExchangeSpecification
         .arguments(exchangeSpecification.arguments)
         .build()
 
-    return withContext(resourceManagementDispatcher) {
+    return withContext(Dispatchers.IO) {
         channel.asyncCompletableRpc(declaration).await().method as AMQP.Exchange.DeclareOk
     }
 }
@@ -43,7 +43,7 @@ suspend fun Channel.deleteExchange(specification: DeleteExchangeSpecification): 
         .nowait(specification.noWait)
         .build()
 
-    return withContext(resourceManagementDispatcher) {
+    return withContext(Dispatchers.IO) {
         channel.asyncCompletableRpc(deleteDeclaration).await().method as AMQP.Exchange.DeleteOk
     }
 }
@@ -64,7 +64,7 @@ suspend fun Channel.bindExchange(specification: BindExchangeSpecification): AMQP
         .arguments(specification.arguments)
         .build()
 
-    return withContext(resourceManagementDispatcher) {
+    return withContext(Dispatchers.IO) {
         channel.asyncCompletableRpc(bindDeclaration).await().method as AMQP.Exchange.BindOk
     }
 }
@@ -85,7 +85,7 @@ suspend fun Channel.unbindExchange(specification: UnbindExchangeSpecification): 
         .arguments(specification.arguments)
         .build()
 
-    return withContext(resourceManagementDispatcher) {
+    return withContext(Dispatchers.IO) {
         channel.asyncCompletableRpc(unbindDeclaration).await().method as AMQP.Exchange.UnbindOk
     }
 }

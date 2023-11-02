@@ -2,7 +2,7 @@ package com.viartemev.thewhiterabbit.queue
 
 import com.rabbitmq.client.AMQP
 import com.rabbitmq.client.Channel
-import com.viartemev.thewhiterabbit.common.resourceManagementDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.withContext
 
@@ -22,7 +22,7 @@ suspend fun Channel.declareQueue(queueSpecification: QueueSpecification): AMQP.Q
         .arguments(queueSpecification.arguments)
         .build()
 
-    return withContext(resourceManagementDispatcher) {
+    return withContext(Dispatchers.IO) {
         channel.asyncCompletableRpc(queueDeclaration).await().method as AMQP.Queue.DeclareOk
     }
 }
@@ -42,7 +42,7 @@ suspend fun Channel.deleteQueue(specification: DeleteQueueSpecification): AMQP.Q
         .nowait(specification.noWait)
         .build()
 
-    return withContext(resourceManagementDispatcher) {
+    return withContext(Dispatchers.IO) {
         channel.asyncCompletableRpc(deleteDeclaration).await().method as AMQP.Queue.DeleteOk
     }
 }
@@ -60,7 +60,7 @@ suspend fun Channel.purgeQueue(specification: PurgeQueueSpecification): AMQP.Que
         .nowait(specification.noWait)
         .build()
 
-    return withContext(resourceManagementDispatcher) {
+    return withContext(Dispatchers.IO) {
         channel.asyncCompletableRpc(deleteDeclaration).await().method as AMQP.Queue.PurgeOk
     }
 }
@@ -81,7 +81,7 @@ suspend fun Channel.bindQueue(specification: BindQueueSpecification): AMQP.Queue
         .arguments(specification.arguments)
         .build()
 
-    return withContext(resourceManagementDispatcher) {
+    return withContext(Dispatchers.IO) {
         channel.asyncCompletableRpc(bindDeclaration).await().method as AMQP.Queue.BindOk
     }
 }
@@ -101,7 +101,7 @@ suspend fun Channel.unbindQueue(specification: UnbindQueueSpecification): AMQP.Q
         .arguments(specification.arguments)
         .build()
 
-    return withContext(resourceManagementDispatcher) {
+    return withContext(Dispatchers.IO) {
         channel.asyncCompletableRpc(unbindDeclaration).await().method as AMQP.Queue.UnbindOk
     }
 }
