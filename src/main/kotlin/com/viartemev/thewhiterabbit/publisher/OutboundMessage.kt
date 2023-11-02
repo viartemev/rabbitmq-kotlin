@@ -2,6 +2,22 @@ package com.viartemev.thewhiterabbit.publisher
 
 import com.rabbitmq.client.AMQP.BasicProperties
 
+/**
+ * Represents an outbound message to be sent to a RabbitMQ exchange.
+ *
+ * @property exchange the exchange to which the message should be sent
+ * @property routingKey the routing key to be used for the message
+ * @property properties additional properties of the message
+ * @property msg the message data as a byte array
+ * @constructor Creates a new instance of [OutboundMessage] with the specified parameters.
+ *
+ * @param exchange the exchange to which the message should be sent
+ * @param routingKey the routing key to be used for the message
+ * @param properties additional properties of the message
+ * @param msg the message data as a byte array
+ *
+ * @see BasicProperties
+ */
 data class OutboundMessage(
     val exchange: String,
     val routingKey: String,
