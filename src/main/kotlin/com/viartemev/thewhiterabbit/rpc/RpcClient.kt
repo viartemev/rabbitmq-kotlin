@@ -2,7 +2,6 @@ package com.viartemev.thewhiterabbit.rpc
 
 import com.rabbitmq.client.Channel
 import com.viartemev.thewhiterabbit.common.RabbitMqMessage
-import com.viartemev.thewhiterabbit.common.cancelOnIOException
 import com.viartemev.thewhiterabbit.queue.DeleteQueueSpecification
 import com.viartemev.thewhiterabbit.queue.declareQueue
 import com.viartemev.thewhiterabbit.queue.deleteQueue
@@ -36,15 +35,13 @@ class RpcClient(val channel: Channel) {
         var consumerTag: String? = null
         try {
             return suspendCancellableCoroutine { continuation ->
-                cancelOnIOException(continuation) {
-                    consumerTag = channel.basicConsume(replyQueueName, true, { _, delivery ->
-                        if (corrId == delivery.properties.correlationId) {
-                            continuation.resume(RabbitMqMessage(delivery.properties, delivery.body))
-                        }
-                    }, { consumerTag ->
-                        logger.debug { "Consumer $consumerTag has been cancelled for reasons other than by a call to Channel#basicCancel" }
-                    })
-                }
+                consumerTag = channel.basicConsume(replyQueueName, true, { _, delivery ->
+                    if (corrId == delivery.properties.correlationId) {
+                        continuation.resume(RabbitMqMessage(delivery.properties, delivery.body))
+                    }
+                }, { consumerTag ->
+                    logger.debug { "Consumer $consumerTag has been cancelled for reasons other than by a call to Channel#basicCancel" }
+                })
             }
         } finally {
             try {
