@@ -1,7 +1,6 @@
 package com.viartemev.thewhiterabbit.publisher
 
 import com.rabbitmq.client.Channel
-import com.viartemev.thewhiterabbit.common.cancelOnIOException
 import kotlinx.coroutines.suspendCancellableCoroutine
 import mu.KotlinLogging
 import java.util.concurrent.ConcurrentHashMap
@@ -31,13 +30,11 @@ class ConfirmPublisher internal constructor(private val channel: Channel) {
      */
     suspend fun publishWithConfirm(message: OutboundMessage): Boolean {
         val messageSequenceNumber = channel.nextPublishSeqNo
-        logger.debug { "The message Sequence Number: $messageSequenceNumber" }
+        logger.debug { "Generated message Sequence Number: $messageSequenceNumber" }
         return suspendCancellableCoroutine { continuation ->
-            continuations[messageSequenceNumber] = continuation
             continuation.invokeOnCancellation { continuations.remove(messageSequenceNumber) }
-            cancelOnIOException(continuation) {
-                message.run { channel.basicPublish(exchange, routingKey, properties, msg) }
-            }
+            continuations[messageSequenceNumber] = continuation
+            message.apply { channel.basicPublish(exchange, routingKey, properties, msg) }
         }
     }
 }

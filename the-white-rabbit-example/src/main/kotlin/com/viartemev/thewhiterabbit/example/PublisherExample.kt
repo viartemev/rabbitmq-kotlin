@@ -13,16 +13,13 @@ const val PUBLISHER_EXCHANGE_NAME = ""
 const val PUBLISHER_QUEUE_NAME = "test_queue"
 const val TIMES = 100_000
 
-fun main() {
+fun main() = runBlocking {
     val connectionFactory = ConnectionFactory().apply { useNio() }
     val connection = connectionFactory.newConnection()
-    runBlocking {
-        connection.confirmChannel {
-            publish {
-                coroutineScope {
-                    val messages = (1..TIMES).map { createMessage("") }
-                    publishWithConfirmAsync(this.coroutineContext, messages).awaitAll()
-                }
+    connection.confirmChannel {
+        publish {
+            coroutineScope {
+                val messages = (1..TIMES).map { createMessage("") }.map {  publishWithConfirm(it) }
             }
         }
     }
