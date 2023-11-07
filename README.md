@@ -1,3 +1,6 @@
+
+<img src=https://github.com/viartemev/the-white-rabbit/assets/23705041/1bd2825b-1241-49d8-94fc-550c381969de width="200" height="200">
+
 # The White Rabbit 
 [![Build Status](https://travis-ci.org/viartemev/the-white-rabbit.svg?branch=master)](https://travis-ci.org/viartemev/the-white-rabbit)
 [ ![Download](https://api.bintray.com/packages/viartemev/Maven/the-white-rabbit/images/download.svg) ](https://bintray.com/viartemev/Maven/the-white-rabbit/_latestVersion)
