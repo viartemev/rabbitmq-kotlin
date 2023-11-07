@@ -5,8 +5,11 @@ import com.rabbitmq.client.Delivery
 import com.viartemev.thewhiterabbit.exception.AcknowledgeException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import mu.KotlinLogging
@@ -20,7 +23,7 @@ private val logger = KotlinLogging.logger {}
  *
  */
 class ConfirmConsumer internal constructor(
-    private val amqpChannel: Channel, amqpQueue: String, private val prefetchSize: Int
+    private val amqpChannel: Channel, private val amqpQueue: String, private val prefetchSize: Int
 ) : Closeable {
     private val deliveries = KChannel<Delivery>(prefetchSize)
 
@@ -38,7 +41,6 @@ class ConfirmConsumer internal constructor(
             }
         }, { consumerTag ->
             logger.info { "Consumer $consumerTag has been cancelled for reasons other than by a call to Channel#basicCancel" }
-            //FIXME do we need to cancel the channel?
             deliveries.cancel()
         })
     }
@@ -85,8 +87,9 @@ class ConfirmConsumer internal constructor(
     }
 
     override fun close() {
-        logger.debug { "closing ConfirmConsumer" }
+        logger.debug { "Shutting down consumer" }
         amqpChannel.basicCancel(consTag)
+        //FIXME Additional cancellation?
         deliveries.cancel()
     }
 }

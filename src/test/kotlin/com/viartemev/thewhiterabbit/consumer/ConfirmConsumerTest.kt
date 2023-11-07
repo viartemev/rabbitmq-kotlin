@@ -65,21 +65,24 @@ class ConfirmConsumerTest : AbstractTestContainersTest() {
                 val sender = launch {
                     publish {
                         while (isActive) {
-                            delay(100)
+                            delay(1000)
                             publishWithConfirm(message)
                         }
                     }
                 }
-                consume(QUEUE_NAME, 2) {
-                    consumeMessagesWithConfirm {
-                        println("Consuming message: ${it.body}")
-                        delay(5000)
-                        counter.getAndAdd(String(it.body).toInt())
+                val consumer = launch {
+                    consume(QUEUE_NAME, 2) {
+                        consumeMessagesWithConfirm {
+                            println("Consuming message: ${it.body}")
+                            delay(1000)
+                            counter.getAndAdd(String(it.body).toInt())
+                        }
                     }
                 }
-                delay(50000)
+                delay(5000)
                 println("Shouting down...")
                 sender.cancel()
+                consumer.cancel()
             }
         }
     }
