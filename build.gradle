@@ -47,7 +47,7 @@ configure(allprojects) { project ->
     sourceCompatibility = 1.8
 
     dependencies {
-        implementation("io.github.microutils:kotlin-logging:2.0.6")
+        implementation("io.github.microutils:kotlin-logging:3.0.5")
 
         implementation("com.rabbitmq:amqp-client:$rabbitmq_java_client_version")
         implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version")
