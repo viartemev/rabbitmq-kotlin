@@ -16,7 +16,7 @@ buildscript {
     dependencies {
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
         classpath("org.jetbrains.kotlin:kotlin-allopen:$kotlin_version")
-        classpath("com.adarshr:gradle-test-logger-plugin:2.1.1")
+        classpath("com.adarshr:gradle-test-logger-plugin:4.0.0")
         classpath("me.champeau.jmh:jmh-gradle-plugin:0.7.2")
     }
 }
