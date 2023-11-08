@@ -55,7 +55,7 @@ class ConfirmConsumer internal constructor(
             cancel(errorMessage, e)
         }
     }
-    
+
     suspend fun consumeMessagesWithConfirm(handler: suspend (Delivery) -> Unit) = coroutineScope {
         val semaphore = Semaphore(prefetchSize)
         while (isActive) {
