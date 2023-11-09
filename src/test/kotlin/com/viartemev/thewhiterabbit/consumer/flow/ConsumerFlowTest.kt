@@ -6,10 +6,12 @@ import com.viartemev.thewhiterabbit.channel.publish
 import com.viartemev.thewhiterabbit.queue.QueueSpecification
 import com.viartemev.thewhiterabbit.queue.declareQueue
 import com.viartemev.thewhiterabbit.utils.createMessage
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.single
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
@@ -41,14 +43,12 @@ class ConsumerFlowTest : AbstractTestContainersTest() {
                     (1..10).map { i -> createMessage(queue = QUEUE_NAME, body = i.toString()) }
                         .map { m -> async { publishWithConfirm(m) } }.awaitAll()
                 }
-                ConsumerFlow(this, QUEUE_NAME)
+                val delivery = ConsumerFlow(this, QUEUE_NAME)
                     .consumerConfirmAckFlow(2)
-                    .take(10)
-                    //.cancellable()
+                    .flowOn(Dispatchers.IO)
                     .catch { e -> println("Caught exception: $e") }
-                    .collect { delivery ->
-                        println("Delivery is $delivery")
-                    }
+                    .single()
+                println("Got the message: ${delivery.body}")
             }
         }
     }

@@ -2,6 +2,7 @@ package com.viartemev.thewhiterabbit.consumer.flow
 
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Delivery
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.flow.Flow
@@ -52,7 +53,7 @@ class ConsumerFlow(
         }
         val deliverCallback: (consumerTag: String, message: Delivery) -> Unit = { _, message ->
             try {
-                logger.debug { "Trying to send a message from the flow consumer to the flow" }
+                logger.debug { "Trying to send a message from the flow consumer to the flow ${Thread.currentThread().name}" }
                 trySendBlocking(message)
                 logger.debug { "The message was successfully sent to the flow" }
                 amqpChannel.basicAck(message.envelope.deliveryTag, false)
