@@ -2,7 +2,6 @@ package com.viartemev.thewhiterabbit.consumer.flow
 
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Delivery
-import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.flow.Flow
@@ -17,7 +16,9 @@ class ConsumerFlow(
 
     /**
      * The consumerAutoAckFlow function establishes a cold Flow for consuming messages from an AMQP queue with automatic acknowledgment enabled.
-     * This flow is designed to emit messages to the downstream consumers as they arrive from the queue.
+     *
+     * @param prefetchSize The maximum number of unacknowledged messages that the consumer can receive at once. Defaults to 0.
+     * @return A Flow of Delivery objects representing the messages received from the queue.
      */
     suspend fun consumerAutoAckFlow(prefetchSize: Int = 0): Flow<Delivery> = callbackFlow {
         if (prefetchSize != 0) {
@@ -46,14 +47,16 @@ class ConsumerFlow(
      * The messages are not automatically acknowledged after being received.
      * Instead, acknowledgments are manually sent to the AMQP server after the messages are successfully emitted to the downstream flow collector.
      *
+     * @param prefetchSize The number of messages to prefetch from the server. Default is 0 which means no prefetching.
+     * @return A cold Flow that consumes messages from the AMQP queue.
      */
-    suspend fun consumerConfirmAckFlow(prefetchSize: Int = 0): Flow<Delivery> = callbackFlow {
+    suspend fun consumerConfirmAckFlow(prefetchSize: Int = 0) = callbackFlow {
         if (prefetchSize != 0) {
             amqpChannel.basicQos(prefetchSize, false)
         }
         val deliverCallback: (consumerTag: String, message: Delivery) -> Unit = { _, message ->
             try {
-                logger.debug { "Trying to send a message from the flow consumer to the flow ${Thread.currentThread().name}" }
+                logger.debug { "Trying to send a message from the flow consumer to the flow" }
                 trySendBlocking(message)
                 logger.debug { "The message was successfully sent to the flow" }
                 amqpChannel.basicAck(message.envelope.deliveryTag, false)
