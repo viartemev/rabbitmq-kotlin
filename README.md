@@ -1,7 +1,7 @@
 
 <img src=https://github.com/viartemev/the-white-rabbit/assets/23705041/1bd2825b-1241-49d8-94fc-550c381969de width="200" height="200">
 
-# RabbitMQ Kotlin 
+# RabbitMQ Kotlin
 [![CI](https://github.com/viartemev/rabbitmq-kotlin/actions/workflows/gradle.yml/badge.svg?branch=master)](https://github.com/viartemev/rabbitmq-kotlin/actions/workflows/gradle.yml)
 [![Open Source Helpers](https://www.codetriage.com/viartemev/the-white-rabbit/badges/users.svg)](https://www.codetriage.com/viartemev/the-white-rabbit)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -13,43 +13,15 @@ The White Rabbit is a [fast](https://github.com/viartemev/the-white-rabbit/issue
 * Message consuming with acknowledgment
 * Transactional publishing and consuming
 * RPC pattern
- 
+
 ## Adding to project
-<details><summary>Gradle</summary>
-
-```
-repositories {
-    jcenter()
-}
-
-compile 'com.viartemev:the-white-rabbit:$version'
-```
-</details>
-
-<details><summary>Maven</summary>
-
-```
-<repositories>
-    <repository>
-        <id>jcenter</id>
-        <url>https://jcenter.bintray.com/</url>
-    </repository>
-</repositories>
-
-<dependency>
-  <groupId>com.viartemev</groupId>
-  <artifactId>the-white-rabbit</artifactId>
-  <version>${version}</version>
-</dependency>
-```
-</details>
 
 ## Usage notes and examples
 
-Use one of the extension methods on `com.rabbitmq.client.Connection` to get a channel you need: 
+Use one of the extension methods on `com.rabbitmq.client.Connection` to get a channel you need:
 
 ```kotlin
-connection.channel { 
+connection.channel {
     /*
     The plain channel with consumer acknowledgments, supports:
         -- queue and exchange manipulations
@@ -58,7 +30,7 @@ connection.channel {
      */
 }
 
-connection.confirmChannel { // 
+connection.confirmChannel { //
     /*
     Channel with publisher confirmations, additionally supports:
         -- asynchronous message publishing
@@ -86,7 +58,7 @@ connection.channel.declareQueue(QueueSpecification(QUEUE_NAME))
 connection.channel.bindQueue(BindQueueSpecification(EXCHANGE_NAME, QUEUE_NAME))
 ```
 
-### Asynchronous message publishing with confirmation 
+### Asynchronous message publishing with confirmation
 ```kotlin
 connection.confirmChannel {
     publish {
@@ -126,7 +98,7 @@ RabbitMQ and AMQP itself offer rather scarce support for transaction. When consi
 * transactions cannot be nested into each other;
 
  The library provides a convenient way to perform transactional publishing and receiving based on `transaction` extension function. This function commits a transaction upon normal execution of the block and rolls it back if a `RuntimeException` occurs. Exceptions are always propagated further. Coroutines are not used for publishing though, since there are no any asynchronous operations involved.
- 
+
 ```kotlin
 connection.txChannel {
     transaction {

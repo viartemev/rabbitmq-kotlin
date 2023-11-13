@@ -84,7 +84,7 @@ configure(rootProject) {
     }
 }
 
-project("the-white-rabbit-example") {
+project("rabbitmq-kotlin-example") {
     dependencies {
         implementation(rootProject)
         implementation("org.slf4j:slf4j-api:2.0.9")

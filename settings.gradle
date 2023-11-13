@@ -1,4 +1,4 @@
-rootProject.name = 'the-white-rabbit'
+rootProject.name = 'rabbitmq-kotlin'
 
 include('benchmarks')
-include('the-white-rabbit-example')
+include('rabbitmq-kotlin-example')

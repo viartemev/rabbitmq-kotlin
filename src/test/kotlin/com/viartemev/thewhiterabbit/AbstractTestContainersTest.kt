@@ -1,5 +1,6 @@
 package com.viartemev.thewhiterabbit
 
+import com.rabbitmq.client.Connection
 import com.rabbitmq.client.ConnectionFactory
 import com.rabbitmq.http.client.Client
 import com.viartemev.thewhiterabbit.utils.RabbitMQContainer
@@ -20,6 +21,7 @@ abstract class AbstractTestContainersTest {
 
     lateinit var factory: ConnectionFactory
     lateinit var httpRabbitMQClient: Client
+    lateinit var connection: Connection
     val DEFAULT_VHOST = "/"
 
     @BeforeAll
@@ -29,5 +31,6 @@ abstract class AbstractTestContainersTest {
         factory.port = rabbitmq.connectionPort()
         httpRabbitMQClient =
             Client(URL("http://${rabbitmq.host}:${rabbitmq.managementPort()}/api/"), "guest", "guest")
+        connection = factory.newConnection()
     }
 }

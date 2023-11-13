@@ -11,13 +11,10 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class ConsumerFlowTest : AbstractTestContainersTest() {
     private val QUEUE_NAME = "test_queue"
-    private val connection = factory.newConnection()
 
     private suspend fun generateMessages(count: Int) = coroutineScope {
         connection.channel {
@@ -35,9 +32,7 @@ class ConsumerFlowTest : AbstractTestContainersTest() {
         val messagesCount = 100
         generateMessages(messagesCount)
         connection.channel {
-            ConsumerFlow(this, QUEUE_NAME)
-                .consumerAutoAckFlow(2)
-                .take(messagesCount)
+            ConsumerFlow(this, QUEUE_NAME).consumerAutoAckFlow(2).take(messagesCount)
                 .collect { delivery -> println(String(delivery.body)) }
         }
     }
@@ -47,10 +42,7 @@ class ConsumerFlowTest : AbstractTestContainersTest() {
         val messagesCount = 10
         generateMessages(messagesCount)
         connection.channel {
-            ConsumerFlow(this, QUEUE_NAME)
-                .consumerConfirmAckFlow(2)
-                .flowOn(Dispatchers.IO)
-                .take(messagesCount)
+            ConsumerFlow(this, QUEUE_NAME).consumerConfirmAckFlow(2).flowOn(Dispatchers.IO).take(messagesCount)
                 .catch { e -> println("Caught exception: $e") }.collect { delivery ->
                     println("Got the message: ${delivery.body}")
                 }
