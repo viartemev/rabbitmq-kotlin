@@ -1,11 +1,9 @@
 
 <img src=https://github.com/viartemev/the-white-rabbit/assets/23705041/1bd2825b-1241-49d8-94fc-550c381969de width="200" height="200">
 
-# The White Rabbit 
-[![Build Status](https://travis-ci.org/viartemev/the-white-rabbit.svg?branch=master)](https://travis-ci.org/viartemev/the-white-rabbit)
-[ ![Download](https://api.bintray.com/packages/viartemev/Maven/the-white-rabbit/images/download.svg) ](https://bintray.com/viartemev/Maven/the-white-rabbit/_latestVersion)
+# RabbitMQ Kotlin 
+[![Build Status](https://github.com/viartemev/rabbitmq-kotlin/actions/workflows/gradle/badge.svg)](https://github.com/viartemev/rabbitmq-kotlin/actions/workflows/gradle.yml)
 [![Open Source Helpers](https://www.codetriage.com/viartemev/the-white-rabbit/badges/users.svg)](https://www.codetriage.com/viartemev/the-white-rabbit)
-[![codecov](https://codecov.io/gh/viartemev/the-white-rabbit/branch/master/graph/badge.svg)](https://codecov.io/gh/viartemev/the-white-rabbit)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Gitter](https://badges.gitter.im/kotlin-the-white-rabbit/community.svg)](https://gitter.im/kotlin-the-white-rabbit/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
