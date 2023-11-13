@@ -3,6 +3,9 @@ package com.viartemev.thewhiterabbit.example.rpc
 import com.rabbitmq.client.AMQP
 import com.rabbitmq.client.ConnectionFactory
 import com.rabbitmq.client.Delivery
+import mu.KotlinLogging
+
+private val logger = KotlinLogging.logger {}
 
 fun main() {
     val connectionFactory = ConnectionFactory().apply { useNio() }
@@ -14,7 +17,8 @@ fun main() {
         override fun handleCall(request: Delivery?, replyProperties: AMQP.BasicProperties?): ByteArray {
             return request?.body?.let {
                 val body = String(it)
-                println("Request: $body")
+                logger.info { "Request for greeting: $body" }
+                //Thread.sleep(5000)
                 ("Hello, $body").toByteArray()
             } ?: "Body is empty".toByteArray()
         }
