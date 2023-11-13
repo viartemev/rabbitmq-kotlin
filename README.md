@@ -2,7 +2,7 @@
 <img src=https://github.com/viartemev/the-white-rabbit/assets/23705041/1bd2825b-1241-49d8-94fc-550c381969de width="200" height="200">
 
 # RabbitMQ Kotlin 
-[![Build Status](https://github.com/viartemev/rabbitmq-kotlin/actions/workflows/gradle/badge.svg)](https://github.com/viartemev/rabbitmq-kotlin/actions/workflows/gradle.yml)
+[![CI](https://github.com/viartemev/rabbitmq-kotlin/actions/workflows/gradle.yml/badge.svg?branch=master)](https://github.com/viartemev/rabbitmq-kotlin/actions/workflows/gradle.yml)
 [![Open Source Helpers](https://www.codetriage.com/viartemev/the-white-rabbit/badges/users.svg)](https://www.codetriage.com/viartemev/the-white-rabbit)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Gitter](https://badges.gitter.im/kotlin-the-white-rabbit/community.svg)](https://gitter.im/kotlin-the-white-rabbit/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
