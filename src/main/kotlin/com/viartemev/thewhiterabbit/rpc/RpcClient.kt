@@ -19,8 +19,19 @@ import kotlin.coroutines.resumeWithException
 
 private val logger = KotlinLogging.logger {}
 
+/**
+ * Represents an RPC client that can make method calls and receive responses.
+ *
+ * @param channel The channel to communicate with the RPC server.
+ */
 class RpcClient(val channel: Channel) {
 
+    /**
+     * Makes a method call with the provided `OutboundMessage` and waits for a response.
+     *
+     * @param outboundMessage The outbound message to send.
+     * @return The delivery response received from the method call.
+     */
     suspend fun call(outboundMessage: OutboundMessage): Delivery {
         val replyQueueName = channel.declareQueue(RpcQueueSpecification).queue
         val corrId = UUID.randomUUID().toString()
