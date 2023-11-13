@@ -18,10 +18,16 @@ abstract class AbstractTestContainersTest {
         val rabbitmq = RabbitMQContainer()
     }
 
-    val factory: ConnectionFactory = ConnectionFactory().apply {
-        host = rabbitmq.host.toString()
-        port = rabbitmq.connectionPort()
-    }
-    var httpRabbitMQClient = Client(URL("http://${rabbitmq.host}:${rabbitmq.managementPort()}/api/"), "guest", "guest")
+    lateinit var factory: ConnectionFactory
+    lateinit var httpRabbitMQClient: Client
     val DEFAULT_VHOST = "/"
+
+    @BeforeAll
+    fun setUp() {
+        factory = ConnectionFactory()
+        factory.host = rabbitmq.host.toString()
+        factory.port = rabbitmq.connectionPort()
+        httpRabbitMQClient =
+            Client(URL("http://${rabbitmq.host}:${rabbitmq.managementPort()}/api/"), "guest", "guest")
+    }
 }
