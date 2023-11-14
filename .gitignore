@@ -12,3 +12,6 @@ CONTENT.md
 
 #JMH
 benchmarks.jar
+
+# MacOS
+.DS_Store
