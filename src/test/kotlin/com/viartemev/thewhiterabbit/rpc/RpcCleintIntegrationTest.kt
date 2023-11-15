@@ -1,12 +1,10 @@
 package com.viartemev.thewhiterabbit.rpc
 
 import com.rabbitmq.client.AMQP
-import com.rabbitmq.client.AMQP.BasicProperties
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Delivery
 import com.rabbitmq.client.MessageProperties
 import com.viartemev.thewhiterabbit.AbstractTestContainersTest
-import com.viartemev.thewhiterabbit.common.RabbitMqMessage
 import com.viartemev.thewhiterabbit.publisher.OutboundMessage
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -39,10 +37,13 @@ class RpcCleintIntegrationTest : AbstractTestContainersTest() {
         thread(isDaemon = true) { rpcServer(serverChannel(), rpcQueueName) }
         factory.newConnection().use { connection ->
             val channel = connection.createChannel()
-            val message = RabbitMqMessage(MessageProperties.PERSISTENT_BASIC, "Slava".toByteArray())
             val rpcClient = RpcClient(channel)
             runBlocking {
-                val rpcResponse = rpcClient.call(OutboundMessage("", rpcQueueName, MessageProperties.PERSISTENT_BASIC, message.body))
+                val rpcResponse = rpcClient.call(
+                    OutboundMessage(
+                        "", rpcQueueName, MessageProperties.PERSISTENT_BASIC, "Slava".toByteArray()
+                    )
+                )
                 val rpcResponseAsString = String(rpcResponse.body)
                 assertNotNull(rpcResponseAsString)
                 assertEquals("Hello, Slava", rpcResponseAsString)
