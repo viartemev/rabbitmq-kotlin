@@ -1,12 +1,12 @@
 package com.github.viartemev.rabbitmq
 
+import com.github.viartemev.rabbitmq.channel.ConfirmChannel
+import com.github.viartemev.rabbitmq.channel.createConfirmChannel
+import com.github.viartemev.rabbitmq.publisher.ConfirmPublisher
+import com.github.viartemev.rabbitmq.publisher.OutboundMessage
 import com.rabbitmq.client.Connection
 import com.rabbitmq.client.ConnectionFactory
 import com.rabbitmq.client.MessageProperties
-import com.viartemev.thewhiterabbit.channel.ConfirmChannel
-import com.viartemev.thewhiterabbit.channel.createConfirmChannel
-import com.viartemev.thewhiterabbit.publisher.ConfirmPublisher
-import com.viartemev.thewhiterabbit.publisher.OutboundMessage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
