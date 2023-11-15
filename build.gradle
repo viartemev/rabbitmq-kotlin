@@ -26,6 +26,8 @@ plugins {
     id "com.github.johnrengelman.shadow" version "8.1.1"
     id "org.jetbrains.dokka" version "1.9.10"
     id "java-library"
+    id "maven-publish"
+    id "signing"
 }
 
 allprojects {
@@ -88,6 +90,21 @@ configure(rootProject) {
         testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junit_jupiter_version")
     }
 }
+
+task javadocJar(type: Jar) {
+    from javadoc
+    archiveClassifier.set('javadoc')
+}
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allSource
+    archiveClassifier.set('sources')
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
 
 subprojects {
     dependencies {
