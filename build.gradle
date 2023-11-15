@@ -70,7 +70,7 @@ allprojects {
 }
 
 configure(rootProject) {
-    version = "0.0.6"
+    version = "0.0.7"
 
     apply plugin: "com.adarshr.test-logger"
 
@@ -134,3 +134,51 @@ project(":benchmarks") {
     jmhCompileGeneratedClasses.finalizedBy deleteEmptyBmList
 }
 
+publishing {
+    repositories {
+        maven {
+            name = "MavenCentral"
+            def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+            def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots"
+            url = version.toString().endsWith("SNAPSHOT") ? uri(snapshotsRepoUrl) : uri(releasesRepoUrl)
+            credentials {
+                username = System.getenv("MAVEN_USERNAME")
+                password = System.getenv("MAVEN_PASSWORD")
+            }
+        }
+    }
+    publications {
+        maven(MavenPublication) {
+            from(components["java"])
+            artifact(tasks["sourcesJar"])
+            artifact(tasks["javadocJar"])
+            groupId = "com.github.viartemev"
+            artifactId = "rabbitmq-kotlin"
+            version = "0.7.0"
+            pom {
+                name.set("RabbitMQ Kotlin")
+                description.set("Kotlin library for RabbitMQ")
+                url.set("https://github.com/viartemev/rabbitmq-kotlin")
+                licenses {
+                    license {
+                        name.set("MIT License")
+                        url.set("https://github.com/viartemev/rabbitmq-kotlin/blob/master/LICENSE")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("https://github.com/viartemev")
+                        name.set("Vyacheslav Artemyev")
+                        email.set("viartemev@gmail.com")
+                    }
+                }
+                scm {
+                    connection.set("scm:git:https://github.com/viartemev/rabbitmq-kotlin.git")
+                    developerConnection.set("scm:git:https://github.com/viartemev/rabbitmq-kotlin.git")
+                    url.set("https://github.com/viartemev/rabbitmq-kotlin")
+                }
+
+            }
+        }
+    }
+}
