@@ -41,6 +41,19 @@ class ConfirmConsumer internal constructor(
         deliveries.close()
     }
 
+    /**
+     * Consume a message from the channel with manual confirmation.
+     *
+     * This method suspends the current coroutine, receives a message from the channel, and passes it to the provided
+     * handler function. After the handler completes without throwing an exception, the method sends an acknowledgement
+     * (basicAck) to the AMQP channel to confirm the message processing. If the handler throws an exception, the method
+     * cancels the coroutine and logs an error.
+     *
+     * @param handler The suspend function that will be called with the received [Delivery] object.
+     * The function should handle the processing of the message and optionally throw an exception if an error occurs.
+     *
+     * @throws [CancellationException] if the coroutine is canceled due to an error in the handler function.
+     */
     suspend fun consumeMessageWithConfirm(handler: suspend (Delivery) -> Unit) = coroutineScope {
         logger.debug { "Trying to receive a message from the channel" }
         val delivery = deliveries.receive()
@@ -56,6 +69,11 @@ class ConfirmConsumer internal constructor(
         }
     }
 
+    /**
+     * Suspend function to consume messages with confirm.
+     *
+     * @param handler The handler function that processes the delivery.
+     */
     suspend fun consumeMessagesWithConfirm(handler: suspend (Delivery) -> Unit) = coroutineScope {
         val semaphore = Semaphore(prefetchSize)
         while (isActive) {
