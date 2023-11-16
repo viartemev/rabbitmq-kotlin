@@ -156,7 +156,7 @@ publishing {
             artifact(tasks["javadocJar"])
             groupId = "io.github.viartemev"
             artifactId = "rabbitmq-kotlin"
-            version = "0.7.0"
+            version = "0.7.0-SNAPSHOT"
             pom {
                 name.set("RabbitMQ Kotlin")
                 description.set("Kotlin library for RabbitMQ")
