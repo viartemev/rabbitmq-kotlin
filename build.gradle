@@ -6,7 +6,6 @@ buildscript {
         testcontainers_version = "1.19.2"
         httpclient_version = "5.2.1"
         rabbitmq_http_client_version = "5.2.0"
-        isReleaseVersion = !version.endsWith("SNAPSHOT")
     }
 
     repositories {
@@ -186,6 +185,6 @@ publishing {
 }
 
 signing {
-    required { isReleaseVersion && gradle.taskGraph.hasTask("publish") }
+    required { !version.endsWith("SNAPSHOT") && gradle.taskGraph.hasTask("publish") }
     sign configurations.archives
 }
