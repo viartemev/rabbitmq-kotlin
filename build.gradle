@@ -6,6 +6,7 @@ buildscript {
         testcontainers_version = "1.19.2"
         httpclient_version = "5.2.1"
         rabbitmq_http_client_version = "5.2.0"
+        isReleaseVersion = !version.endsWith("SNAPSHOT")
     }
 
     repositories {
@@ -70,7 +71,8 @@ allprojects {
 }
 
 configure(rootProject) {
-    version = "0.0.7"
+    archivesBaseName = "rabbitmq-kotlin"
+    version = "0.0.7-SNAPSHOT"
 
     apply plugin: "com.adarshr.test-logger"
 
@@ -152,7 +154,7 @@ publishing {
             from(components["java"])
             artifact(tasks["sourcesJar"])
             artifact(tasks["javadocJar"])
-            groupId = "com.github.viartemev"
+            groupId = "io.github.viartemev"
             artifactId = "rabbitmq-kotlin"
             version = "0.7.0"
             pom {
@@ -181,4 +183,9 @@ publishing {
             }
         }
     }
+}
+
+signing {
+    required { isReleaseVersion && gradle.taskGraph.hasTask("publish") }
+    sign configurations.archives
 }
