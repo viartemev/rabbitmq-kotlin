@@ -31,7 +31,7 @@ plugins {
 }
 
 allprojects {
-    group = "com.viartemev"
+    group = "io.github.viartemev"
 
     apply plugin: "java"
     apply plugin: "kotlin"

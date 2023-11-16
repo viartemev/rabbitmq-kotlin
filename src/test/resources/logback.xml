@@ -7,7 +7,7 @@
         </encoder>
     </appender>
 
-    <logger name="com.viartemev" level="TRACE"/>
+    <logger name="io.github.viartemev" level="TRACE"/>
     <root level="INFO">
         <appender-ref ref="STDOUT"/>
     </root>
