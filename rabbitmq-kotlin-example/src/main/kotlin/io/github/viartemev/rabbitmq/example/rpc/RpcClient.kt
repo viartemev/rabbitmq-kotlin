@@ -14,9 +14,8 @@ import mu.KotlinLogging
 private val logger = KotlinLogging.logger {}
 
 fun main(): Unit = runBlocking {
-    val connection = ConnectionFactory().apply { useNio() }.newConnection()
     val message = OutboundMessage("", "rpc_request", MessageProperties.PERSISTENT_BASIC, "Slava")
-    connection.use { conn ->
+    ConnectionFactory().apply { useNio() }.newConnection().use { conn ->
         conn.channel {
             logger.info { "Asking for greeting request..." }
             val response = withTimeoutOrNull(1000) {
