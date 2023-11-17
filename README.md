@@ -1,89 +1,49 @@
 # RabbitMQ Kotlin
 [![CI](https://github.com/viartemev/rabbitmq-kotlin/actions/workflows/gradle.yml/badge.svg?branch=master)](https://github.com/viartemev/rabbitmq-kotlin/actions/workflows/gradle.yml)
-[![Open Source Helpers](https://www.codetriage.com/viartemev/the-white-rabbit/badges/users.svg)](https://www.codetriage.com/viartemev/the-white-rabbit)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Gitter](https://badges.gitter.im/kotlin-the-white-rabbit/community.svg)](https://gitter.im/kotlin-the-white-rabbit/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
-The White Rabbit is a [fast](https://github.com/viartemev/the-white-rabbit/issues/88#issuecomment-470461937) and asynchronous RabbitMQ (AMQP) client library based on Kotlin coroutines. Currently the following features are supported:
-* Queue and exchange manipulations
-* Message publishing with confirmation
-* Message consuming with acknowledgment
-* Transactional publishing and consuming
-* RPC pattern
+The RabbitMQ Kotlin Coroutine Library is designed to provide Kotlin developers with an efficient, coroutine-based approach to interact with RabbitMQ.  
+This library simplifies message queue operations by integrating seamlessly with Kotlin's coroutines, offering a modern and reactive way to handle asynchronous messaging in Kotlin applications.   
+It supports a variety of advanced features including queue and exchange manipulations, message publishing with confirmation, message consuming with acknowledgment, transactional operations, and the Remote Procedure Call (RPC) pattern.  
 
-## Adding to project
+## Features
 
-## Usage notes and examples
+- **Queue and Exchange Manipulations**: Easily create, delete, and configure queues and exchanges. Supports all RabbitMQ exchange types (direct, topic, headers, fanout) and offers flexible options for queue bindings and attributes.
+- **Message Publishing with Confirmation**: Publish messages to queues with the option to receive confirmations, ensuring reliable delivery and handling of messages.
+- **Message Consuming with Acknowledgment**: Consume messages from queues with acknowledgment support, allowing for precise control over message processing and acknowledging.
+- **Transactional Publishing and Consuming**: Support for transactional operations, enabling the grouping of publish and consume actions into atomic units, ensuring data consistency and reliability.
+- **RPC Pattern Implementation**: Facilitates the implementation of the RPC pattern, allowing for easy setup of request-response message flows, suitable for service-oriented architectures.
 
-Use one of the extension methods on `com.rabbitmq.client.Connection` to get a channel you need:
+## Getting Started
 
-```kotlin
-connection.channel {
-    /*
-    The plain channel with consumer acknowledgments, supports:
-        -- queue and exchange manipulations
-        -- asynchronous consuming
-        -- RPC pattern
-     */
-}
-
-connection.confirmChannel { //
-    /*
-    Channel with publisher confirmations, additionally supports:
-        -- asynchronous message publishing
-     */
-}
-
-connection.txChannel { // transactional support
-    /*
-    Supports transactional publishing and consuming.
-     */
-}
-```
-
-### Queue and exchange manipulations
-#### Asynchronous exchange declaration
-```kotlin
-connection.channel.declareExchange(ExchangeSpecification(EXCHANGE_NAME))
-```
-#### Asynchronous queue declaration
-```kotlin
-connection.channel.declareQueue(QueueSpecification(QUEUE_NAME))
-```
-#### Asynchronous queue binding to an exchange
-```kotlin
-connection.channel.bindQueue(BindQueueSpecification(EXCHANGE_NAME, QUEUE_NAME))
-```
+## Examples
+Full list of examples could be found [here](https://github.com/viartemev/rabbitmq-kotlin/tree/master/rabbitmq-kotlin-example/src/main)
 
 ### Asynchronous message publishing with confirmation
 ```kotlin
-connection.confirmChannel {
-    publish {
-        val messages = (1..n).map { createMessage("Hello #$it") }
-        publishWithConfirmAsync(coroutineContext, messages).awaitAll()
-    }
-}
-```
-or
-```kotlin
-connection.confirmChannel {
-     publish {
-        coroutineScope {
-            val messages = (1..n).map { createMessage("Hello #$it") }
-            messages.map { async { publishWithConfirm(it) } }
+    val connectionFactory = ConnectionFactory().apply { useNio() }
+    connectionFactory.newConnection().use { connection ->
+        connection.confirmChannel {
+            declareQueue(QueueSpecification(PUBLISHER_QUEUE_NAME)).queue
+            publish {
+                (1..TIMES).map { createMessage("") }.map { async(Dispatchers.IO) { publishWithConfirm(it) } }.awaitAll()
+                    .forEach { println(it) }
+            }
         }
     }
-}
 ```
 
 ### Asynchronous message consuming with acknowledgement
 Consume only n-messages:
 ```kotlin
-connection.channel {
-    consume(QUEUE_NAME, PREFETCH_COUNT) {
-        (1..n).map { async { consumeMessageWithConfirm({ println(it) }) } }.awaitAll()
+val connectionFactory = ConnectionFactory().apply { useNio() }
+    connectionFactory.newConnection().use { connction ->
+        connction.channel {
+            consume(CONSUMER_QUEUE_NAME, 1) {
+                (1..CONSUME_TIMES).map { async(Dispatchers.IO) { consumeMessageWithConfirm(handler) } }.awaitAll()
+            }
+        }
     }
-}
 ```
 
 ### Transactional publishing and consuming
@@ -107,19 +67,25 @@ connection.txChannel {
 
 ### RPC pattern
 ```kotlin
-connection.channel {
-    val message = RabbitMqMessage(MessageProperties.PERSISTENT_BASIC, "Hello world".toByteArray())
-    coroutineScope {
-        (1..10).map {
-            async {
-                rpc {
-                    call(requestQueueName = "rpc_request", message = message)
-                        .also { println("Reply: ${String(it.body)}") }
-                }
+ConnectionFactory().apply { useNio() }.newConnection().use { conn ->
+        conn.channel {
+            logger.info { "Asking for greeting request..." }
+            val response = withTimeoutOrNull(1000) {
+                async(Dispatchers.IO) {
+                    rpc {
+                        val result = call(message)
+                        logger.info { "Got a message: ${String(result.body)}" }
+                        result
+                    }
+                }.await()
             }
-        }.awaitAll()
+            if (response == null) {
+                logger.info { "Timeout is exeeded" }
+            } else {
+                logger.info { "Result: ${String(response.body)}" }
+            }
+        }
     }
-}
 ```
 
 ## Links
