@@ -15,6 +15,19 @@ It supports a variety of advanced features including queue and exchange manipula
 - **RPC Pattern Implementation**: Facilitates the implementation of the RPC pattern, allowing for easy setup of request-response message flows, suitable for service-oriented architectures.
 
 ## Getting Started
+You need to have [Java 8](https://www.oracle.com/technetwork/java/javase/downloads/index.html) installed.
+
+### Snapshots
+```gradle
+repositories {
+    mavenCentral()
+    maven("https://s01.oss.sonatype.org/content/repositories/snapshots")
+}
+
+dependencies {
+    implementation("io.github.viartemev:rabbitmq-kotlin:0.7.0-SNAPSHOT")
+}
+```
 
 ## Examples
 Full list of examples could be found [here](https://github.com/viartemev/rabbitmq-kotlin/tree/master/rabbitmq-kotlin-example/src/main)
