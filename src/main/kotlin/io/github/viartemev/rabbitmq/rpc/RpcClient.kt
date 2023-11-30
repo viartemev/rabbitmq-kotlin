@@ -2,14 +2,11 @@ package io.github.viartemev.rabbitmq.rpc
 
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Delivery
-import io.github.viartemev.rabbitmq.publisher.OutboundMessage
+import io.github.viartemev.rabbitmq.common.OutboundMessage
 import io.github.viartemev.rabbitmq.queue.DeleteQueueSpecification
 import io.github.viartemev.rabbitmq.queue.declareQueue
 import io.github.viartemev.rabbitmq.queue.deleteQueue
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import mu.KotlinLogging
 import java.io.IOException
 import java.util.*
@@ -37,24 +34,25 @@ class RpcClient(val channel: Channel) {
         val corrId = UUID.randomUUID().toString()
         val properties = outboundMessage.properties.builder().correlationId(corrId).replyTo(replyQueueName).build()
 
-        withContext(Dispatchers.IO) {
-            channel.basicPublish(
-                outboundMessage.exchange, outboundMessage.routingKey, properties, outboundMessage.msg
-            )
+        runInterruptible(Dispatchers.IO) {
+            channel.basicPublish(outboundMessage.exchange, outboundMessage.routingKey, properties, outboundMessage.msg)
         }
 
         var consumerTag: String? = null
         try {
             return suspendCancellableCoroutine { continuation ->
+                val deliverCallback: (consumerTag: String, message: Delivery) -> Unit = { _, delivery ->
+                    if (corrId == delivery.properties.correlationId) {
+                        channel.basicAck(delivery.envelope.deliveryTag, false)
+                        continuation.resume(delivery)
+                    }
+                }
+                val cancelCallback: (consumerTag: String) -> Unit = { consumerTag ->
+                    logger.debug { "Consumer $consumerTag has been cancelled for reasons other than by a call to Channel#basicCancel" }
+                }
+
                 try {
-                    consumerTag = channel.basicConsume(replyQueueName, false, { _, delivery ->
-                        if (corrId == delivery.properties.correlationId) {
-                            continuation.resume(delivery)
-                            channel.basicAck(delivery.envelope.deliveryTag, false)
-                        }
-                    }, { consumerTag ->
-                        logger.debug { "Consumer $consumerTag has been cancelled for reasons other than by a call to Channel#basicCancel" }
-                    })
+                    consumerTag = channel.basicConsume(replyQueueName, false, deliverCallback, cancelCallback)
                 } catch (e: Exception) {
                     continuation.resumeWithException(e)
                 }

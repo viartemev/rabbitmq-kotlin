@@ -2,7 +2,7 @@ package io.github.viartemev.rabbitmq.channel
 
 import com.rabbitmq.client.Channel
 import io.github.viartemev.rabbitmq.consumer.ConfirmConsumer
-import io.github.viartemev.rabbitmq.publisher.OutboundMessage
+import io.github.viartemev.rabbitmq.common.OutboundMessage
 import mu.KotlinLogging
 import java.util.concurrent.atomic.AtomicBoolean
 

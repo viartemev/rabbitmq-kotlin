@@ -5,7 +5,7 @@ import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Delivery
 import com.rabbitmq.client.MessageProperties
 import io.github.viartemev.rabbitmq.AbstractTestContainersTest
-import io.github.viartemev.rabbitmq.publisher.OutboundMessage
+import io.github.viartemev.rabbitmq.common.OutboundMessage
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull

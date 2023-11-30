@@ -4,7 +4,7 @@ import com.rabbitmq.client.ConnectionFactory
 import com.rabbitmq.client.MessageProperties
 import io.github.viartemev.rabbitmq.channel.channel
 import io.github.viartemev.rabbitmq.channel.rpc
-import io.github.viartemev.rabbitmq.publisher.OutboundMessage
+import io.github.viartemev.rabbitmq.common.OutboundMessage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking

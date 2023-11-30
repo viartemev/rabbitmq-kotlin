@@ -4,7 +4,7 @@ import com.rabbitmq.client.ConnectionFactory
 import com.rabbitmq.client.MessageProperties
 import io.github.viartemev.rabbitmq.channel.confirmChannel
 import io.github.viartemev.rabbitmq.channel.publish
-import io.github.viartemev.rabbitmq.publisher.OutboundMessage
+import io.github.viartemev.rabbitmq.common.OutboundMessage
 import io.github.viartemev.rabbitmq.queue.QueueSpecification
 import io.github.viartemev.rabbitmq.queue.declareQueue
 import kotlinx.coroutines.Dispatchers

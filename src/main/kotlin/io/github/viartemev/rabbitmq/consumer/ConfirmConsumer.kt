@@ -2,11 +2,8 @@ package io.github.viartemev.rabbitmq.consumer
 
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Delivery
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.trySendBlocking
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import mu.KotlinLogging
 import java.io.Closeable
@@ -61,7 +58,9 @@ class ConfirmConsumer internal constructor(
         val deliveryTag = delivery.envelope.deliveryTag
         try {
             handler(delivery)
-            amqpChannel.basicAck(deliveryTag, false)
+            runInterruptible(Dispatchers.IO) {
+                amqpChannel.basicAck(deliveryTag, false)
+            }
         } catch (e: Exception) {
             val errorMessage = "Can't ack a message with deliveryTag: $deliveryTag"
             logger.error(e) { errorMessage }

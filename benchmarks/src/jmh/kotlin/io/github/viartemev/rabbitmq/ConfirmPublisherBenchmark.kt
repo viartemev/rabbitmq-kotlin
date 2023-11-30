@@ -6,7 +6,7 @@ import com.rabbitmq.client.MessageProperties
 import io.github.viartemev.rabbitmq.channel.ConfirmChannel
 import io.github.viartemev.rabbitmq.channel.createConfirmChannel
 import io.github.viartemev.rabbitmq.publisher.ConfirmPublisher
-import io.github.viartemev.rabbitmq.publisher.OutboundMessage
+import io.github.viartemev.rabbitmq.common.OutboundMessage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll

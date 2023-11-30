@@ -1,4 +1,4 @@
-package io.github.viartemev.rabbitmq.publisher
+package io.github.viartemev.rabbitmq.common
 
 import com.rabbitmq.client.AMQP.BasicProperties
 

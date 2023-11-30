@@ -1,6 +1,7 @@
 package io.github.viartemev.rabbitmq.publisher
 
 import com.rabbitmq.client.Channel
+import io.github.viartemev.rabbitmq.common.OutboundMessage
 import kotlinx.coroutines.suspendCancellableCoroutine
 import mu.KotlinLogging
 import java.util.concurrent.ConcurrentHashMap
@@ -16,7 +17,7 @@ private val logger = KotlinLogging.logger {}
  * @constructor Creates a ConfirmPublisher with the specified channel.
  */
 class ConfirmPublisher internal constructor(private val channel: Channel) {
-    internal val continuations = ConcurrentHashMap<Long, Continuation<Boolean>>()
+    private val continuations = ConcurrentHashMap<Long, Continuation<Boolean>>()
 
     init {
         channel.addConfirmListener(AckListener(continuations))
@@ -34,7 +35,7 @@ class ConfirmPublisher internal constructor(private val channel: Channel) {
         return suspendCancellableCoroutine { continuation ->
             continuation.invokeOnCancellation { continuations.remove(messageSequenceNumber) }
             continuations[messageSequenceNumber] = continuation
-            message.apply { channel.basicPublish(exchange, routingKey, properties, msg) }
+            channel.basicPublish(message.exchange, message.routingKey, message.properties, message.msg)
             logger.debug { "Message successfully published" }
         }
     }
