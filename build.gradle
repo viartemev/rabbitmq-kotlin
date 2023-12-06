@@ -4,7 +4,7 @@ buildscript {
         rabbitmq_java_client_version = "5.20.0"
         junit_jupiter_version = "5.10.1"
         testcontainers_version = "1.19.3"
-        httpclient_version = "5.2.1"
+        httpclient_version = "5.3"
         rabbitmq_http_client_version = "5.2.0"
     }
 
