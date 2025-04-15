@@ -24,12 +24,13 @@ class ConfirmPublisher internal constructor(
 ) {
     internal val continuations = ConcurrentHashMap<Long, Continuation<Boolean>>()
     private val inFlightSemaphore = Semaphore(maxInFlightMessages)
+    private val ackListener = AckListener(continuations, inFlightSemaphore)
 
     @Volatile
     private var isClosed = false
 
     init {
-        channel.addConfirmListener(AckListener(continuations, inFlightSemaphore))
+        channel.addConfirmListener(ackListener)
     }
 
     /**
@@ -66,5 +67,15 @@ class ConfirmPublisher internal constructor(
         } else {
             block()
         }
+    }
+
+    fun close() {
+        if (isClosed) return
+        isClosed = true
+        channel.removeConfirmListener(ackListener)
+        continuations.forEach { (_, continuation) ->
+            continuation.resumeWithException(IllegalStateException("Publisher closed"))
+        }
+        continuations.clear()
     }
 }
