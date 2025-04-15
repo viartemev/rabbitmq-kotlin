@@ -3,6 +3,7 @@ package io.github.viartemev.rabbitmq.publisher
 import com.rabbitmq.client.Channel
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.withTimeout
 import mu.KotlinLogging
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.Continuation
@@ -24,6 +25,9 @@ class ConfirmPublisher internal constructor(
     internal val continuations = ConcurrentHashMap<Long, Continuation<Boolean>>()
     private val inFlightSemaphore = Semaphore(maxInFlightMessages)
 
+    @Volatile
+    private var isClosed = false
+
     init {
         channel.addConfirmListener(AckListener(continuations, inFlightSemaphore))
     }
@@ -32,26 +36,35 @@ class ConfirmPublisher internal constructor(
      * Publishes a message with confirmation to the specified exchange and routing key.
      *
      * @param message The {@link OutboundMessage} to publish.
-     * @return True if the message was published successfully, false otherwise.
+     * @param timeoutMillis Optional timeout in milliseconds for ожидания подтверждения. Если null — ждать бесконечно.
+     * @return True if the message was published успешно, false otherwise.
      */
-    suspend fun publishWithConfirm(message: OutboundMessage): Boolean {
+    suspend fun publishWithConfirm(message: OutboundMessage, timeoutMillis: Long? = null): Boolean {
+        if (isClosed) throw IllegalStateException("Publisher is closed")
         val messageSequenceNumber = channel.nextPublishSeqNo
         logger.debug { "Generated message Sequence Number: $messageSequenceNumber" }
         inFlightSemaphore.acquire()
-        return suspendCancellableCoroutine { continuation ->
-            continuation.invokeOnCancellation {
-                continuations.remove(messageSequenceNumber)
-                inFlightSemaphore.release()
+        val block: suspend () -> Boolean = {
+            suspendCancellableCoroutine { continuation ->
+                continuation.invokeOnCancellation {
+                    continuations.remove(messageSequenceNumber)
+                    inFlightSemaphore.release()
+                }
+                continuations[messageSequenceNumber] = continuation
+                try {
+                    message.apply { channel.basicPublish(exchange, routingKey, properties, msg) }
+                    logger.debug { "Message successfully published" }
+                } catch (e: Exception) {
+                    continuations.remove(messageSequenceNumber)
+                    inFlightSemaphore.release()
+                    continuation.resumeWithException(e)
+                }
             }
-            continuations[messageSequenceNumber] = continuation
-            try {
-                message.apply { channel.basicPublish(exchange, routingKey, properties, msg) }
-                logger.debug { "Message successfully published" }
-            } catch (e: Exception) {
-                continuations.remove(messageSequenceNumber)
-                inFlightSemaphore.release()
-                continuation.resumeWithException(e)
-            }
+        }
+        return if (timeoutMillis != null) {
+            withTimeout(timeoutMillis) { block() }
+        } else {
+            block()
         }
     }
 }
