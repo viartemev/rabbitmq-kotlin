@@ -1,6 +1,7 @@
 package io.github.viartemev.rabbitmq.publisher
 
 import com.rabbitmq.client.ConfirmListener
+import kotlinx.coroutines.sync.Semaphore
 import mu.KotlinLogging
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
@@ -16,7 +17,10 @@ private val logger = KotlinLogging.logger {}
  * @property continuations A ConcurrentHashMap that stores the Continuation objects associated with delivery tags.
  * @property lowerBoundOfMultiple An AtomicLong that represents the lower bound of multiple acknowledgments.
  */
-internal class AckListener(private val continuations: ConcurrentHashMap<Long, Continuation<Boolean>>) : ConfirmListener {
+internal class AckListener(
+    private val continuations: ConcurrentHashMap<Long, Continuation<Boolean>>,
+    inFlightSemaphore: Semaphore
+) : ConfirmListener {
 
     private val lowerBoundOfMultiple = AtomicLong(1)
 
