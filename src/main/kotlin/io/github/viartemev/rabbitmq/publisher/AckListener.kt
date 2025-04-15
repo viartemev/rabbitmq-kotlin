@@ -19,7 +19,7 @@ private val logger = KotlinLogging.logger {}
  */
 internal class AckListener(
     private val continuations: ConcurrentHashMap<Long, Continuation<Boolean>>,
-    inFlightSemaphore: Semaphore
+    private val inFlightSemaphore: Semaphore
 ) : ConfirmListener {
 
     private val lowerBoundOfMultiple = AtomicLong(1)
@@ -54,16 +54,25 @@ internal class AckListener(
      */
     private fun handle(deliveryTag: Long, multiple: Boolean, ack: Boolean) {
         logger.debug { "deliveryTag = [$deliveryTag], multiple = [$multiple], positive = [$ack]" }
-        val lowerBound = lowerBoundOfMultiple.get()
         if (multiple) {
-            for (tag in lowerBound..deliveryTag) {
-                continuations.remove(tag)?.resume(ack)
+            // Итерируемся по ключам map, которые <= deliveryTag
+            val tagsToAck = continuations.keys.filter { it <= deliveryTag }
+            for (tag in tagsToAck) {
+                val cont = continuations.remove(tag)
+                if (cont != null) {
+                    cont.resume(ack)
+                    inFlightSemaphore.release()
+                } else {
+                    logger.warn { "Continuation for $tag not found (maybe already cancelled)" }
+                }
             }
-            lowerBoundOfMultiple.compareAndSet(lowerBound, deliveryTag)
         } else {
-            continuations.remove(deliveryTag)?.resume(ack)
-            if (deliveryTag == lowerBound + 1) {
-                lowerBoundOfMultiple.compareAndSet(lowerBound, deliveryTag)
+            val cont = continuations.remove(deliveryTag)
+            if (cont != null) {
+                cont.resume(ack)
+                inFlightSemaphore.release()
+            } else {
+                logger.warn { "Continuation for $deliveryTag not found (maybe already cancelled)" }
             }
         }
     }
