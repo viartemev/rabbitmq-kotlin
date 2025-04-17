@@ -30,7 +30,7 @@ dependencies {
 ```
 
 ## Examples
-Full list of examples could be found [here](https://github.com/viartemev/rabbitmq-kotlin/tree/master/rabbitmq-kotlin-example/src/main)
+Full list of examples could be found [here](rabbitmq-kotlin-example/src/main)
 
 ### Asynchronous message publishing with confirmation
 ```kotlin
