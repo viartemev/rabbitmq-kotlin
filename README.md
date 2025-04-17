@@ -38,7 +38,7 @@ Full list of examples could be found [here](rabbitmq-kotlin-example/src/main)
         connection.confirmChannel {
             declareQueue(QueueSpecification(PUBLISHER_QUEUE_NAME)).queue
             publish {
-                (1..TIMES).map { createMessage("") }.map { async(Dispatchers.IO) { publishWithConfirm(it) } }.awaitAll()
+                (1..TIMES).map { createMessage("") }.map { publishWithConfirm(it) }
                     .forEach { println(it) }
             }
         }
