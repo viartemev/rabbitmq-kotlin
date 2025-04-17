@@ -24,7 +24,7 @@ buildscript {
 plugins {
     id("jacoco")
     id "com.github.johnrengelman.shadow" version "8.1.1"
-    id "org.jetbrains.dokka" version "1.9.10"
+    id "org.jetbrains.dokka" version "1.9.20"
     id "java-library"
     id "maven-publish"
     id "signing"
