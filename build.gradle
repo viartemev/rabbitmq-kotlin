@@ -81,7 +81,7 @@ configure(rootProject) {
 
     dependencies {
         testImplementation("com.rabbitmq:http-client:$rabbitmq_http_client_version")
-        testImplementation("org.springframework:spring-web:5.3.31")
+        testImplementation("org.springframework:spring-web:5.3.39")
         testImplementation("org.apache.httpcomponents.client5:httpclient5:$httpclient_version")
         testImplementation("org.testcontainers:testcontainers:$testcontainers_version")
         testImplementation("org.testcontainers:junit-jupiter:$testcontainers_version")
