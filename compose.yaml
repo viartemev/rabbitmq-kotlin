@@ -3,8 +3,8 @@ services:
         image: rabbitmq:${RABBITMQ_VERSION:-3-management}
         container_name: ${CONTAINER_NAME:-rabbitmq}
         environment:
-            - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER:-guest}
-            - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASS:-guest}
+            RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
+            RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-guest}
         ports:
             - "${RABBITMQ_PORT_1:-5672}:5672"
             - "${RABBITMQ_PORT_2:-15672}:15672"
