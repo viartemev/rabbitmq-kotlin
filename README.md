@@ -4,7 +4,7 @@
 
 The RabbitMQ Kotlin Coroutine Library is designed to provide Kotlin developers with an efficient, coroutine-based approach to interact with RabbitMQ.  
 This library simplifies message queue operations by integrating seamlessly with Kotlin's coroutines, offering a modern and reactive way to handle asynchronous messaging in Kotlin applications.   
-It supports a variety of advanced features including queue and exchange manipulations, message publishing with confirmation, message consuming with acknowledgment, transactional operations, and the Remote Procedure Call (RPC) pattern.  
+It supports a variety of advanced features including queue and exchange manipulations, message publishing with confirmation, message consuming with acknowledgment, and transactional operations.
 
 ## Features
 
@@ -12,7 +12,6 @@ It supports a variety of advanced features including queue and exchange manipula
 - **Message Publishing with Confirmation**: Publish messages to queues with the option to receive confirmations, ensuring reliable delivery and handling of messages.
 - **Message Consuming with Acknowledgment**: Consume messages from queues with acknowledgment support, allowing for precise control over message processing and acknowledging.
 - **Transactional Publishing and Consuming**: Support for transactional operations, enabling the grouping of publish and consume actions into atomic units, ensuring data consistency and reliability.
-- **RPC Pattern Implementation**: Facilitates the implementation of the RPC pattern, allowing for easy setup of request-response message flows, suitable for service-oriented architectures.
 
 ## Getting Started
 You need to have [Java 8](https://www.oracle.com/java/technologies/javase/javase8u211-later-archive-downloads.html) installed.
@@ -76,29 +75,6 @@ connection.txChannel {
         publish(message)
     }
 }
-```
-
-### RPC pattern
-```kotlin
-ConnectionFactory().apply { useNio() }.newConnection().use { conn ->
-        conn.channel {
-            logger.info { "Asking for greeting request..." }
-            val response = withTimeoutOrNull(1000) {
-                async(Dispatchers.IO) {
-                    rpc {
-                        val result = call(message)
-                        logger.info { "Got a message: ${String(result.body)}" }
-                        result
-                    }
-                }.await()
-            }
-            if (response == null) {
-                logger.info { "Timeout is exeeded" }
-            } else {
-                logger.info { "Result: ${String(response.body)}" }
-            }
-        }
-    }
 ```
 
 ## Links
