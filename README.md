@@ -15,7 +15,7 @@ It supports a variety of advanced features including queue and exchange manipula
 - **RPC Pattern Implementation**: Facilitates the implementation of the RPC pattern, allowing for easy setup of request-response message flows, suitable for service-oriented architectures.
 
 ## Getting Started
-You need to have [Java 8](https://www.oracle.com/technetwork/java/javase/downloads/index.html) installed.
+You need to have [Java 8](https://www.oracle.com/java/technologies/javase/javase8u211-later-archive-downloads.html) installed.
 
 ### Snapshots
 ```gradle
