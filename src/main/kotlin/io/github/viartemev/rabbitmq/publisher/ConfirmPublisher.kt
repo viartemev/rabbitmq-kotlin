@@ -14,8 +14,18 @@ import kotlin.coroutines.resumeWithException
 private val logger = KotlinLogging.logger {}
 
 /**
- * Publisher for confirmations in RabbitMQ.
- * Use ConfirmChannel.publisher() to obtain an instance.
+ * Provides a coroutine-friendly way to publish messages to RabbitMQ and wait for publisher confirmations (ACK/NACK).
+ * This publisher manages the correlation between published messages and their confirmations using coroutine continuations.
+ * It limits the number of in-flight messages (messages published but not yet confirmed) using a semaphore.
+ *
+ * This class is thread-safe. It's recommended to have only one `ConfirmPublisher` instance per `Channel`.
+ * Use `ConfirmChannel.publisher()` (extension function, assumed) to obtain an instance.
+ *
+ * @param channel The underlying RabbitMQ `Channel` configured for publisher confirms (`Channel.confirmSelect()`).
+ *              The publisher adds its own `ConfirmListener` and `ShutdownListener` to this channel.
+ * @param maxInFlightMessages The maximum number of messages that can be published without receiving a confirmation.
+ *                            Helps to prevent overwhelming the broker or running out of memory. Defaults to 1000.
+ *                            Values above 10,000 might lead to resource issues. Must be >= 1.
  */
 class ConfirmPublisher private constructor(
     private val channel: Channel,
@@ -50,14 +60,27 @@ class ConfirmPublisher private constructor(
 
     init {
         synchronized(channel) {
-            val listeners = channel.javaClass.getDeclaredField("_confirmListeners").apply { isAccessible = true }.get(channel) as? MutableList<*>
-            if (listeners != null && listeners.any { it is AckListener }) {
-                throw IllegalStateException("AckListener already registered on this channel!")
-            }
             channel.addConfirmListener(ackListener)
         }
     }
 
+    /**
+     * Publishes a message and suspends the coroutine until a confirmation (ACK/NACK) is received from the broker
+     * or a timeout occurs.
+     *
+     * Handles acquiring a permit from the in-flight message semaphore before publishing and releasing it
+     * upon confirmation, cancellation, or timeout.
+     *
+     * @param message The [OutboundMessage] to publish.
+     * @param timeoutMillis Optional timeout in milliseconds. If provided, the call will fail with [kotlinx.coroutines.TimeoutCancellationException]
+     *                      if no confirmation is received within this period. If null (default), waits indefinitely.
+     * @return `true` if the message was ACKed by the broker, `false` if it was NACKed.
+     * @throws IllegalStateException if the publisher is already closed.
+     * @throws kotlinx.coroutines.TimeoutCancellationException if a `timeoutMillis` was specified and the timeout was reached.
+     * @throws kotlinx.coroutines.CancellationException if the calling coroutine is cancelled.
+     * @throws java.io.IOException or other exceptions from the underlying `channel.basicPublish` if the publication fails immediately.
+     * @throws Exception for other unexpected errors during the process.
+     */
     suspend fun publishWithConfirm(message: OutboundMessage, timeoutMillis: Long? = null): Boolean {
         if (isClosed) throw IllegalStateException("Publisher is closed")
         val messageSequenceNumber = channel.nextPublishSeqNo
@@ -98,6 +121,14 @@ class ConfirmPublisher private constructor(
         }
     }
 
+    /**
+     * Closes the publisher, preventing new publications and cancelling any pending confirmations.
+     *
+     * Removes the internal `ConfirmListener` from the channel.
+     * Any coroutines currently suspended in `publishWithConfirm` will be resumed with an [IllegalStateException].
+     * This method is idempotent; calling it multiple times has no effect after the first call.
+     * Note: This does *not* close the underlying `Channel`.
+     */
     fun close() {
         synchronized(channel) {
             if (isClosed) return
@@ -119,7 +150,14 @@ class ConfirmPublisher private constructor(
     }
 
     companion object {
-        // Only ConfirmChannel can create instance
+        /**
+         * Factory method to create a [ConfirmPublisher]. Intended for internal use (e.g., by channel extensions).
+         * Note: It's crucial to ensure that only one ConfirmPublisher is created per channel if using this directly.
+         *
+         * @param channel The channel to use, must have publisher confirms enabled.
+         * @param maxInFlightMessages The maximum number of unconfirmed messages allowed.
+         * @return A new instance of [ConfirmPublisher].
+         */
         internal fun create(channel: Channel, maxInFlightMessages: Int = 1000): ConfirmPublisher = ConfirmPublisher(channel, maxInFlightMessages)
     }
 }

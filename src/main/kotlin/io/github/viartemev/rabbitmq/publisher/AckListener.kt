@@ -23,8 +23,6 @@ internal class AckListener(
     private val inFlightSemaphore: Semaphore
 ) : ConfirmListener {
 
-    private val lowerBoundOfMultiple = AtomicLong(1)
-
     /**
      * This method is responsible for handling an acknowledgment (ack) from the message broker.
      * It overrides the parent handle method and sets the parameters for acknowledgment.
