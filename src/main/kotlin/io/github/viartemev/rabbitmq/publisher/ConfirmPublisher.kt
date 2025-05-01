@@ -43,24 +43,35 @@ class ConfirmPublisher private constructor(
         val block: suspend () -> Boolean = {
             suspendCancellableCoroutine { continuation ->
                 continuation.invokeOnCancellation {
+                    logger.warn { "Continuation cancelled for sequence number $messageSequenceNumber" }
                     continuations.remove(messageSequenceNumber)
                     inFlightSemaphore.release()
                 }
                 continuations[messageSequenceNumber] = continuation
                 try {
                     message.apply { channel.basicPublish(exchange, routingKey, properties, msg) }
-                    logger.debug { "Message successfully published" }
+                    logger.debug { "Message with sequence number $messageSequenceNumber successfully published, waiting for confirm..." }
                 } catch (e: Exception) {
+                    logger.error(e) { "Failed to publish message with sequence number $messageSequenceNumber" }
                     continuations.remove(messageSequenceNumber)
                     inFlightSemaphore.release()
-                    continuation.resumeWithException(e)
+                    try {
+                        continuation.resumeWithException(e)
+                    } catch (ex: Exception) {
+                        logger.error(ex) { "Failed to resume continuation with exception for seqNo $messageSequenceNumber" }
+                    }
                 }
             }
         }
-        return if (timeoutMillis != null) {
-            withTimeout(timeoutMillis) { block() }
-        } else {
-            block()
+        return try {
+            if (timeoutMillis != null) {
+                withTimeout(timeoutMillis) { block() }
+            } else {
+                block()
+            }
+        } catch(e: Exception) {
+            logger.error(e) { "Error in publishWithConfirm for sequence number $messageSequenceNumber" }
+            throw e
         }
     }
 
