@@ -20,7 +20,10 @@ open class ConfirmChannel internal constructor(private val channel: Channel) : C
         channel.confirmSelect()
     }
 
-    fun publisher() = ConfirmPublisher(this)
+    // Singleton publisher per channel
+    private val publisherInstance: ConfirmPublisher by lazy { ConfirmPublisher.create(this) }
+
+    fun publisher(): ConfirmPublisher = publisherInstance
 }
 
 /**

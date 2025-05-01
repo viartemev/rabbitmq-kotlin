@@ -15,3 +15,5 @@ benchmarks.jar
 
 # MacOS
 .DS_Store
+
+.vscode
