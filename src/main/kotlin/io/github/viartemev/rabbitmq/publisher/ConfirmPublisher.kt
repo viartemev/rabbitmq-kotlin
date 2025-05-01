@@ -19,6 +19,13 @@ class ConfirmPublisher private constructor(
     private val channel: Channel,
     maxInFlightMessages: Int = 1000
 ) {
+    init {
+        if (maxInFlightMessages > 10_000) {
+            logger.warn { "maxInFlightMessages=$maxInFlightMessages is very high and may cause OOM or resource exhaustion!" }
+        } else if (maxInFlightMessages < 1) {
+            throw IllegalArgumentException("maxInFlightMessages must be >= 1")
+        }
+    }
     internal val continuations = ConcurrentSkipListMap<Long, Continuation<Boolean>>()
     private val inFlightSemaphore = Semaphore(maxInFlightMessages)
     private val ackListener: AckListener = AckListener(continuations, inFlightSemaphore)
