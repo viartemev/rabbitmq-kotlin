@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 private val logger = KotlinLogging.logger {}
 
@@ -54,25 +55,22 @@ internal class AckListener(
      */
     private fun handle(deliveryTag: Long, multiple: Boolean, ack: Boolean) {
         logger.debug { "deliveryTag = [$deliveryTag], multiple = [$multiple], positive = [$ack]" }
-        if (multiple) {
-            // Итерируемся по ключам map, которые <= deliveryTag
-            val tagsToAck = continuations.keys.filter { it <= deliveryTag }
-            for (tag in tagsToAck) {
-                val cont = continuations.remove(tag)
-                if (cont != null) {
-                    cont.resume(ack)
-                    inFlightSemaphore.release()
-                } else {
-                    logger.warn { "Continuation for $tag not found (maybe already cancelled)" }
-                }
-            }
-        } else {
-            val cont = continuations.remove(deliveryTag)
+        val resultTags = if (multiple) continuations.keys.filter { it <= deliveryTag } else listOf(deliveryTag)
+        for (tag in resultTags) {
+            val cont = continuations.remove(tag)
             if (cont != null) {
-                cont.resume(ack)
-                inFlightSemaphore.release()
+                try {
+                    cont.resume(ack)
+                } catch (e: IllegalStateException) {
+                    logger.warn(e) { "Continuation for $tag already completed (ack/nack race)" }
+                } catch (e: Exception) {
+                    logger.error(e) { "Unexpected error resuming continuation for $tag" }
+                    try { cont.resumeWithException(e) } catch (_: Exception) {}
+                } finally {
+                    inFlightSemaphore.release()
+                }
             } else {
-                logger.warn { "Continuation for $deliveryTag not found (maybe already cancelled)" }
+                logger.warn { "Continuation for $tag not found (maybe already cancelled)" }
             }
         }
     }
