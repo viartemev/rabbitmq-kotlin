@@ -1,6 +1,8 @@
 package io.github.viartemev.rabbitmq.publisher
 
 import com.rabbitmq.client.Channel
+import com.rabbitmq.client.ShutdownListener
+import com.rabbitmq.client.ShutdownSignalException
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.withTimeout
@@ -25,6 +27,20 @@ class ConfirmPublisher private constructor(
         } else if (maxInFlightMessages < 1) {
             throw IllegalArgumentException("maxInFlightMessages must be >= 1")
         }
+        // Автоматическое завершение всех continuations при закрытии канала
+        channel.addShutdownListener(object : ShutdownListener {
+            override fun shutdownCompleted(cause: ShutdownSignalException?) {
+                logger.warn { "Channel is shutting down, cancelling all pending confirmations." }
+                val ex = cause ?: IllegalStateException("Channel was closed while waiting for confirmation.")
+                continuations.forEach { (_, continuation) ->
+                    try {
+                        continuation.resumeWithException(ex)
+                        inFlightSemaphore.release()
+                    } catch (_: Exception) {}
+                }
+                continuations.clear()
+            }
+        })
     }
     internal val continuations = ConcurrentSkipListMap<Long, Continuation<Boolean>>()
     private val inFlightSemaphore = Semaphore(maxInFlightMessages)
