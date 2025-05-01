@@ -5,7 +5,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.withTimeout
 import mu.KotlinLogging
-import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentSkipListMap
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resumeWithException
 
@@ -19,7 +19,7 @@ class ConfirmPublisher private constructor(
     private val channel: Channel,
     maxInFlightMessages: Int = 1000
 ) {
-    internal val continuations = ConcurrentHashMap<Long, Continuation<Boolean>>()
+    internal val continuations = ConcurrentSkipListMap<Long, Continuation<Boolean>>()
     private val inFlightSemaphore = Semaphore(maxInFlightMessages)
     private val ackListener: AckListener = AckListener(continuations, inFlightSemaphore)
     @Volatile
