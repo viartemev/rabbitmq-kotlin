@@ -85,7 +85,7 @@ configure(rootProject) {
         testImplementation("org.apache.httpcomponents.client5:httpclient5:$httpclient_version")
         testImplementation("org.testcontainers:testcontainers:$testcontainers_version")
         testImplementation("org.testcontainers:junit-jupiter:$testcontainers_version")
-        testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
+        testImplementation("org.mockito.kotlin:mockito-kotlin:6.0.0")
         testImplementation("org.mockito:mockito-inline:5.2.0")
         testImplementation("org.junit.jupiter:junit-jupiter-api:$junit_jupiter_version")
         testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junit_jupiter_version")
