@@ -2,7 +2,7 @@ buildscript {
     ext {
         kotlin_version = "2.2.0"
         rabbitmq_java_client_version = "5.26.0"
-        junit_jupiter_version = "5.10.1"
+        junit_jupiter_version = "5.13.4"
         testcontainers_version = "1.21.3"
         httpclient_version = "5.5"
         rabbitmq_http_client_version = "5.4.0"
