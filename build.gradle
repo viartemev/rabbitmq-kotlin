@@ -30,6 +30,10 @@ plugins {
     id "signing"
 }
 
+ext {
+    project_version = "0.7.0-SNAPSHOT"
+}
+
 allprojects {
     group = "io.github.viartemev"
 
@@ -71,7 +75,7 @@ allprojects {
 
 configure(rootProject) {
     archivesBaseName = "rabbitmq-kotlin"
-    version = "0.0.7-SNAPSHOT"
+    version = project_version
 
     apply plugin: "com.adarshr.test-logger"
 
@@ -155,7 +159,7 @@ publishing {
             artifact(tasks["javadocJar"])
             groupId = "io.github.viartemev"
             artifactId = "rabbitmq-kotlin"
-            version = "0.7.0-SNAPSHOT"
+            version = project_version
             pom {
                 name.set("RabbitMQ Kotlin")
                 description.set("Kotlin library for RabbitMQ")
