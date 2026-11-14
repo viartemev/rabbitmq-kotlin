@@ -2,13 +2,13 @@ package io.github.viartemev.rabbitmq.consumer
 
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Delivery
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
-import mu.KotlinLogging
 import java.io.Closeable
 import kotlinx.coroutines.channels.Channel as KChannel
 

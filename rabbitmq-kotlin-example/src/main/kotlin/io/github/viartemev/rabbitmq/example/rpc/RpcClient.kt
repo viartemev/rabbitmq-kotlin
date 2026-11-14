@@ -2,6 +2,7 @@ package io.github.viartemev.rabbitmq.example.rpc
 
 import com.rabbitmq.client.ConnectionFactory
 import com.rabbitmq.client.MessageProperties
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.github.viartemev.rabbitmq.channel.channel
 import io.github.viartemev.rabbitmq.channel.rpc
 import io.github.viartemev.rabbitmq.publisher.OutboundMessage
@@ -9,7 +10,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
-import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
 

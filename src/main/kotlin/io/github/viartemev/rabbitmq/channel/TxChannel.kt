@@ -1,9 +1,9 @@
 package io.github.viartemev.rabbitmq.channel
 
 import com.rabbitmq.client.Channel
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.github.viartemev.rabbitmq.consumer.ConfirmConsumer
 import io.github.viartemev.rabbitmq.publisher.OutboundMessage
-import mu.KotlinLogging
 import java.util.concurrent.atomic.AtomicBoolean
 
 private val logger = KotlinLogging.logger {}
@@ -53,7 +53,7 @@ open class TxChannel internal constructor(private val channel: Channel) : Channe
             block(tx)
         } catch (rollbackException: RuntimeException) {
             if (tx.active.get()) {
-                logger.info("rolling back tx on runtime exception", rollbackException)
+                logger.info(rollbackException) { "rolling back tx on runtime exception" }
                 tx.rollback()
             }
             throw rollbackException

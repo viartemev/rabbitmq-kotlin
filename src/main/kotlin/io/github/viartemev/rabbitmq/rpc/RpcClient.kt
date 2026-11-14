@@ -2,6 +2,7 @@ package io.github.viartemev.rabbitmq.rpc
 
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Delivery
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.github.viartemev.rabbitmq.publisher.OutboundMessage
 import io.github.viartemev.rabbitmq.queue.DeleteQueueSpecification
 import io.github.viartemev.rabbitmq.queue.declareQueue
@@ -10,7 +11,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
-import mu.KotlinLogging
 import java.io.IOException
 import java.util.*
 import kotlin.coroutines.resume

@@ -2,11 +2,11 @@ package io.github.viartemev.rabbitmq.consumer.flow
 
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Delivery
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
 

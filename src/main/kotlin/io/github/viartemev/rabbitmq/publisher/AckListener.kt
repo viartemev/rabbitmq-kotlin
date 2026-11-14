@@ -1,8 +1,8 @@
 package io.github.viartemev.rabbitmq.publisher
 
 import com.rabbitmq.client.ConfirmListener
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.sync.Semaphore
-import mu.KotlinLogging
 import java.util.concurrent.ConcurrentSkipListMap
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.coroutines.Continuation
