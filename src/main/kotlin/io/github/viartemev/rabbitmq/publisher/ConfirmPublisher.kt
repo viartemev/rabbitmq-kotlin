@@ -3,10 +3,10 @@ package io.github.viartemev.rabbitmq.publisher
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.ShutdownListener
 import com.rabbitmq.client.ShutdownSignalException
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.withTimeout
-import mu.KotlinLogging
 import java.util.concurrent.ConcurrentSkipListMap
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resumeWithException

@@ -1,5 +1,6 @@
 package io.github.viartemev.rabbitmq.channel
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.github.viartemev.rabbitmq.AbstractTestContainersTest
 import io.github.viartemev.rabbitmq.queue.QueueSpecification
 import io.github.viartemev.rabbitmq.queue.declareQueue
@@ -8,7 +9,6 @@ import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import mu.KotlinLogging
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
